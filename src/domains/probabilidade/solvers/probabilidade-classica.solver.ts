@@ -1,6 +1,6 @@
 import type { Problem, Solution } from "@/core/domain/problem";
 import type { ProblemSolver } from "@/core/domain/solver";
-import { simplificarFracao } from "../generators/probabilidade-classica.generator";
+import { simplificarFracao } from "../utils/math";
 import {
   TOPICO_PROBABILIDADE_CLASSICA,
   type ProbabilidadeClassicaData,

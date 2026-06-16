@@ -12,10 +12,6 @@ const CORES = [
   { nome: "amarelas", cor: "amarela" },
 ] as const;
 
-function gcd(a: number, b: number): number {
-  return b === 0 ? a : gcd(b, a % b);
-}
-
 export const probabilidadeClassicaGenerator = {
   topicoId: TOPICO_PROBABILIDADE_CLASSICA,
   version: 1,
@@ -63,11 +59,3 @@ export const probabilidadeClassicaGenerator = {
     };
   },
 };
-
-export function simplificarFracao(numerador: number, denominador: number): string {
-  const divisor = gcd(numerador, denominador);
-  const n = numerador / divisor;
-  const d = denominador / divisor;
-  if (d === 1) return String(n);
-  return `${n}/${d}`;
-}
