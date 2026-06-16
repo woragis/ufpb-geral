@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.math-content .katex {
+  font-size: 1.05em;
+}
+
+.math-content-display {
+  display: block;
+  overflow-x: auto;
+  padding: 0.25rem 0;
+}
