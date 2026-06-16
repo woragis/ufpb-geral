@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyButton } from "@/app/components/CopyButton";
+import { ExerciseView } from "@/app/components/exercise/ExerciseView";
 import { generateAndSolve } from "@/core/application/generate-and-solve";
 import { encodeExerciseSeed } from "@/core/application/seed-codec";
+import { resolveVisualSpecs } from "@/core/presentation/visual/resolve-visual-specs";
+import { MathContent } from "@/app/components/math/MathContent";
 import { getDisciplina, getTopico } from "@/infrastructure/catalog/disciplines";
 
 import type { ExerciseSeed } from "@/core/domain/seed";
@@ -75,6 +78,7 @@ export default function TopicPage({
   }
 
   const { solution, stepsVisiveis, problem, exerciseSeed } = result;
+  const visualSpecs = resolveVisualSpecs(problem);
 
   const currentStep = stepsVisiveis.length;
 
@@ -133,48 +137,11 @@ export default function TopicPage({
             </div>
           </div>
 
-          <div className="mt-4 text-zinc-900 dark:text-zinc-50">
-            <h2 className="font-semibold mb-2">Enunciado</h2>
-            <div className="whitespace-pre-wrap text-zinc-800 dark:text-zinc-200">
-              {problem.enunciado}
-            </div>
-          </div>
-
-          <div className="mt-6 space-y-4">
-            {stepsVisiveis.map((step) => (
-              <div
-                key={step.ordem}
-                className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900"
-              >
-                <div className="font-semibold text-zinc-900 dark:text-zinc-50">
-                  Passo {step.ordem}: {step.titulo}
-                </div>
-                <div className="mt-2 text-zinc-700 dark:text-zinc-300">
-                  {step.explicacao}
-                </div>
-                {step.calculo ? (
-                  <div className="mt-3">
-                    <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                      Cálculo
-                    </div>
-                    <pre className="mt-1 whitespace-pre-wrap text-zinc-800 dark:text-zinc-200">
-                      {step.calculo}
-                    </pre>
-                  </div>
-                ) : null}
-                {step.resultado ? (
-                  <div className="mt-3">
-                    <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                      Resultado
-                    </div>
-                    <div className="mt-1 rounded border border-zinc-200 bg-white px-3 py-2 text-zinc-800 dark:border-zinc-800 dark:bg-black dark:text-zinc-200">
-                      {step.resultado}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            ))}
-          </div>
+          <ExerciseView
+            problem={problem}
+            stepsVisiveis={stepsVisiveis}
+            visualSpecs={visualSpecs}
+          />
 
           <div className="mt-6 flex items-center gap-3 flex-wrap">
             {hasNext ? (
@@ -186,7 +153,7 @@ export default function TopicPage({
               </Link>
             ) : (
               <div className="text-sm text-zinc-700 dark:text-zinc-300">
-                Resposta final: {solution.respostaFinal}
+                Resposta final: <MathContent>{solution.respostaFinal}</MathContent>
               </div>
             )}
 
