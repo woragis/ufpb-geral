@@ -4,6 +4,7 @@ import type { RankedSeed } from "@/core/domain/engagement";
 import { exercisePath } from "@/infrastructure/engagement/seed-key";
 import { getTopSeedsForTopico } from "@/infrastructure/engagement/store";
 import { getCuratedSeedsForTopico } from "@/infrastructure/engagement/curated-seeds";
+import { CardHighlight } from "@/app/components/ui/Card";
 
 interface TopSeedsListProps {
   topicoId: TopicoId;
@@ -22,8 +23,8 @@ export async function TopSeedsList({
   if (seeds.length === 0) return null;
 
   return (
-    <div className="mt-2 rounded-lg border border-amber-200/80 bg-amber-50/50 p-3 dark:border-amber-900/40 dark:bg-amber-950/20">
-      <div className="text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+    <CardHighlight className="mt-2">
+      <div className="text-xs font-semibold uppercase tracking-wide text-warning-muted-fg">
         Destaques — {topicoNome}
       </div>
       <ul className="mt-2 space-y-1">
@@ -31,7 +32,7 @@ export async function TopSeedsList({
           <SeedRow key={item.seedKey} item={item} disciplinaId={disciplinaId} />
         ))}
       </ul>
-    </div>
+    </CardHighlight>
   );
 }
 
@@ -55,11 +56,14 @@ function SeedRow({
 
   return (
     <li className="flex items-center justify-between gap-2 text-sm">
-      <Link href={href} className="text-zinc-900 hover:underline dark:text-zinc-50">
+      <Link
+        href={href}
+        className="text-fg hover:text-primary transition-colors"
+      >
         {curated?.label ?? `seed ${item.seed}`}
         {item.curated ? " ★" : ""}
       </Link>
-      <span className="shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
+      <span className="shrink-0 text-xs text-fg-subtle">
         {item.visits} visitas · {item.likes} curtidas
       </span>
     </li>

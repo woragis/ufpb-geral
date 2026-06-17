@@ -2,6 +2,7 @@
 
 import type { Step } from "@/core/domain/problem";
 import { useState } from "react";
+import { Button } from "@/app/components/ui/Button";
 
 interface ExplainPanelProps {
   topicoId: string;
@@ -68,58 +69,49 @@ export function ExplainPanel(props: ExplainPanelProps) {
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={handleOpen}
-        className="rounded-lg border border-violet-300 bg-violet-50 px-3 py-2 text-sm text-violet-900 hover:bg-violet-100 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-100"
-      >
+      <Button type="button" variant="aiSoft" onClick={handleOpen}>
         Explicar
-      </button>
+      </Button>
     );
   }
 
   return (
-    <div className="mt-4 rounded-xl border border-violet-200 bg-violet-50/80 p-4 dark:border-violet-900 dark:bg-violet-950/20">
+    <div className="mt-4 rounded-xl border border-ai/25 bg-ai-muted/40 p-4">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="font-semibold text-violet-900 dark:text-violet-100">
-          Tutor IA
-        </h3>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          className="text-sm text-zinc-600 hover:underline"
-        >
+        <h3 className="font-semibold text-ai-muted-fg">Tutor IA</h3>
+        <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
           Fechar
-        </button>
+        </Button>
       </div>
 
       {loading && !explanation ? (
-        <p className="mt-3 text-sm text-zinc-600">Pensando…</p>
+        <p className="mt-3 text-sm text-fg-muted">Pensando…</p>
       ) : null}
-      {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
 
       {explanation ? (
-        <div className="mt-3 whitespace-pre-wrap text-sm text-zinc-800 dark:text-zinc-200">
+        <div className="mt-3 whitespace-pre-wrap text-sm text-fg">
           {explanation}
         </div>
       ) : null}
 
       {suggestions.length > 0 ? (
         <div className="mt-4">
-          <div className="text-xs font-semibold uppercase text-zinc-500">
+          <div className="text-xs font-semibold uppercase text-fg-subtle">
             Próximas perguntas
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
             {suggestions.map((q) => (
-              <button
+              <Button
                 key={q}
                 type="button"
+                variant="secondary"
                 disabled={loading}
+                className="!rounded-full !px-3 !py-1 !text-xs"
                 onClick={() => ask(q)}
-                className="rounded-full border border-zinc-300 bg-white px-3 py-1 text-xs text-zinc-800 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-700 dark:bg-black dark:text-zinc-200"
               >
                 {q}
-              </button>
+              </Button>
             ))}
           </div>
         </div>

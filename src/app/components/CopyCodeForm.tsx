@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { decodeExerciseSeed } from "@/core/application/seed-codec";
+import { Button } from "@/app/components/ui/Button";
 
 export function CopyCodeForm() {
   const router = useRouter();
@@ -36,17 +37,13 @@ export function CopyCodeForm() {
       <input
         value={code}
         onChange={(e) => setCode(e.target.value)}
-        className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none dark:border-zinc-800 dark:bg-black dark:text-zinc-50"
+        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-fg outline-none focus:border-primary focus:ring-2 focus:ring-ring/30"
         placeholder="Ex: UFB.eyJ0IjoicHJvY... (cola aqui)"
       />
-      <button
-        type="submit"
-        className="rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black"
-      >
+      <Button type="submit" variant="primary">
         Abrir exercício
-      </button>
-      {error ? <div className="text-sm text-red-600">{error}</div> : null}
+      </Button>
+      {error ? <div className="text-sm text-destructive">{error}</div> : null}
     </form>
   );
 }
-

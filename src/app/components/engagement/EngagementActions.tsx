@@ -4,6 +4,7 @@ import type { DisciplinaId } from "@/core/domain/ids";
 import type { ExerciseSeed } from "@/core/domain/seed";
 import { toEngagementPayload } from "@/core/domain/engagement";
 import { buildSeedKey } from "@/infrastructure/engagement/seed-key";
+import { Button } from "@/app/components/ui/Button";
 import { useEffect, useState } from "react";
 
 interface EngagementActionsProps {
@@ -32,7 +33,6 @@ export function EngagementActions({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     }).catch(() => {});
-    // payload derivado de exerciseSeed estável por seedKey
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seedKey]);
 
@@ -56,17 +56,15 @@ export function EngagementActions({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={handleLike}
-        disabled={liked || pending}
-        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-800 dark:bg-black dark:text-zinc-50"
-        aria-pressed={liked}
-      >
-        {liked ? "Curtido" : "Curtir"}
-        {likes > 0 ? ` (${likes})` : ""}
-      </button>
-    </div>
+    <Button
+      type="button"
+      variant={liked ? "primary" : "secondary"}
+      onClick={handleLike}
+      disabled={liked || pending}
+      aria-pressed={liked}
+    >
+      {liked ? "Curtido" : "Curtir"}
+      {likes > 0 ? ` (${likes})` : ""}
+    </Button>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/app/components/ui/Button";
 import { useState } from "react";
 
 export function CopyButton({
@@ -23,13 +24,8 @@ export function CopyButton({
   }
 
   return (
-    <button
-      type="button"
-      onClick={onCopy}
-      className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-black dark:text-zinc-50"
-    >
+    <Button type="button" variant="secondary" onClick={onCopy}>
       {status === "idle" ? label : status === "ok" ? "Copiado!" : "Falha ao copiar"}
-    </button>
+    </Button>
   );
 }
-

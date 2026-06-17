@@ -29,7 +29,7 @@ export function UrnDiagramFigure({ spec }: { spec: UrnDiagramSpec }) {
         role="img"
         aria-label={spec.ariaLabel}
         viewBox="0 0 240 160"
-        className="w-full max-w-xs rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950"
+        className="w-full max-w-xs rounded-lg border border-border bg-surface"
       >
         <rect
           x={40}

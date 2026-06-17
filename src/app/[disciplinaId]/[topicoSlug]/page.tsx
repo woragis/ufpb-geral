@@ -1,5 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ButtonLink } from "@/app/components/ui/Button";
+import { Card } from "@/app/components/ui/Card";
+import { disciplineAccentText } from "@/lib/discipline-accent";
+import type { DisciplinaId } from "@/core/domain/ids";
 import { CopyButton } from "@/app/components/CopyButton";
 import { ExerciseView } from "@/app/components/exercise/ExerciseView";
 import { EngagementActions } from "@/app/components/engagement/EngagementActions";
@@ -158,44 +161,41 @@ export default async function TopicPage({
   const examStartUrl = `${basePath}?mode=prova&minutes=30&s=${exerciseSeed.seed}&d=${exerciseSeed.dificuldade}`;
 
   return (
-    <div className="flex flex-col flex-1 bg-zinc-50 font-sans dark:bg-black">
+    <div className="flex flex-col flex-1">
       <main className="w-full max-w-4xl mx-auto px-4 py-10">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+            <h1 className={`text-2xl font-semibold text-fg ${disciplineAccentText[disciplina.id as DisciplinaId]}`}>
               {disciplina.nome} — {topico.nome}
               {importPayload ? (
-                <span className="ml-2 text-sm font-normal text-violet-600">
+                <span className="ml-2 text-sm font-normal text-ai-muted-fg">
                   (importado)
                 </span>
               ) : null}
             </h1>
-            <p className="text-zinc-600 dark:text-zinc-300">{topico.descricao}</p>
+            <p className="text-fg-muted">{topico.descricao}</p>
           </div>
-          <Link
-            href="/"
-            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-black dark:text-zinc-50"
-          >
+          <ButtonLink href="/" variant="secondary">
             Início
-          </Link>
+          </ButtonLink>
         </div>
 
         {examMode ? <ExamTimer minutes={examMinutes} /> : null}
 
-        <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-black mt-4">
+        <Card className="mt-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="text-sm text-zinc-700 dark:text-zinc-300">
+              <div className="text-sm text-fg-muted">
                 Dificuldade: {exerciseSeed.dificuldade} · Passos visíveis:{" "}
                 {examMode ? "ocultos" : `${currentStep}/${solution.steps.length}`}
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <EngagementActions
-                  disciplinaId={disciplina.id as any}
+                  disciplinaId={disciplina.id as DisciplinaId}
                   exerciseSeed={exerciseSeed}
                 />
                 <PersonalExerciseTracker
-                  disciplinaId={disciplina.id as any}
+                  disciplinaId={disciplina.id as DisciplinaId}
                   exerciseSeed={exerciseSeed}
                   topicoNome={topico.nome}
                   enunciadoPreview={problem.enunciado}
@@ -205,25 +205,18 @@ export default async function TopicPage({
                   <CopyButton value={shareCode} label="Copiar código" />
                 ) : null}
                 <CopyButton value={shareUrl} label="Copiar link" />
-                <Link
-                  href={printUrl}
-                  target="_blank"
-                  className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-black dark:text-zinc-50"
-                >
+                <ButtonLink href={printUrl} variant="secondary" target="_blank">
                   PDF
-                </Link>
+                </ButtonLink>
                 {!examMode ? (
-                  <Link
-                    href={examStartUrl}
-                    className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900"
-                  >
+                  <ButtonLink href={examStartUrl} variant="warningSoft">
                     Modo prova
-                  </Link>
+                  </ButtonLink>
                 ) : null}
               </div>
             </div>
 
-            <div className="text-sm text-zinc-600 dark:text-zinc-300">
+            <div className="text-sm text-fg-subtle">
               Exercício ID: {problem.id}
             </div>
           </div>
@@ -246,21 +239,15 @@ export default async function TopicPage({
 
           <div className="mt-6 flex items-center gap-3 flex-wrap">
             {examMode && !respostaFinalRevelada ? (
-              <Link
-                href={submitUrl}
-                className="rounded-lg bg-amber-600 px-4 py-2 text-white hover:bg-amber-500"
-              >
+              <ButtonLink href={submitUrl} variant="warning">
                 Entregar prova
-              </Link>
+              </ButtonLink>
             ) : hasNext ? (
-              <Link
-                href={nextUrl}
-                className="rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black"
-              >
+              <ButtonLink href={nextUrl} variant="primary">
                 Revelar próximo passo
-              </Link>
+              </ButtonLink>
             ) : (
-              <div className="text-sm text-zinc-700 dark:text-zinc-300">
+              <div className="text-sm text-fg-muted">
                 Resposta final:{" "}
                 <MathContent latex={solution.respostaFinalLatex}>
                   {solution.respostaFinal}
@@ -268,14 +255,18 @@ export default async function TopicPage({
               </div>
             )}
 
-            <Link
-              href={importPayload ? basePath : `${basePath}?${new URLSearchParams({ d: String(exerciseSeed.dificuldade) }).toString()}`}
-              className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-black dark:text-zinc-50"
+            <ButtonLink
+              href={
+                importPayload
+                  ? basePath
+                  : `${basePath}?${new URLSearchParams({ d: String(exerciseSeed.dificuldade) }).toString()}`
+              }
+              variant="secondary"
             >
               Novo exercício
-            </Link>
+            </ButtonLink>
           </div>
-        </section>
+        </Card>
       </main>
     </div>
   );

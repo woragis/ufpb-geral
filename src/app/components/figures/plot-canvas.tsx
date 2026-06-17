@@ -54,7 +54,7 @@ export function PlotCanvas({
   return (
     <figure className="my-4">
       {title ? (
-        <figcaption className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <figcaption className="text-sm font-medium text-fg-muted mb-2">
           {title}
         </figcaption>
       ) : null}
@@ -62,7 +62,7 @@ export function PlotCanvas({
         role="img"
         aria-label={ariaLabel}
         viewBox={`0 0 ${PLOT_WIDTH} ${PLOT_HEIGHT}`}
-        className="w-full max-w-md rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950"
+        className="w-full max-w-md rounded-lg border border-border bg-surface"
       >
         <line
           x1={PLOT_PADDING}
@@ -115,7 +115,7 @@ export function MarkerDot({
           y={y - 8}
           fontSize={11}
           fill="currentColor"
-          className="fill-zinc-700 dark:fill-zinc-300"
+          className="fill-fg-muted"
         >
           {label}
         </text>

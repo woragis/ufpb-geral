@@ -22,7 +22,7 @@ export function BoxPlotFigure({ spec }: { spec: BoxPlotSpec }) {
         role="img"
         aria-label={spec.ariaLabel}
         viewBox={`0 0 ${W} ${H}`}
-        className="w-full max-w-md rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950"
+        className="w-full max-w-md rounded-lg border border-border bg-surface"
       >
         <line
           x1={xMin}
@@ -57,7 +57,7 @@ export function BoxPlotFigure({ spec }: { spec: BoxPlotSpec }) {
             textAnchor="middle"
             fontSize={10}
             fill="currentColor"
-            className="fill-zinc-600 dark:fill-zinc-400"
+            className="fill-fg-muted"
           >
             {v}
           </text>

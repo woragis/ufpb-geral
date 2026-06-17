@@ -30,8 +30,8 @@ export function ExamTimer({ minutes, onExpire }: ExamTimerProps) {
     <div
       className={`rounded-lg px-3 py-2 text-sm font-mono ${
         urgent
-          ? "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200"
-          : "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-100"
+          ? "bg-destructive-muted text-destructive border border-destructive/30"
+          : "bg-warning-muted text-warning-muted-fg border border-warning/30"
       }`}
     >
       Modo prova — {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}

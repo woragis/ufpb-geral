@@ -7,7 +7,7 @@ export function VennDiagramFigure({ spec }: { spec: VennDiagramSpec }) {
         role="img"
         aria-label={spec.ariaLabel}
         viewBox="0 0 320 180"
-        className="w-full max-w-md rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950"
+        className="w-full max-w-md rounded-lg border border-border bg-surface"
       >
         <circle
           cx={120}

@@ -10,7 +10,7 @@ export function BarChartFigure({ spec }: { spec: BarChartSpec }) {
   return (
     <figure className="my-4">
       {spec.title ? (
-        <figcaption className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+        <figcaption className="text-sm font-medium text-fg-muted mb-2">
           {spec.title}
         </figcaption>
       ) : null}
@@ -18,7 +18,7 @@ export function BarChartFigure({ spec }: { spec: BarChartSpec }) {
         role="img"
         aria-label={spec.ariaLabel}
         viewBox={`0 0 ${W} ${H}`}
-        className="w-full max-w-md rounded-lg border border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950"
+        className="w-full max-w-md rounded-lg border border-border bg-surface"
       >
         {spec.referenceLine !== undefined ? (
           <line
@@ -52,7 +52,7 @@ export function BarChartFigure({ spec }: { spec: BarChartSpec }) {
                 textAnchor="middle"
                 fontSize={10}
                 fill="currentColor"
-                className="fill-zinc-600 dark:fill-zinc-400"
+                className="fill-fg-muted"
               >
                 {spec.labels[i]}
               </text>

@@ -9,6 +9,7 @@ import {
   togglePersonalFavorite,
   type PersonalExerciseEntry,
 } from "@/lib/client/personal-store";
+import { Button } from "@/app/components/ui/Button";
 import { useEffect, useState } from "react";
 
 interface PersonalExerciseTrackerProps {
@@ -54,13 +55,13 @@ export function PersonalExerciseTracker({
   }
 
   return (
-    <button
+    <Button
       type="button"
+      variant={favorited ? "warningSoft" : "ghost"}
       onClick={handleFavorite}
-      className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-black dark:text-zinc-50"
       aria-pressed={favorited}
     >
       {favorited ? "★ Favorito" : "☆ Favoritar"}
-    </button>
+    </Button>
   );
 }

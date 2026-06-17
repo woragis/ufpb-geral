@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { exercisePath } from "@/infrastructure/engagement/seed-key";
 import { readPersonalStore } from "@/lib/client/personal-store";
+import { Card } from "@/app/components/ui/Card";
 import { useEffect, useState } from "react";
 
 export function PersonalPanels() {
@@ -23,35 +24,26 @@ export function PersonalPanels() {
   return (
     <section className="mb-10 grid gap-4 md:grid-cols-2">
       {history.length > 0 ? (
-        <Panel title="Continuar estudando">
-          {history.map((item) => (
-            <EntryLink key={item.seedKey} item={item} />
-          ))}
-        </Panel>
+        <Card>
+          <h2 className="font-semibold text-fg">Continuar estudando</h2>
+          <ul className="mt-3 space-y-2">
+            {history.map((item) => (
+              <EntryLink key={item.seedKey} item={item} />
+            ))}
+          </ul>
+        </Card>
       ) : null}
       {favorites.length > 0 ? (
-        <Panel title="Favoritos">
-          {favorites.map((item) => (
-            <EntryLink key={item.seedKey} item={item} />
-          ))}
-        </Panel>
+        <Card>
+          <h2 className="font-semibold text-fg">Favoritos</h2>
+          <ul className="mt-3 space-y-2">
+            {favorites.map((item) => (
+              <EntryLink key={item.seedKey} item={item} />
+            ))}
+          </ul>
+        </Card>
       ) : null}
     </section>
-  );
-}
-
-function Panel({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-black">
-      <h2 className="font-semibold text-zinc-900 dark:text-zinc-50">{title}</h2>
-      <ul className="mt-3 space-y-2">{children}</ul>
-    </div>
   );
 }
 
@@ -73,11 +65,11 @@ function EntryLink({
 
   return (
     <li>
-      <Link href={href} className="block hover:underline">
-        <div className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+      <Link href={href} className="block hover:text-primary transition-colors">
+        <div className="text-sm font-medium text-fg">
           {item.topicoNome ?? item.topicoId}
         </div>
-        <div className="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-1">
+        <div className="text-xs text-fg-muted line-clamp-1">
           {item.enunciadoPreview ?? item.seed}
         </div>
       </Link>

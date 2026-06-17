@@ -1,28 +1,149 @@
 @import "tailwindcss";
 
+/* ── Opção A: Acadêmico institucional (light) ── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-elevated: #f1f5f9;
+  --fg: #0f172a;
+  --fg-muted: #475569;
+  --fg-subtle: #64748b;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
+  --primary-active: #1e3a8a;
+  --primary-fg: #ffffff;
+
+  --ai: #7c3aed;
+  --ai-hover: #6d28d9;
+  --ai-active: #5b21b6;
+  --ai-fg: #ffffff;
+  --ai-muted: #f5f3ff;
+  --ai-muted-fg: #5b21b6;
+
+  --warning: #d97706;
+  --warning-hover: #b45309;
+  --warning-active: #92400e;
+  --warning-fg: #ffffff;
+  --warning-muted: #fffbeb;
+  --warning-muted-fg: #92400e;
+
+  --success: #059669;
+  --success-muted: #ecfdf5;
+  --success-muted-fg: #047857;
+
+  --destructive: #dc2626;
+  --destructive-muted: #fef2f2;
+
+  --accent-prob: #0d9488;
+  --accent-calc: #1d4ed8;
+  --accent-vet: #4f46e5;
+  --accent-ae: #059669;
+
+  --ring: #3b82f6;
+  --ring-offset: #f8fafc;
+}
+
+/* ── Dark ── */
+.dark {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface-elevated: #334155;
+  --fg: #f1f5f9;
+  --fg-muted: #94a3b8;
+  --fg-subtle: #64748b;
+  --border: #334155;
+  --border-strong: #475569;
+
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --primary-active: #93c5fd;
+  --primary-fg: #0f172a;
+
+  --ai: #a78bfa;
+  --ai-hover: #c4b5fd;
+  --ai-active: #ddd6fe;
+  --ai-fg: #1e1b4b;
+  --ai-muted: #2e1065;
+  --ai-muted-fg: #e9d5ff;
+
+  --warning: #fbbf24;
+  --warning-hover: #fcd34d;
+  --warning-active: #fde68a;
+  --warning-fg: #1c1917;
+  --warning-muted: #451a03;
+  --warning-muted-fg: #fde68a;
+
+  --success: #34d399;
+  --success-muted: #064e3b;
+  --success-muted-fg: #a7f3d0;
+
+  --destructive: #f87171;
+  --destructive-muted: #450a0a;
+
+  --accent-prob: #2dd4bf;
+  --accent-calc: #60a5fa;
+  --accent-vet: #818cf8;
+  --accent-ae: #34d399;
+
+  --ring: #60a5fa;
+  --ring-offset: #0f172a;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-active: var(--primary-active);
+  --color-primary-fg: var(--primary-fg);
+
+  --color-ai: var(--ai);
+  --color-ai-hover: var(--ai-hover);
+  --color-ai-active: var(--ai-active);
+  --color-ai-fg: var(--ai-fg);
+  --color-ai-muted: var(--ai-muted);
+  --color-ai-muted-fg: var(--ai-muted-fg);
+
+  --color-warning: var(--warning);
+  --color-warning-hover: var(--warning-hover);
+  --color-warning-active: var(--warning-active);
+  --color-warning-fg: var(--warning-fg);
+  --color-warning-muted: var(--warning-muted);
+  --color-warning-muted-fg: var(--warning-muted-fg);
+
+  --color-success: var(--success);
+  --color-success-muted: var(--success-muted);
+  --color-success-muted-fg: var(--success-muted-fg);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-muted: var(--destructive-muted);
+
+  --color-accent-prob: var(--accent-prob);
+  --color-accent-calc: var(--accent-calc);
+  --color-accent-vet: var(--accent-vet);
+  --color-accent-ae: var(--accent-ae);
+
+  --color-ring: var(--ring);
+  --color-ring-offset: var(--ring-offset);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
 .math-content .katex {
@@ -33,4 +154,10 @@ body {
   display: block;
   overflow-x: auto;
   padding: 0.25rem 0;
+}
+
+/* Focus visível global para acessibilidade */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }

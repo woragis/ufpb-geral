@@ -1,7 +1,9 @@
 import { promises as fs } from "fs";
 import path from "path";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
+import { ButtonLink } from "@/app/components/ui/Button";
+import { Card } from "@/app/components/ui/Card";
 import { CURATED_SEEDS } from "@/infrastructure/engagement/curated-seeds";
 import { exercisePath } from "@/infrastructure/engagement/seed-key";
 
@@ -29,8 +31,8 @@ export default async function AdminPage({
   if (!adminToken) {
     return (
       <main className="mx-auto max-w-2xl p-8">
-        <h1 className="text-xl font-semibold">Admin</h1>
-        <p className="mt-2 text-zinc-600">
+        <h1 className="text-xl font-semibold text-fg">Admin</h1>
+        <p className="mt-2 text-fg-muted">
           Configure <code>ADMIN_TOKEN</code> no ambiente para habilitar o painel.
         </p>
       </main>
@@ -46,38 +48,38 @@ export default async function AdminPage({
   return (
     <main className="mx-auto max-w-3xl p-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Painel Admin</h1>
-        <Link href="/" className="text-sm underline">
+        <h1 className="text-2xl font-semibold text-fg">Painel Admin</h1>
+        <ButtonLink href="/" variant="ghost">
           Início
-        </Link>
+        </ButtonLink>
       </div>
 
-      <section className="mt-6 rounded-xl border p-4">
-        <h2 className="font-semibold">Estatísticas</h2>
-        <ul className="mt-2 text-sm text-zinc-700">
+      <Card className="mt-6">
+        <h2 className="font-semibold text-fg">Estatísticas</h2>
+        <ul className="mt-2 text-sm text-fg-muted">
           <li>Seeds com engajamento registrado: {engagementCount}</li>
           <li>Seeds curadas no catálogo: {CURATED_SEEDS.length}</li>
         </ul>
-      </section>
+      </Card>
 
-      <section className="mt-6 rounded-xl border p-4">
-        <h2 className="font-semibold">Seeds curadas</h2>
+      <Card className="mt-6">
+        <h2 className="font-semibold text-fg">Seeds curadas</h2>
         <ul className="mt-3 space-y-2 text-sm">
           {CURATED_SEEDS.map((c) => (
             <li key={`${c.topicoId}-${c.seed}`} className="flex justify-between gap-4">
-              <span>
+              <span className="text-fg">
                 {c.label} — <code>{c.topicoId}</code>
               </span>
               <Link
                 href={exercisePath(c.disciplinaId, c)}
-                className="underline shrink-0"
+                className="shrink-0 text-primary hover:text-primary-hover transition-colors"
               >
                 Abrir
               </Link>
             </li>
           ))}
         </ul>
-      </section>
+      </Card>
     </main>
   );
 }

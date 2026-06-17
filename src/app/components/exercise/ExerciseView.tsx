@@ -18,9 +18,9 @@ export function ExerciseView({
 }: ExerciseViewProps) {
   return (
     <>
-      <div className="mt-4 text-zinc-900 dark:text-zinc-50">
+      <div className="mt-4 text-fg">
         <h2 className="font-semibold mb-2">Enunciado</h2>
-        <div className="text-zinc-800 dark:text-zinc-200">
+        <div className="text-fg-muted">
           <MathContent display latex={problem.enunciadoLatex}>
             {problem.enunciado}
           </MathContent>
@@ -33,12 +33,12 @@ export function ExerciseView({
         {stepsVisiveis.map((step) => (
           <div
             key={step.ordem}
-            className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900"
+            className="rounded-lg border border-border bg-surface-elevated p-4"
           >
-            <div className="font-semibold text-zinc-900 dark:text-zinc-50">
+            <div className="font-semibold text-fg">
               Passo {step.ordem}: {step.titulo}
             </div>
-            <div className="mt-2 text-zinc-700 dark:text-zinc-300">
+            <div className="mt-2 text-fg-muted">
               {step.explicacaoLatex ? (
                 <MathContent latex={step.explicacaoLatex}>
                   {step.explicacao}
@@ -49,10 +49,8 @@ export function ExerciseView({
             </div>
             {step.calculo || step.calculoLatex ? (
               <div className="mt-3">
-                <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                  Cálculo
-                </div>
-                <div className="mt-1 math-content-display text-zinc-800 dark:text-zinc-200">
+                <div className="text-sm font-semibold text-fg">Cálculo</div>
+                <div className="mt-1 math-content-display text-fg-muted">
                   <MathContent display latex={step.calculoLatex}>
                     {step.calculo ?? ""}
                   </MathContent>
@@ -61,10 +59,8 @@ export function ExerciseView({
             ) : null}
             {step.resultado || step.resultadoLatex ? (
               <div className="mt-3">
-                <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                  Resultado
-                </div>
-                <div className="mt-1 rounded border border-zinc-200 bg-white px-3 py-2 text-zinc-800 dark:border-zinc-800 dark:bg-black dark:text-zinc-200">
+                <div className="text-sm font-semibold text-fg">Resultado</div>
+                <div className="mt-1 rounded border border-border bg-surface px-3 py-2 text-fg">
                   <MathContent latex={step.resultadoLatex}>
                     {step.resultado ?? ""}
                   </MathContent>

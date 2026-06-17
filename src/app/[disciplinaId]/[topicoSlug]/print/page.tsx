@@ -82,7 +82,7 @@ export default async function PrintPage({
         <h1 className="text-xl font-bold">
           {disciplina.nome} — {topico.nome}
         </h1>
-        <p className="text-sm text-zinc-600">Exportação PDF / impressão</p>
+        <p className="text-sm text-fg-subtle">Exportação PDF / impressão</p>
       </header>
 
       <ExerciseView
@@ -98,7 +98,7 @@ export default async function PrintPage({
         </MathContent>
       </div>
 
-      <p className="mt-8 text-xs text-zinc-500 no-print">
+      <p className="mt-8 text-xs text-fg-subtle no-print">
         <Link href={`/${disciplina.id}/${params.topicoSlug}`}>Voltar ao exercício</Link>
         {" · "}
         Use Ctrl+P para imprimir ou salvar como PDF.
