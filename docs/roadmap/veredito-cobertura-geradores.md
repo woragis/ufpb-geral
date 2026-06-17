@@ -1,7 +1,7 @@
 # Veredito de cobertura dos geradores
 
 Documento de referência para retomar pendências depois.  
-**Atualizado em:** 16/06/2026 (CV v3 + AE v2 + polish infra)  
+**Atualizado em:** 16/06/2026 (CV v3 + AE v3 + polish infra)  
 **Repositório:** `ufpb-geral`  
 **Meta do roadmap:** [06-fase-variacao-geradores.md](./06-fase-variacao-geradores.md) — Probabilidade ≥4 cenários/tópico, Cálculo ≥4, Cálculo Vetorial ≥3.
 
@@ -14,9 +14,9 @@ Documento de referência para retomar pendências depois.
 | **Cálculo 1**     | v3               | 40 tipos / 5 tópicos | ~85–90%                 | ✅ atingida  |
 | **Cálculo Vetorial** | v3            | 30 tipos / 6 tópicos | ~70–80%                 | ✅ atingida  |
 | **Probabilidade** | v2               | ~30 tipos / 6 tópicos | ~65–75%              | ✅ atingida  |
-| **Análise Exploratória** | v2        | ~18 tipos / 5 tópicos | ~75–85%          | ✅ atingida  |
+| **Análise Exploratória** | v3        | ~30 tipos / 5 tópicos | ~85–90%          | ✅ atingida  |
 
-**Infraestrutura comum:** LaTeX e visuais cobrem todos os tipos v2/v3 de CV e AE. Smoke test inclui assert de diversidade (≥3 tipos) para geradores v2+. Seeds showcase v2/v3 para Prob, CV e AE.
+**Infraestrutura comum:** LaTeX e visuais cobrem todos os tipos v2/v3 de CV e AE v3. Smoke test inclui assert de diversidade (≥3 tipos) e visual não-vazio para CV e AE. Seeds showcase v3 para Prob, CV e AE.
 
 ---
 
@@ -105,6 +105,46 @@ Cobertura estimada **~70–80%** de um Cálculo Vetorial 1 típico. Meta roadmap
 | Visuais | ✅ todos os tipos (hélice = projeção xy; campos 3D = componentes) |
 | Seeds | ✅ showcase v2 + v3 por tópico |
 | Smoke | ✅ 2900/2900 + diversidade ≥3 tipos (v2+) |
+
+---
+
+## Análise Exploratória — estado após v3
+
+### O que está implementado (5 tópicos, ~30 cenários)
+
+| Tópico | Cenários | Tipos |
+|--------|----------|-------|
+| Tipos de dados | 4 | escala, gráfico adequado, frequência, média por escala |
+| Medidas de tendência | 6 | média, mediana, moda, ponderada, escolha da medida, média geométrica |
+| Medidas de dispersão | 4 | variância/desvio/amplitude, CV, populacional, MAD |
+| Distribuições | 7 | IQR, ler boxplot, quartis, outliers, histograma, assimetria, cinco números |
+| Correlação | 6 | Pearson (+/−/fraca), Spearman, interpretação, covariância |
+
+**Arquivos principais:** `src/domains/analise-exploratoria/`, `lib/stats.ts`, LaTeX e visuais dedicados.
+
+### Veredito
+
+Cobertura estimada **~85–90%** de uma Análise Exploratória típica. Meta roadmap **≥3 cenários/tópico** ✅ em todos os 5 tópicos.
+
+### Lacunas de conteúdo (v4+)
+
+| Área | O que falta |
+|------|-------------|
+| Tendência | média harmônica, percentis como medida |
+| Dispersão | quartis como dispersão, boxplot construído passo a passo |
+| Distribuições | curva normal teórica, diagrama de ramos-e-folhas |
+| Correlação | correlação parcial, diagrama de dispersão com reta de regressão |
+| Inferência | amostragem, IC, testes — fora do escopo AE pura |
+
+### Infraestrutura
+
+| Recurso | Estado |
+|---------|--------|
+| Solvers | ✅ 5/5 tópicos, ~30 tipos |
+| LaTeX | ✅ todos os tipos v3 |
+| Visuais | ✅ todos os tipos (histograma, boxplot, scatter, linha temporal) |
+| Seeds | ✅ showcase v3 por tópico |
+| Smoke | ✅ diversidade ≥3 + visual não-vazio |
 
 ---
 
@@ -328,7 +368,7 @@ Probabilidade e Cálculo Vetorial ainda usam geradores **monolíticos v1** sem e
 - [ ] Cálculo 1 v4: MVT, squeeze, LaTeX/visuais v2/v3
 - [x] Cálculo Vetorial v3: ≥3 cenários/tópico + LaTeX/visuais/seeds
 - [x] Probabilidade v2: ≥4 cenários/tópico + Bayes + binomial
-- [x] Análise Exploratória v2: cenários variados + infra
+- [x] Análise Exploratória v3: ~30 tipos + LaTeX/visuais/seeds/smoke
 - [x] Smoke: assert de diversidade (v2+)
 - [ ] Cálculo Vetorial v4: reta–reta, curl 3D, visuais 3D avançados
 - [ ] Push dos commits locais

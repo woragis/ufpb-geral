@@ -24,11 +24,11 @@ const modulos: ModuloMeta[] = [
     nome: "Análise Exploratória",
     ordem: 1,
     topicos: [
-      { id: TOPICO_TIPOS_DADOS, nome: "Tipos e escalas de dados", descricao: "Nominal, ordinal, intervalar e razão.", status: "ativo" },
-      { id: TOPICO_MEDIDAS_TENDENCIA, nome: "Medidas de tendência central", descricao: "Média, mediana e moda.", status: "ativo" },
-      { id: TOPICO_MEDIDAS_DISPERSAO, nome: "Medidas de dispersão", descricao: "Variância, desvio padrão e amplitude.", status: "ativo" },
-      { id: TOPICO_DISTRIBUICOES, nome: "Distribuições e gráficos", descricao: "Histogramas, boxplots e forma da distribuição.", status: "ativo" },
-      { id: TOPICO_CORRELACAO, nome: "Correlação", descricao: "Associação entre variáveis quantitativas.", status: "ativo" },
+      { id: TOPICO_TIPOS_DADOS, nome: "Tipos e escalas de dados", descricao: "Escalas, gráficos adequados, frequências e média por escala.", status: "ativo" },
+      { id: TOPICO_MEDIDAS_TENDENCIA, nome: "Medidas de tendência central", descricao: "Média, mediana, moda, ponderada, geométrica e escolha da medida.", status: "ativo" },
+      { id: TOPICO_MEDIDAS_DISPERSAO, nome: "Medidas de dispersão", descricao: "Variância, desvio, amplitude, CV, MAD e medidas populacionais.", status: "ativo" },
+      { id: TOPICO_DISTRIBUICOES, nome: "Distribuições e gráficos", descricao: "Histogramas, boxplots, quartis, assimetria e cinco números.", status: "ativo" },
+      { id: TOPICO_CORRELACAO, nome: "Correlação", descricao: "Pearson, Spearman, covariância e interpretação.", status: "ativo" },
     ],
   },
 ];

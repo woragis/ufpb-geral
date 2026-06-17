@@ -8,10 +8,7 @@ const SEEDS_PER_TOPIC = Number(process.env.SMOKE_SEEDS_PER_TOPIC ?? "100");
 const DIVERSITY_MIN = Number(process.env.SMOKE_DIVERSITY_MIN ?? "3");
 
 /** Tópicos com menos de 3 cenários estruturais por design. */
-const DIVERSITY_FLOOR: Record<string, number> = {
-  "analise-exploratoria.tipos-dados": 2,
-  "analise-exploratoria.medidas-dispersao": 2,
-};
+const DIVERSITY_FLOOR: Record<string, number> = {};
 
 interface Failure {
   topicoId: string;
@@ -64,7 +61,11 @@ function main(): void {
         }
 
         const specs = resolveVisualSpecs(result.problem);
-        if (specs.length === 0 && result.problem.disciplinaId === "calculo-vetorial") {
+        if (
+          specs.length === 0 &&
+          (result.problem.disciplinaId === "calculo-vetorial" ||
+            result.problem.disciplinaId === "analise-exploratoria")
+        ) {
           const tipo = (result.problem.dados as { tipo?: string }).tipo;
           throw new Error(`visual vazio para tipo ${tipo ?? "?"}`);
         }

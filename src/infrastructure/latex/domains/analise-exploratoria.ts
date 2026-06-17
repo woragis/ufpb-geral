@@ -10,15 +10,23 @@ import type {
 } from "@/domains/analise-exploratoria/entities/types";
 import {
   contarOutliers,
+  covarianciaAmostral,
   desvioAmostral,
+  desvioMedioAbsoluto,
+  desvioPopulacional,
+  interpretarCorrelacao,
+  labelInterpretacao,
   media,
+  mediaGeometrica,
   mediana,
   mediaPonderada,
   moda,
   pearson,
   quartis,
   round2,
+  spearman,
   varianciaAmostral,
+  varianciaPopulacional,
 } from "@/domains/analise-exploratoria/lib/stats";
 
 function isAE(p: Problem): boolean {
@@ -43,6 +51,16 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
         const x = dados<Extract<TiposDadosData, { tipo: "tipos-dados-grafico" }>>(problem);
         return `Para ${text(x.variavel)}, qual gráfico é mais adequado?`;
       }
+      case "tipos-dados-frequencia": {
+        const x = dados<Extract<TiposDadosData, { tipo: "tipos-dados-frequencia" }>>(problem);
+        return x.pergunta === "total"
+          ? `Qual é o total de observações na tabela de frequências?`
+          : `Qual categoria tem maior frequência na tabela?`;
+      }
+      case "tipos-dados-media-escala": {
+        const x = dados<Extract<TiposDadosData, { tipo: "tipos-dados-media-escala" }>>(problem);
+        return `Para ${text(x.variavel)}, em qual escala faz sentido calcular $\\bar{x}$?`;
+      }
       case "media-aritmetica": {
         const x = dados<Extract<MedidasTendenciaData, { tipo: "media-aritmetica" }>>(problem);
         return `Dado ${setLatex(x.valores)}, calcule a média aritmética $\\bar{x}$.`;
@@ -59,6 +77,14 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
         const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-ponderada" }>>(problem);
         return `Calcule a média ponderada de ${setLatex(x.valores)} com pesos ${setLatex(x.pesos)}.`;
       }
+      case "medidas-tendencia-escolha": {
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-escolha" }>>(problem);
+        return `Dado ${setLatex(x.valores)}, qual medida é mais representativa: média ou mediana?`;
+      }
+      case "medidas-tendencia-geometrica": {
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-geometrica" }>>(problem);
+        return `Calcule a média geométrica de ${setLatex(x.valores)}.`;
+      }
       case "medidas-dispersao": {
         const x = dados<Extract<MedidasDispersaoData, { tipo: "medidas-dispersao" }>>(problem);
         const label =
@@ -72,6 +98,15 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
       case "medidas-dispersao-cv": {
         const x = dados<Extract<MedidasDispersaoData, { tipo: "medidas-dispersao-cv" }>>(problem);
         return `Dado ${setLatex(x.valores)}, calcule o coeficiente de variação $\\mathrm{CV}$.`;
+      }
+      case "medidas-dispersao-populacional": {
+        const x = dados<Extract<MedidasDispersaoData, { tipo: "medidas-dispersao-populacional" }>>(problem);
+        const label = x.pergunta === "variancia" ? "\\sigma^2" : "\\sigma";
+        return `Dado ${setLatex(x.valores)}, calcule ${label} (populacional).`;
+      }
+      case "medidas-dispersao-mad": {
+        const x = dados<Extract<MedidasDispersaoData, { tipo: "medidas-dispersao-mad" }>>(problem);
+        return `Dado ${setLatex(x.valores)}, calcule o desvio médio absoluto (MAD).`;
       }
       case "distribuicoes": {
         const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes" }>>(problem);
@@ -92,10 +127,44 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
         const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-outliers" }>>(problem);
         return `Dado ${setLatex(x.valores)}, quantos outliers existem (regra $1{,}5\\cdot\\mathrm{IQR}$)?`;
       }
+      case "distribuicoes-histograma": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-histograma" }>>(problem);
+        return x.pergunta === "frequencia-total"
+          ? `Qual é a frequência total do histograma?`
+          : `Qual classe tem maior frequência no histograma?`;
+      }
+      case "distribuicoes-assimetria": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-assimetria" }>>(problem);
+        return `Dado ${setLatex(x.valores)}, a distribuição é assimétrica positiva, negativa ou simétrica?`;
+      }
+      case "distribuicoes-cinco-numeros": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-cinco-numeros" }>>(problem);
+        const label = x.pergunta === "min" ? "mínimo" : x.pergunta === "max" ? "máximo" : "amplitude";
+        return `Dado ${setLatex(x.valores)}, calcule o ${label}.`;
+      }
+      case "correlacao-spearman": {
+        const x = dados<Extract<CorrelacaoData, { tipo: "correlacao-spearman" }>>(problem);
+        const pares = x.xs.map((xi, i) => `(${num(xi)}, ${num(x.ys[i]!)})`).join(",\\,");
+        return `Dados os pares ${pares}, calcule a correlação de Spearman $\\rho$.`;
+      }
+      case "correlacao-interpretacao": {
+        const x = dados<Extract<CorrelacaoData, { tipo: "correlacao-interpretacao" }>>(problem);
+        return `Com $r = ${num(x.r)}$, classifique a correlação.`;
+      }
+      case "correlacao-covariancia": {
+        const x = dados<Extract<CorrelacaoData, { tipo: "correlacao-covariancia" }>>(problem);
+        const pares = x.xs.map((xi, i) => `(${num(xi)}, ${num(x.ys[i]!)})`).join(",\\,");
+        return `Dados os pares ${pares}, calcule $\\mathrm{Cov}(X,Y)$.`;
+      }
       case "correlacao":
       case "correlacao-negativa":
       case "correlacao-fraca": {
-        const x = dados<CorrelacaoData>(problem);
+        const x = dados<
+          Extract<
+            CorrelacaoData,
+            { tipo: "correlacao" | "correlacao-negativa" | "correlacao-fraca" }
+          >
+        >(problem);
         const pares = x.xs.map((xi, i) => `(${num(xi)}, ${num(x.ys[i]!)})`).join(",\\,");
         return `Dados os pares ${pares}, calcule o coeficiente de correlação de Pearson $r$.`;
       }
@@ -127,6 +196,25 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
         };
         return labels[x.graficoCorreto];
       }
+      case "tipos-dados-frequencia": {
+        const x = dados<Extract<TiposDadosData, { tipo: "tipos-dados-frequencia" }>>(problem);
+        if (x.pergunta === "total") {
+          return num(x.frequencias.reduce((a, b) => a + b, 0));
+        }
+        let idx = 0;
+        let max = 0;
+        for (let i = 0; i < x.frequencias.length; i++) {
+          if (x.frequencias[i]! > max) {
+            max = x.frequencias[i]!;
+            idx = i;
+          }
+        }
+        return text(x.categorias[idx]!);
+      }
+      case "tipos-dados-media-escala": {
+        const x = dados<Extract<TiposDadosData, { tipo: "tipos-dados-media-escala" }>>(problem);
+        return text(x.escalaCorreta === "razao" ? "Razão" : "Intervalar");
+      }
       case "media-aritmetica": {
         const x = dados<Extract<MedidasTendenciaData, { tipo: "media-aritmetica" }>>(problem);
         return num(round2(media(x.valores)));
@@ -143,6 +231,14 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
         const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-ponderada" }>>(problem);
         return num(round2(mediaPonderada(x.valores, x.pesos)));
       }
+      case "medidas-tendencia-escolha": {
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-escolha" }>>(problem);
+        return text(x.resposta === "mediana" ? "Mediana" : "Média");
+      }
+      case "medidas-tendencia-geometrica": {
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-geometrica" }>>(problem);
+        return num(mediaGeometrica(x.valores));
+      }
       case "medidas-dispersao": {
         const x = dados<Extract<MedidasDispersaoData, { tipo: "medidas-dispersao" }>>(problem);
         if (x.pergunta === "amplitude") {
@@ -156,6 +252,16 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
         const m = media(x.valores);
         const s = desvioAmostral(x.valores);
         return num(round2((s / m) * 100));
+      }
+      case "medidas-dispersao-populacional": {
+        const x = dados<Extract<MedidasDispersaoData, { tipo: "medidas-dispersao-populacional" }>>(problem);
+        return x.pergunta === "variancia"
+          ? num(varianciaPopulacional(x.valores))
+          : num(desvioPopulacional(x.valores));
+      }
+      case "medidas-dispersao-mad": {
+        const x = dados<Extract<MedidasDispersaoData, { tipo: "medidas-dispersao-mad" }>>(problem);
+        return num(desvioMedioAbsoluto(x.valores));
       }
       case "distribuicoes": {
         const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes" }>>(problem);
@@ -175,10 +281,59 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
         const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-outliers" }>>(problem);
         return num(contarOutliers(x.valores));
       }
+      case "distribuicoes-histograma": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-histograma" }>>(problem);
+        if (x.pergunta === "frequencia-total") {
+          return num(x.frequencias.reduce((a, b) => a + b, 0));
+        }
+        let idx = 0;
+        let max = 0;
+        for (let i = 0; i < x.frequencias.length; i++) {
+          if (x.frequencias[i]! > max) {
+            max = x.frequencias[i]!;
+            idx = i;
+          }
+        }
+        return text(x.bins[idx]!);
+      }
+      case "distribuicoes-assimetria": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-assimetria" }>>(problem);
+        const labels = {
+          positiva: text("Assimétrica positiva"),
+          negativa: text("Assimétrica negativa"),
+          simetrica: text("Simétrica"),
+        };
+        return labels[x.assimetria];
+      }
+      case "distribuicoes-cinco-numeros": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-cinco-numeros" }>>(problem);
+        const min = Math.min(...x.valores);
+        const max = Math.max(...x.valores);
+        if (x.pergunta === "min") return num(min);
+        if (x.pergunta === "max") return num(max);
+        return num(max - min);
+      }
+      case "correlacao-spearman": {
+        const x = dados<Extract<CorrelacaoData, { tipo: "correlacao-spearman" }>>(problem);
+        return num(spearman(x.xs, x.ys));
+      }
+      case "correlacao-interpretacao": {
+        const x = dados<Extract<CorrelacaoData, { tipo: "correlacao-interpretacao" }>>(problem);
+        return text(labelInterpretacao(interpretarCorrelacao(x.r)));
+      }
+      case "correlacao-covariancia": {
+        const x = dados<Extract<CorrelacaoData, { tipo: "correlacao-covariancia" }>>(problem);
+        return num(covarianciaAmostral(x.xs, x.ys));
+      }
       case "correlacao":
       case "correlacao-negativa":
       case "correlacao-fraca": {
-        const x = dados<CorrelacaoData>(problem);
+        const x = dados<
+          Extract<
+            CorrelacaoData,
+            { tipo: "correlacao" | "correlacao-negativa" | "correlacao-fraca" }
+          >
+        >(problem);
         return num(pearson(x.xs, x.ys));
       }
       default:
@@ -220,8 +375,12 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
       case "correlacao":
       case "correlacao-negativa":
       case "correlacao-fraca": {
-        const x = dados<CorrelacaoData>(problem);
-        const n = x.xs.length;
+        const x = dados<
+          Extract<
+            CorrelacaoData,
+            { tipo: "correlacao" | "correlacao-negativa" | "correlacao-fraca" }
+          >
+        >(problem);
         const mx = media(x.xs);
         const my = media(x.ys);
         const r = pearson(x.xs, x.ys);

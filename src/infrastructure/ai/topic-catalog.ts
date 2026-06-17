@@ -29,9 +29,9 @@ calculo-vetorial.retas-planos → tipos: retas-planos | retas-planos-parametrica
 calculo-vetorial.curvas → tipos: curvas | curvas-velocidade-vetor | curvas-tangente | curvas-circulo | curvas-comprimento | curvas-helice
 calculo-vetorial.campos → tipos: campos | campos-divergente | campos-rotacional | campos-gradiente-3d | campos-divergente-3d
 
-analise-exploratoria.tipos-dados → tipos: tipos-dados (escala) | tipos-dados-grafico (gráfico adequado)
-analise-exploratoria.medidas-tendencia → tipos: media-aritmetica | medidas-tendencia-mediana | medidas-tendencia-moda | medidas-tendencia-ponderada
-analise-exploratoria.medidas-dispersao → tipos: medidas-dispersao (variancia|desvio|amplitude) | medidas-dispersao-cv
-analise-exploratoria.distribuicoes → tipos: distribuicoes (IQR) | distribuicoes-quartis | distribuicoes-outliers | distribuicoes-ler-boxplot
-analise-exploratoria.correlacao → tipos: correlacao | correlacao-negativa | correlacao-fraca
+analise-exploratoria.tipos-dados → tipos: tipos-dados (escala) | tipos-dados-grafico | tipos-dados-frequencia | tipos-dados-media-escala
+analise-exploratoria.medidas-tendencia → tipos: media-aritmetica | medidas-tendencia-mediana | medidas-tendencia-moda | medidas-tendencia-ponderada | medidas-tendencia-escolha | medidas-tendencia-geometrica
+analise-exploratoria.medidas-dispersao → tipos: medidas-dispersao (variancia|desvio|amplitude) | medidas-dispersao-cv | medidas-dispersao-populacional | medidas-dispersao-mad
+analise-exploratoria.distribuicoes → tipos: distribuicoes (IQR) | distribuicoes-quartis | distribuicoes-outliers | distribuicoes-ler-boxplot | distribuicoes-histograma | distribuicoes-assimetria | distribuicoes-cinco-numeros
+analise-exploratoria.correlacao → tipos: correlacao | correlacao-negativa | correlacao-fraca | correlacao-spearman | correlacao-interpretacao | correlacao-covariancia
 `;

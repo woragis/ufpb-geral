@@ -55,18 +55,17 @@ export const CURATED_SEEDS: CuratedSeed[] = [
   { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.produto-vetorial", seed: "showcase-v3-2", dificuldade: 3, generatorVersion: 3, label: "Área e produto misto" },
   { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.retas-planos", seed: "showcase-v3-6", dificuldade: 3, generatorVersion: 3, label: "Distância à reta e interseção" },
   { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.produto-escalar", seed: "showcase-v3-1", dificuldade: 3, generatorVersion: 3, label: "Projeção e ortogonalidade" },
-  // Análise Exploratória
-  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.tipos-dados", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Escala de medição" },
-  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-tendencia", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Média aritmética" },
-  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-dispersao", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Desvio padrão" },
-  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.distribuicoes", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "IQR" },
-  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.correlacao", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Correlação de Pearson" },
-  // Análise Exploratória v2
-  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-tendencia", seed: "showcase-v2-2", dificuldade: 3, generatorVersion: 2, label: "Mediana e moda" },
-  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-dispersao", seed: "showcase-v2-5", dificuldade: 3, generatorVersion: 2, label: "Coeficiente de variação" },
-  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.distribuicoes", seed: "showcase-v2-7", dificuldade: 3, generatorVersion: 2, label: "Quartis e outliers" },
-  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.tipos-dados", seed: "showcase-v2-3", dificuldade: 3, generatorVersion: 2, label: "Gráfico adequado" },
-  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.correlacao", seed: "showcase-v2-9", dificuldade: 3, generatorVersion: 2, label: "Correlação negativa" },
+  // Análise Exploratória v3
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.tipos-dados", seed: "showcase-v3-0", dificuldade: 2, generatorVersion: 3, label: "Escala de medição" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.tipos-dados", seed: "showcase-v3-1", dificuldade: 3, generatorVersion: 3, label: "Frequência e gráfico" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-tendencia", seed: "showcase-v3-2", dificuldade: 2, generatorVersion: 3, label: "Média e mediana" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-tendencia", seed: "showcase-v3-3", dificuldade: 3, generatorVersion: 3, label: "Média geométrica e escolha" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-dispersao", seed: "showcase-v3-4", dificuldade: 2, generatorVersion: 3, label: "Desvio e amplitude" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-dispersao", seed: "showcase-v3-5", dificuldade: 3, generatorVersion: 3, label: "MAD e variância populacional" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.distribuicoes", seed: "showcase-v3-6", dificuldade: 2, generatorVersion: 3, label: "IQR e boxplot" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.distribuicoes", seed: "showcase-v3-7", dificuldade: 3, generatorVersion: 3, label: "Histograma e assimetria" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.correlacao", seed: "showcase-v3-8", dificuldade: 2, generatorVersion: 3, label: "Pearson e Spearman" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.correlacao", seed: "showcase-v3-9", dificuldade: 3, generatorVersion: 3, label: "Interpretação e covariância" },
 ];
 
 export function getCuratedSeedsForTopico(topicoId: TopicoId): CuratedSeed[] {
