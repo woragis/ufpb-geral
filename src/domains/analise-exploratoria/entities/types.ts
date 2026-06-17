@@ -27,11 +27,25 @@ export interface MedidasTendenciaPonderadaData {
   pesos: number[];
 }
 
+export interface MedidasTendenciaEscolhaData {
+  tipo: "medidas-tendencia-escolha";
+  valores: number[];
+  /** Medida mais representativa para o conjunto (com outlier). */
+  resposta: "media" | "mediana";
+}
+
+export interface MedidasTendenciaGeometricaData {
+  tipo: "medidas-tendencia-geometrica";
+  valores: number[];
+}
+
 export type MedidasTendenciaData =
   | MedidasTendenciaMediaData
   | MedidasTendenciaMedianaData
   | MedidasTendenciaModaData
-  | MedidasTendenciaPonderadaData;
+  | MedidasTendenciaPonderadaData
+  | MedidasTendenciaEscolhaData
+  | MedidasTendenciaGeometricaData;
 
 // ── Tipos de dados ──
 
@@ -49,7 +63,25 @@ export interface TiposDadosGraficoData {
   graficoCorreto: "barras" | "histograma" | "linha" | "boxplot";
 }
 
-export type TiposDadosData = TiposDadosEscalaData | TiposDadosGraficoData;
+export interface TiposDadosFrequenciaData {
+  tipo: "tipos-dados-frequencia";
+  categorias: string[];
+  frequencias: number[];
+  pergunta: "total" | "moda-categoria";
+}
+
+export interface TiposDadosMediaEscalaData {
+  tipo: "tipos-dados-media-escala";
+  variavel: string;
+  /** Escala em que a média aritmética é adequada. */
+  escalaCorreta: "intervalar" | "razao";
+}
+
+export type TiposDadosData =
+  | TiposDadosEscalaData
+  | TiposDadosGraficoData
+  | TiposDadosFrequenciaData
+  | TiposDadosMediaEscalaData;
 
 // ── Dispersão ──
 
@@ -64,9 +96,22 @@ export interface MedidasDispersaoCvData {
   valores: number[];
 }
 
+export interface MedidasDispersaoPopulacionalData {
+  tipo: "medidas-dispersao-populacional";
+  valores: number[];
+  pergunta: "variancia" | "desvio";
+}
+
+export interface MedidasDispersaoMadData {
+  tipo: "medidas-dispersao-mad";
+  valores: number[];
+}
+
 export type MedidasDispersaoData =
   | MedidasDispersaoBasicoData
-  | MedidasDispersaoCvData;
+  | MedidasDispersaoCvData
+  | MedidasDispersaoPopulacionalData
+  | MedidasDispersaoMadData;
 
 // ── Distribuições ──
 
@@ -96,11 +141,33 @@ export interface DistribuicoesLerBoxplotData {
   pergunta: "iqr" | "mediana";
 }
 
+export interface DistribuicoesHistogramaData {
+  tipo: "distribuicoes-histograma";
+  bins: string[];
+  frequencias: number[];
+  pergunta: "classe-moda" | "frequencia-total";
+}
+
+export interface DistribuicoesAssimetriaData {
+  tipo: "distribuicoes-assimetria";
+  valores: number[];
+  assimetria: "positiva" | "negativa" | "simetrica";
+}
+
+export interface DistribuicoesCincoNumerosData {
+  tipo: "distribuicoes-cinco-numeros";
+  valores: number[];
+  pergunta: "min" | "max" | "amplitude";
+}
+
 export type DistribuicoesData =
   | DistribuicoesIqrData
   | DistribuicoesQuartisData
   | DistribuicoesOutliersData
-  | DistribuicoesLerBoxplotData;
+  | DistribuicoesLerBoxplotData
+  | DistribuicoesHistogramaData
+  | DistribuicoesAssimetriaData
+  | DistribuicoesCincoNumerosData;
 
 // ── Correlação ──
 
@@ -122,7 +189,27 @@ export interface CorrelacaoFracaData {
   ys: number[];
 }
 
+export interface CorrelacaoSpearmanData {
+  tipo: "correlacao-spearman";
+  xs: number[];
+  ys: number[];
+}
+
+export interface CorrelacaoInterpretacaoData {
+  tipo: "correlacao-interpretacao";
+  r: number;
+}
+
+export interface CorrelacaoCovarianciaData {
+  tipo: "correlacao-covariancia";
+  xs: number[];
+  ys: number[];
+}
+
 export type CorrelacaoData =
   | CorrelacaoPearsonData
   | CorrelacaoNegativaData
-  | CorrelacaoFracaData;
+  | CorrelacaoFracaData
+  | CorrelacaoSpearmanData
+  | CorrelacaoInterpretacaoData
+  | CorrelacaoCovarianciaData;
