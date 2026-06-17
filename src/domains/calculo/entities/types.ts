@@ -57,13 +57,34 @@ export interface LimitesSubstituicaoData {
   expoentes: number[];
 }
 
+export interface LimitesExpLogData {
+  tipo: "limite-exp-log";
+  variante: "exp-x" | "ln-1px";
+}
+
+export interface LimitesInfinitoNegData {
+  tipo: "limite-infinito-neg";
+  numA: number;
+  numB: number;
+  denA: number;
+  denB: number;
+}
+
+export interface LimitesLhopitalData {
+  tipo: "limite-lhopital";
+  variante: "exp-menos-x" | "sin-menos-x";
+}
+
 export type LimitesData =
   | LimitesAlgebricoData
   | LimitesTrigData
   | LimitesRacionalData
   | LimitesRadicalData
   | LimitesInfinitoData
-  | LimitesSubstituicaoData;
+  | LimitesSubstituicaoData
+  | LimitesExpLogData
+  | LimitesInfinitoNegData
+  | LimitesLhopitalData;
 
 // ── Continuidade ──
 
@@ -99,15 +120,40 @@ export interface ContinuidadeCompletarData {
 export interface ContinuidadeLateralData {
   tipo: "continuidade-lateral";
   a: number;
-  /** lim esq e dir de 1/(x-a) ou similar */
   variante: "inverso" | "modulo";
+}
+
+export interface ContinuidadeTviData {
+  tipo: "continuidade-tvi";
+  a: number;
+  b: number;
+  fa: number;
+  fb: number;
+  k: number;
+}
+
+export interface ContinuidadeTrigPontoData {
+  tipo: "continuidade-trig-ponto";
+  funcao: "sin" | "cos";
+  x0: number;
+}
+
+export interface ContinuidadeRolleData {
+  tipo: "continuidade-rolle";
+  a: number;
+  b: number;
+  /** f(x) = coef*x^2 + b*x + c com f(a)=f(b) */
+  coef: number;
 }
 
 export type ContinuidadeData =
   | ContinuidadeAfimData
   | ContinuidadeClassificarData
   | ContinuidadeCompletarData
-  | ContinuidadeLateralData;
+  | ContinuidadeLateralData
+  | ContinuidadeTviData
+  | ContinuidadeTrigPontoData
+  | ContinuidadeRolleData;
 
 // ── Derivadas ──
 
@@ -167,6 +213,43 @@ export interface DerivadasDefinicaoData {
   x0: number;
 }
 
+export interface DerivadasTaxaRelacionadaData {
+  tipo: "derivadas-taxa-relacionada";
+  variante: "escada" | "balao" | "cono";
+  /** parâmetros numéricos do problema */
+  p1: number;
+  p2: number;
+  p3: number;
+}
+
+export interface DerivadasImplicitaData {
+  tipo: "derivadas-implicita";
+  r: number;
+  x0: number;
+  y0: number;
+}
+
+export interface DerivadasAproxLinearData {
+  tipo: "derivadas-aprox-linear";
+  a: number;
+  n: number;
+  x0: number;
+  dx: number;
+}
+
+export interface DerivadasSegundaTesteData {
+  tipo: "derivadas-segunda-teste";
+  /** f(x) = x^3 + a*x, ponto crítico em x0 */
+  a: number;
+  x0: number;
+}
+
+export interface DerivadasInversaTrigData {
+  tipo: "derivadas-inversa-trig";
+  funcao: "arctan" | "arcsin";
+  x0: number;
+}
+
 export type DerivadasData =
   | DerivadasPolinomioData
   | DerivadasTrigData
@@ -174,7 +257,12 @@ export type DerivadasData =
   | DerivadasProdutoData
   | DerivadasQuocienteData
   | DerivadasTangenteData
-  | DerivadasDefinicaoData;
+  | DerivadasDefinicaoData
+  | DerivadasTaxaRelacionadaData
+  | DerivadasImplicitaData
+  | DerivadasAproxLinearData
+  | DerivadasSegundaTesteData
+  | DerivadasInversaTrigData;
 
 // ── Regra da cadeia ──
 
@@ -202,10 +290,17 @@ export interface RegraCadeiaExpLogData {
   x0: number;
 }
 
+export interface RegraCadeiaAvancadaData {
+  tipo: "regra-cadeia-avancada";
+  variante: "sin-quadrado" | "exp-quadrado" | "ln-quadrado" | "sqrt-composta";
+  x0: number;
+}
+
 export type RegraCadeiaData =
   | RegraCadeiaPotenciaData
   | RegraCadeiaTrigData
-  | RegraCadeiaExpLogData;
+  | RegraCadeiaExpLogData
+  | RegraCadeiaAvancadaData;
 
 // ── Otimização ──
 
@@ -234,11 +329,39 @@ export interface OtimizacaoConcavidadeData {
   a: number;
 }
 
+export interface OtimizacaoCilindroData {
+  tipo: "otimizacao-cilindro";
+  /** área superficial fixa S (sem tampa opcional — com tampa) */
+  area: number;
+}
+
+export interface OtimizacaoCaixaData {
+  tipo: "otimizacao-caixa";
+  /** folha quadrada de lado L, cortes x nos cantos */
+  lado: number;
+}
+
+export interface OtimizacaoSegundaDerivadaData {
+  tipo: "otimizacao-segunda-derivada";
+  a: number;
+  b: number;
+  x0: number;
+}
+
+export interface OtimizacaoEsboçoData {
+  tipo: "otimizacao-esboco";
+  a: number;
+}
+
 export type OtimizacaoData =
   | OtimizacaoParabolaData
   | OtimizacaoGeometricaData
   | OtimizacaoCrescimentoData
-  | OtimizacaoConcavidadeData;
+  | OtimizacaoConcavidadeData
+  | OtimizacaoCilindroData
+  | OtimizacaoCaixaData
+  | OtimizacaoSegundaDerivadaData
+  | OtimizacaoEsboçoData;
 
 // ── Cálculo 2+ (inalterados) ──
 

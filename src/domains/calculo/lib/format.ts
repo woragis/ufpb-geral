@@ -34,6 +34,15 @@ export function trigArg(k: number, b: number): string {
   return `${k}x ${fmtSigned(b)}`;
 }
 
+export function fmtX(x: number): string {
+  if (x === Math.PI) return "π";
+  if (x === Math.PI / 2) return "π/2";
+  if (x === Math.PI / 4) return "π/4";
+  if (x === Math.PI / 3) return "π/3";
+  if (Math.abs(x - Math.E) < 0.001) return "e";
+  return fmtNum(x);
+}
+
 export function trigFn(name: "sin" | "cos" | "tan", k: number, b: number): string {
   const arg = trigArg(k, b);
   const label = name === "sin" ? "sin" : name === "cos" ? "cos" : "tg";
