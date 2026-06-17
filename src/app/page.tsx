@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { disciplinas } from "@/infrastructure/catalog/disciplines";
+import { disciplinas, topicoSlugFromId } from "@/infrastructure/catalog/disciplines";
 import { CopyCodeForm } from "./components/CopyCodeForm";
 import { ImportExerciseForm } from "./components/ai/ImportExerciseForm";
 import { PersonalPanels } from "./components/personal/PersonalPanels";
-import { topicoSlugFromId } from "@/infrastructure/catalog/disciplines";
 
 export const dynamic = "force-dynamic";
 
@@ -52,9 +51,12 @@ export default function Home() {
               >
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+                    <Link
+                      href={`/${disciplina.id}`}
+                      className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 hover:underline"
+                    >
                       {disciplina.nome}
-                    </h3>
+                    </Link>
                     <p className="text-zinc-600 dark:text-zinc-300">
                       {activeTopics.length} tópico(s) ativo(s) no momento.
                     </p>

@@ -11,13 +11,16 @@ import type { ExerciseSeed } from "@/core/domain/seed";
 
 export const dynamic = "force-dynamic";
 
-export default function PrintPage({
-  params,
-  searchParams,
+export default async function PrintPage({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }: {
-  params: { disciplinaId: string; topicoSlug: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ disciplinaId: string; topicoSlug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const params = await paramsPromise;
+  const searchParams = await searchParamsPromise;
+
   const disciplina = getDisciplina(params.disciplinaId as any);
   if (!disciplina) notFound();
 

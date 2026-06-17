@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { TopSeedsList } from "@/app/components/catalog/TopSeedsList";
 import { getDisciplina, topicoSlugFromId } from "@/infrastructure/catalog/disciplines";
 
+export const dynamic = "force-dynamic";
+
 export default async function DisciplinaPage({
   params,
 }: {
