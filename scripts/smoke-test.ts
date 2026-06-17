@@ -5,6 +5,13 @@ import { resolveVisualSpecs } from "../src/core/presentation/visual/resolve-visu
 import type { Dificuldade } from "../src/core/domain/ids";
 
 const SEEDS_PER_TOPIC = Number(process.env.SMOKE_SEEDS_PER_TOPIC ?? "100");
+const DIVERSITY_MIN = Number(process.env.SMOKE_DIVERSITY_MIN ?? "3");
+
+/** Tópicos com menos de 3 cenários estruturais por design. */
+const DIVERSITY_FLOOR: Record<string, number> = {
+  "analise-exploratoria.tipos-dados": 2,
+  "analise-exploratoria.medidas-dispersao": 2,
+};
 
 interface Failure {
   topicoId: string;
@@ -15,6 +22,7 @@ interface Failure {
 function main(): void {
   const topicos = listRegisteredTopicos();
   const failures: Failure[] = [];
+  const tiposPorTopico = new Map<string, Set<string>>();
   let total = 0;
 
   console.log(`Smoke test: ${topicos.length} tópicos × ${SEEDS_PER_TOPIC} seeds\n`);
@@ -32,6 +40,7 @@ function main(): void {
 
     const disciplinaId = found.disciplina.id;
     let topicOk = 0;
+    const tipos = new Set<string>();
 
     for (let i = 0; i < SEEDS_PER_TOPIC; i++) {
       const seed = `smoke-${i}`;
@@ -54,7 +63,15 @@ function main(): void {
           throw new Error("nenhum passo na solução");
         }
 
-        resolveVisualSpecs(result.problem);
+        const specs = resolveVisualSpecs(result.problem);
+        if (specs.length === 0 && result.problem.disciplinaId === "calculo-vetorial") {
+          const tipo = (result.problem.dados as { tipo?: string }).tipo;
+          throw new Error(`visual vazio para tipo ${tipo ?? "?"}`);
+        }
+
+        const tipo = (result.problem.dados as { tipo?: string }).tipo;
+        if (tipo) tipos.add(tipo);
+
         topicOk++;
       } catch (err) {
         failures.push({
@@ -65,8 +82,22 @@ function main(): void {
       }
     }
 
+    tiposPorTopico.set(topicoId, tipos);
+
+    const requiredDiversity =
+      version >= 2 ? (DIVERSITY_FLOOR[topicoId] ?? DIVERSITY_MIN) : 1;
+    if (tipos.size < requiredDiversity) {
+      failures.push({
+        topicoId,
+        seed: "diversity",
+        error: `apenas ${tipos.size} tipo(s) distinto(s) em ${SEEDS_PER_TOPIC} seeds (mínimo ${requiredDiversity})`,
+      });
+    }
+
     const status = topicOk === SEEDS_PER_TOPIC ? "OK" : "FAIL";
-    console.log(`  [${status}] ${topicoId} — ${topicOk}/${SEEDS_PER_TOPIC}`);
+    const div =
+      version >= 2 ? `, ${tipos.size} tipos` : "";
+    console.log(`  [${status}] ${topicoId} — ${topicOk}/${SEEDS_PER_TOPIC}${div}`);
   }
 
   console.log(`\nTotal: ${total - failures.length}/${total} OK`);

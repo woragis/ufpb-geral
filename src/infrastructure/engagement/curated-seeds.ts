@@ -52,6 +52,9 @@ export const CURATED_SEEDS: CuratedSeed[] = [
   { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.vetores", seed: "showcase-v3-0", dificuldade: 3, generatorVersion: 3, label: "Distância e paralelismo" },
   { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.curvas", seed: "showcase-v3-4", dificuldade: 3, generatorVersion: 3, label: "Círculo, comprimento e hélice" },
   { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.campos", seed: "showcase-v3-8", dificuldade: 3, generatorVersion: 3, label: "Gradiente e divergente 3D" },
+  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.produto-vetorial", seed: "showcase-v3-2", dificuldade: 3, generatorVersion: 3, label: "Área e produto misto" },
+  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.retas-planos", seed: "showcase-v3-6", dificuldade: 3, generatorVersion: 3, label: "Distância à reta e interseção" },
+  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.produto-escalar", seed: "showcase-v3-1", dificuldade: 3, generatorVersion: 3, label: "Projeção e ortogonalidade" },
   // Análise Exploratória
   { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.tipos-dados", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Escala de medição" },
   { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-tendencia", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Média aritmética" },

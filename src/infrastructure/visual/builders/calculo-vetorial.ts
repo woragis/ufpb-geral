@@ -2,7 +2,6 @@ import type { Problem } from "@/core/domain/problem";
 import type { VisualSpec } from "@/core/presentation/visual/types";
 import {
   boundsFromPoints,
-  sampleRange,
 } from "@/core/presentation/visual/plot-utils";
 import type {
   CamposData,
@@ -89,16 +88,54 @@ function buildVetoresVisual(d: VetoresData): VisualSpec {
     };
   }
 
+  if (d.tipo === "vetores-soma") {
+    const [u1, u2, u3 = 0] = d.u;
+    const [v1, v2, v3 = 0] = d.v;
+    const dim = d.dimensao;
+    if (dim === 2) {
+      const bounds = boundsFromPoints([
+        { x: 0, y: 0 },
+        { x: u1, y: u2 },
+        { x: v1, y: v2 },
+        { x: u1 + v1, y: u2 + v2 },
+      ]);
+      return {
+        kind: "vectors-2d",
+        title: "Soma de vetores",
+        bounds,
+        vectors: [
+          { from: { x: 0, y: 0 }, to: { x: u1, y: u2 }, label: "u", color: "#2563eb" },
+          { from: { x: u1, y: u2 }, to: { x: u1 + v1, y: u2 + v2 }, label: "v", color: "#dc2626" },
+          { from: { x: 0, y: 0 }, to: { x: u1 + v1, y: u2 + v2 }, label: "u+v", color: "#16a34a" },
+        ],
+        ariaLabel: "Soma u + v no plano",
+      };
+    }
+    return {
+      kind: "vectors-3d",
+      title: "Soma de vetores",
+      vectors: [
+        { from: { x: 0, y: 0, z: 0 }, to: { x: u1, y: u2, z: u3 }, label: "u", color: "#2563eb" },
+        { from: { x: 0, y: 0, z: 0 }, to: { x: v1, y: v2, z: v3 }, label: "v", color: "#dc2626" },
+        {
+          from: { x: 0, y: 0, z: 0 },
+          to: { x: u1 + v1, y: u2 + v2, z: u3 + v3 },
+          label: "u+v",
+          color: "#16a34a",
+        },
+      ],
+      ariaLabel: "Soma u + v no espaço",
+    };
+  }
+
   const componentes =
-    d.tipo === "vetores-soma"
-      ? d.u.map((ui, i) => ui + d.v[i]!)
-      : d.tipo === "vetores-escalar"
-        ? d.componentes.map((c) => d.k * c)
-        : d.componentes;
+    d.tipo === "vetores-escalar"
+      ? d.componentes.map((c) => d.k * c)
+      : d.componentes;
   const dimensao =
     d.tipo === "vetores-escalar"
       ? 3
-      : d.tipo === "vetores" || d.tipo === "vetores-unitario" || d.tipo === "vetores-soma"
+      : d.tipo === "vetores" || d.tipo === "vetores-unitario"
         ? d.dimensao
         : 2;
   const [x, y, z = 0] = componentes;
@@ -154,14 +191,24 @@ function buildProdutoVetorialVisual(d: ProdutoVetorialData): VisualSpec {
   const cx = u2 * v3 - u3 * v2;
   const cy = u3 * v1 - u1 * v3;
   const cz = u1 * v2 - u2 * v1;
+  const vectors = [
+    { from: { x: 0, y: 0, z: 0 }, to: { x: u1, y: u2, z: u3 }, label: "u", color: "#2563eb" },
+    { from: { x: 0, y: 0, z: 0 }, to: { x: v1, y: v2, z: v3 }, label: "v", color: "#dc2626" },
+    { from: { x: 0, y: 0, z: 0 }, to: { x: cx, y: cy, z: cz }, label: "u×v", color: "#16a34a" },
+  ];
+  if (d.tipo === "produto-vetorial-misto") {
+    const [w1, w2, w3] = d.w;
+    vectors.push({
+      from: { x: 0, y: 0, z: 0 },
+      to: { x: w1, y: w2, z: w3 },
+      label: "w",
+      color: "#9333ea",
+    });
+  }
   return {
     kind: "vectors-3d",
-    title: "u × v",
-    vectors: [
-      { from: { x: 0, y: 0, z: 0 }, to: { x: u1, y: u2, z: u3 }, label: "u", color: "#2563eb" },
-      { from: { x: 0, y: 0, z: 0 }, to: { x: v1, y: v2, z: v3 }, label: "v", color: "#dc2626" },
-      { from: { x: 0, y: 0, z: 0 }, to: { x: cx, y: cy, z: cz }, label: "u×v", color: "#16a34a" },
-    ],
+    title: d.tipo === "produto-vetorial-misto" ? "Produto misto" : "u × v",
+    vectors,
     ariaLabel: "Vetores u, v e produto vetorial",
   };
 }
@@ -301,12 +348,19 @@ function buildCurvasVisual(d: CurvasData): VisualSpec {
     };
   }
   if (d.tipo === "curvas-helice") {
+    const points: { x: number; y: number }[] = [];
+    for (let i = 0; i <= 80; i++) {
+      const t = (i / 80) * 4 * Math.PI;
+      points.push({ x: Math.cos(t), y: Math.sin(t) });
+    }
+    const bounds = boundsFromPoints(points);
     return {
-      kind: "bar-chart",
-      title: "Hélice r(t) = (cos t, sin t, t)",
-      labels: ["|r'(t)|"],
-      values: [Math.sqrt(2)],
-      ariaLabel: "Módulo da derivada da hélice",
+      kind: "parametric-curve",
+      title: "Projeção xy da hélice",
+      bounds,
+      points,
+      marker: { x: Math.cos(d.t0), y: Math.sin(d.t0), label: `t=${d.t0}`, style: "point" },
+      ariaLabel: "Projeção da hélice no plano xy",
     };
   }
 
@@ -375,20 +429,34 @@ function buildCamposVisual(d: CamposData): VisualSpec {
   }
   if (d.tipo === "campos-divergente-3d") {
     return {
-      kind: "bar-chart",
-      title: "Divergente 3D",
-      labels: ["div F"],
-      values: [d.a + d.b + d.c],
-      ariaLabel: "Divergente do campo 3D",
+      kind: "vectors-3d",
+      title: "Campo F em 3D",
+      vectors: [
+        { from: { x: 0, y: 0, z: 0 }, to: { x: d.a, y: 0, z: 0 }, label: "Fx", color: "#2563eb" },
+        { from: { x: 0, y: 0, z: 0 }, to: { x: 0, y: d.b, z: 0 }, label: "Fy", color: "#dc2626" },
+        { from: { x: 0, y: 0, z: 0 }, to: { x: 0, y: 0, z: d.c }, label: "Fz", color: "#16a34a" },
+      ],
+      ariaLabel: "Componentes do campo vetorial 3D",
     };
   }
   if (d.tipo === "campos-divergente" || d.tipo === "campos-rotacional") {
+    const [a, b] =
+      d.tipo === "campos-divergente"
+        ? [d.a, d.c]
+        : [d.a, d.b];
     return {
-      kind: "bar-chart",
-      title: d.tipo === "campos-divergente" ? "Divergente" : "Rotacional 2D",
-      labels: ["valor"],
-      values: [d.tipo === "campos-divergente" ? d.a + d.c : d.b - d.a],
-      ariaLabel: "Resultado escalar do campo",
+      kind: "vectors-2d",
+      title: d.tipo === "campos-divergente" ? "Campo F(x,y)" : "Campo rotacional",
+      bounds: boundsFromPoints([
+        { x: 0, y: 0 },
+        { x: a, y: 0 },
+        { x: 0, y: b },
+      ]),
+      vectors: [
+        { from: { x: 0, y: 0 }, to: { x: a, y: 0 }, label: "Fx", color: "#2563eb" },
+        { from: { x: 0, y: 0 }, to: { x: 0, y: b }, label: "Fy", color: "#dc2626" },
+      ],
+      ariaLabel: "Campo vetorial no plano",
     };
   }
 

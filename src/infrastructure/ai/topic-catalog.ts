@@ -22,12 +22,12 @@ calculo.series → { tipo:"series", a1, r, n }
 calculo.taylor → { tipo:"taylor", funcao:"exponencial"|"seno", x0, grau }
 calculo.edos → { tipo:"edos", k, y0, x }
 
-calculo-vetorial.vetores → { tipo:"vetores", dimensao:2|3, componentes[] }
-calculo-vetorial.produto-escalar → { tipo:"produto-escalar", u[], v[] }
-calculo-vetorial.produto-vetorial → { tipo:"produto-vetorial", u[3], v[3] }
-calculo-vetorial.retas-planos → { tipo:"retas-planos", p1[3], p2[3] }
-calculo-vetorial.curvas → { tipo:"curvas", a, b, t0 }
-calculo-vetorial.campos → { tipo:"campos", x0, y0 }
+calculo-vetorial.vetores → tipos: vetores | vetores-soma | vetores-escalar | vetores-unitario | vetores-distancia | vetores-paralelo
+calculo-vetorial.produto-escalar → tipos: produto-escalar | produto-escalar-angulo | produto-escalar-projecao | produto-escalar-ortogonal
+calculo-vetorial.produto-vetorial → tipos: produto-vetorial | produto-vetorial-area | produto-vetorial-misto
+calculo-vetorial.retas-planos → tipos: retas-planos | retas-planos-parametrica | retas-planos-plano | retas-planos-distancia | retas-planos-distancia-reta | retas-planos-intersecao
+calculo-vetorial.curvas → tipos: curvas | curvas-velocidade-vetor | curvas-tangente | curvas-circulo | curvas-comprimento | curvas-helice
+calculo-vetorial.campos → tipos: campos | campos-divergente | campos-rotacional | campos-gradiente-3d | campos-divergente-3d
 
 analise-exploratoria.tipos-dados → tipos: tipos-dados (escala) | tipos-dados-grafico (gráfico adequado)
 analise-exploratoria.medidas-tendencia → tipos: media-aritmetica | medidas-tendencia-mediana | medidas-tendencia-moda | medidas-tendencia-ponderada
