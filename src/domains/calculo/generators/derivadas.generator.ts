@@ -2,22 +2,33 @@ import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_DERIVADAS, type DerivadasData } from "../entities/types";
 
+const POLINOMIOS: { coeficientes: number[]; expoentes: number[]; label: string }[] = [
+  { coeficientes: [3, 2], expoentes: [2, 1], label: "quadrática" },
+  { coeficientes: [2, 4, 1], expoentes: [3, 2, 1], label: "cúbica" },
+  { coeficientes: [5, 3, 2], expoentes: [2, 1, 0], label: "com termo constante" },
+  { coeficientes: [4, 1], expoentes: [4, 2], label: "quarta potência" },
+];
+
 export const derivadasGenerator = {
   topicoId: TOPICO_DERIVADAS,
   version: 1,
 
   gerar(ctx: GeneratorContext): Problem {
-    const numTermos = ctx.dificuldade === 1 ? 2 : ctx.dificuldade === 2 ? 3 : 3;
-    const expoentes = numTermos === 2
-      ? [ctx.rng.nextInt(2, 3), 1]
-      : [ctx.rng.nextInt(2, 4), ctx.rng.nextInt(1, 2), 0];
-    const coeficientes = expoentes.map(() => ctx.rng.nextInt(1, 5));
-    const x0 = ctx.rng.nextInt(1, 4);
+    const template = ctx.rng.pick(POLINOMIOS);
+    const coeficientes = template.coeficientes.map((c) =>
+      ctx.rng.nextInt(1, ctx.dificuldade === 3 ? 6 : 4),
+    );
+    const x0 = ctx.rng.nextInt(1, ctx.dificuldade === 3 ? 6 : 4);
 
-    const dados: DerivadasData = { tipo: "derivadas", coeficientes, expoentes, x0 };
+    const dados: DerivadasData = {
+      tipo: "derivadas",
+      coeficientes,
+      expoentes: template.expoentes,
+      x0,
+    };
 
     const termos = coeficientes.map((c, i) => {
-      const exp = expoentes[i]!;
+      const exp = template.expoentes[i]!;
       if (exp === 0) return String(c);
       if (exp === 1) return `${c}x`;
       return `${c}x^${exp}`;
@@ -31,7 +42,12 @@ export const derivadasGenerator = {
       enunciado,
       dados,
       dificuldade: ctx.dificuldade,
-      seed: { topicoId: TOPICO_DERIVADAS, dificuldade: ctx.dificuldade, seed: "", generatorVersion: 1 },
+      seed: {
+        topicoId: TOPICO_DERIVADAS,
+        dificuldade: ctx.dificuldade,
+        seed: "",
+        generatorVersion: 1,
+      },
       geradoEm: "",
     };
   },

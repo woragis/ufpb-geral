@@ -27,6 +27,8 @@ export const eventosGenerator = {
       { a: "número par", b: "número maior que 10" },
       { a: "múltiplo de 3", b: "múltiplo de 5" },
       { a: "menor que 8", b: "maior que 12" },
+      { a: "número primo", b: "divisível por 4" },
+      { a: "face par no dado", b: "face ímpar no dado" },
     ];
     const desc = ctx.rng.pick(descricoes);
 

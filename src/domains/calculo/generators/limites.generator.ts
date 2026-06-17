@@ -2,13 +2,20 @@ import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_LIMITES, type LimitesData } from "../entities/types";
 
+const CENARIOS: Pick<LimitesData, "coeficiente">[] = [
+  { coeficiente: 1 },
+  { coeficiente: 2 },
+  { coeficiente: 3 },
+  { coeficiente: 4 },
+];
+
 export const limitesGenerator = {
   topicoId: TOPICO_LIMITES,
   version: 1,
 
   gerar(ctx: GeneratorContext): Problem {
     const a = ctx.rng.nextInt(1, ctx.dificuldade === 3 ? 9 : 5);
-    const coeficiente = ctx.rng.pick([1, 2, 3]);
+    const { coeficiente } = ctx.rng.pick(CENARIOS);
     const constante = coeficiente * a * a;
 
     const dados: LimitesData = {
