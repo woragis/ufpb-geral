@@ -31,6 +31,20 @@ export function buildCalculoVisuals(problem: Problem): VisualSpec[] {
       const rd = d as Extract<LimitesData, { tipo: "limite-racional" }>;
       return [buildLimitesRacionalVisual(rd)];
     }
+    case "limite-trig":
+      return [buildLimitesTrigVisual(d as Extract<LimitesData, { tipo: "limite-trig" }>)];
+    case "limite-exp-log":
+      return [buildLimitesExpLogVisual(d as Extract<LimitesData, { tipo: "limite-exp-log" }>)];
+    case "limite-lhopital":
+      return [buildLimitesLhopitalVisual(d as Extract<LimitesData, { tipo: "limite-lhopital" }>)];
+    case "limite-radical":
+      return [buildLimitesRadicalVisual(d as Extract<LimitesData, { tipo: "limite-radical" }>)];
+    case "limite-infinito":
+      return [buildLimitesInfinitoVisual(d as Extract<LimitesData, { tipo: "limite-infinito" }>)];
+    case "limite-infinito-neg":
+      return [buildLimitesInfinitoNegVisual(d as Extract<LimitesData, { tipo: "limite-infinito-neg" }>)];
+    case "limite-substituicao":
+      return [buildLimitesSubstituicaoVisual(d as Extract<LimitesData, { tipo: "limite-substituicao" }>)];
     case "continuidade-afim":
       return [buildContinuidadeAfimVisual(d as Extract<ContinuidadeData, { tipo: "continuidade-afim" }>)];
     case "derivadas-polinomio":
@@ -62,6 +76,202 @@ export function buildCalculoVisuals(problem: Problem): VisualSpec[] {
     default:
       return [];
   }
+}
+
+function buildLimitHoleVisual(
+  fn: (x: number) => number,
+  title: string,
+  x0: number,
+  yLimit: number,
+  span = 2,
+): VisualSpec {
+  const eps = 0.06;
+  const left = sampleRange(fn, x0 - span, x0 - eps, 80);
+  const right = sampleRange(fn, x0 + eps, x0 + span, 80);
+  const bounds = mergeBounds(boundsFromPoints(left), boundsFromPoints(right));
+  return {
+    kind: "function-plot",
+    title,
+    bounds,
+    curves: [
+      { points: left, color: "#2563eb" },
+      { points: right, color: "#2563eb" },
+    ],
+    markers: [{ x: x0, y: yLimit, label: `L=${yLimit}`, style: "hole" }],
+    ariaLabel: `Gráfico com limite ${yLimit} em x=${x0}`,
+  };
+}
+
+function buildLimitesTrigVisual(
+  d: Extract<LimitesData, { tipo: "limite-trig" }>,
+): VisualSpec {
+  switch (d.variante) {
+    case "sin-x":
+      return buildLimitHoleVisual(
+        (x) => (x === 0 ? 1 : Math.sin(x) / x),
+        "f(x) = sin(x)/x",
+        0,
+        1,
+      );
+    case "sin-ax": {
+      const b = d.b ?? 1;
+      const ratio = d.a / b;
+      return buildLimitHoleVisual(
+        (x) => (x === 0 ? ratio : Math.sin(d.a * x) / (b * x)),
+        `f(x) = sin(${d.a}x)/(${b}x)`,
+        0,
+        ratio,
+      );
+    }
+    case "tan-x":
+      return buildLimitHoleVisual(
+        (x) => (x === 0 ? 1 : Math.tan(x) / x),
+        "f(x) = tan(x)/x",
+        0,
+        1,
+        1.2,
+      );
+    case "um-menos-cos":
+      return buildLimitHoleVisual(
+        (x) => (x === 0 ? 0.5 : (1 - Math.cos(x)) / (x * x)),
+        "f(x) = (1 − cos(x))/x²",
+        0,
+        0.5,
+      );
+  }
+}
+
+function buildLimitesExpLogVisual(
+  d: Extract<LimitesData, { tipo: "limite-exp-log" }>,
+): VisualSpec {
+  if (d.variante === "exp-x") {
+    return buildLimitHoleVisual(
+      (x) => (x === 0 ? 1 : (Math.exp(x) - 1) / x),
+      "f(x) = (eˣ − 1)/x",
+      0,
+      1,
+    );
+  }
+  return buildLimitHoleVisual(
+    (x) => (x === 0 ? 1 : Math.log(1 + x) / x),
+    "f(x) = ln(1 + x)/x",
+    0,
+    1,
+  );
+}
+
+function buildLimitesLhopitalVisual(
+  d: Extract<LimitesData, { tipo: "limite-lhopital" }>,
+): VisualSpec {
+  if (d.variante === "exp-menos-x") {
+    return buildLimitHoleVisual(
+      (x) => (x === 0 ? 0.5 : (Math.exp(x) - 1 - x) / (x * x)),
+      "f(x) = (eˣ − 1 − x)/x²",
+      0,
+      0.5,
+      1.5,
+    );
+  }
+  return buildLimitHoleVisual(
+    (x) => (x === 0 ? -1 / 6 : (Math.sin(x) - x) / (x * x * x)),
+    "f(x) = (sin(x) − x)/x³",
+    0,
+    -1 / 6,
+    1.2,
+  );
+}
+
+function buildLimitesRadicalVisual(
+  d: Extract<LimitesData, { tipo: "limite-radical" }>,
+): VisualSpec {
+  const limitY = 1 / (2 * Math.sqrt(d.k));
+  return buildLimitHoleVisual(
+    (x) =>
+      x === 0
+        ? limitY
+        : (Math.sqrt(x + d.k) - Math.sqrt(d.k)) / x,
+    `f(x) = (√(x+${d.k}) − √${d.k})/x`,
+    0,
+    Math.round(limitY * 1000) / 1000,
+  );
+}
+
+function buildLimitesInfinitoVisual(
+  d: Extract<LimitesData, { tipo: "limite-infinito" }>,
+): VisualSpec {
+  const fn = (x: number) =>
+    (d.numA * x * x + d.numB) / (d.denA * x * x + d.denB);
+  const asymptote = d.numA / d.denA;
+  const points = sampleRange(fn, 1, 12, 100);
+  const bounds = mergeBounds(boundsFromPoints(points), {
+    xMin: 0,
+    xMax: 12,
+    yMin: asymptote - 2,
+    yMax: asymptote + 2,
+  });
+  const asymptoteLine = [
+    { x: 1, y: asymptote },
+    { x: 12, y: asymptote },
+  ];
+  return {
+    kind: "function-plot",
+    title: `f(x) → ${asymptote} quando x → ∞`,
+    bounds,
+    curves: [
+      { points, color: "#2563eb" },
+      { points: asymptoteLine, color: "#dc2626", dashed: true },
+    ],
+    ariaLabel: `Função racional com assíntota horizontal y=${asymptote}`,
+  };
+}
+
+function buildLimitesInfinitoNegVisual(
+  d: Extract<LimitesData, { tipo: "limite-infinito-neg" }>,
+): VisualSpec {
+  const fn = (x: number) =>
+    (d.numA * x * x + d.numB) / (d.denA * x * x + d.denB);
+  const asymptote = d.numA / d.denA;
+  const points = sampleRange(fn, -12, -1, 100);
+  const bounds = mergeBounds(boundsFromPoints(points), {
+    xMin: -12,
+    xMax: 0,
+    yMin: asymptote - 2,
+    yMax: asymptote + 2,
+  });
+  const asymptoteLine = [
+    { x: -12, y: asymptote },
+    { x: -1, y: asymptote },
+  ];
+  return {
+    kind: "function-plot",
+    title: `f(x) → ${asymptote} quando x → −∞`,
+    bounds,
+    curves: [
+      { points, color: "#2563eb" },
+      { points: asymptoteLine, color: "#dc2626", dashed: true },
+    ],
+    ariaLabel: `Função racional com assíntota horizontal y=${asymptote}`,
+  };
+}
+
+function buildLimitesSubstituicaoVisual(
+  d: Extract<LimitesData, { tipo: "limite-substituicao" }>,
+): VisualSpec {
+  const fn = (x: number) =>
+    d.coeficientes.reduce(
+      (acc, c, i) => acc + c * Math.pow(x, d.expoentes[i]!),
+      0,
+    );
+  const points = sampleRange(fn, d.a - 3, d.a + 3);
+  const bounds = boundsFromPoints(points);
+  return {
+    kind: "function-plot",
+    title: "Polinômio contínuo",
+    bounds,
+    curves: [{ points, color: "#2563eb" }],
+    markers: [{ x: d.a, y: fn(d.a), label: `x=${d.a}`, style: "point" }],
+    ariaLabel: `Gráfico do polinômio com ponto em x=${d.a}`,
+  };
 }
 
 function buildLimitesAlgebricoVisual(

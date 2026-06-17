@@ -54,7 +54,13 @@ export function toLatex(input: string): string {
 }
 
 export function looksLikeMath(text: string): boolean {
-  return /[=^\\∫Σ√×·∩∪→²³ⁿ₀₁₂∂∇]|\d+\/\d+|lim\s*\(|P\(|f'|f\(|\\/.test(
-    text,
-  );
+  if (/\\/.test(text)) return true;
+  if (
+    /\b(Calcule|limite|Substitui|Derivamos|Multiplicamos|Ainda|Forma|indeterminada|Resultado|Verificar|Conclusão|aplicação)\b/i.test(
+      text,
+    )
+  ) {
+    return false;
+  }
+  return /[=^∫Σ√×·∩∪→²³ⁿ₀₁₂∂∇]|\d+\/\d+|lim\s*\(|P\(|f'|f\(/.test(text);
 }

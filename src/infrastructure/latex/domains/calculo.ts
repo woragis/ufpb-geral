@@ -18,13 +18,18 @@ import type {
   EdosData,
   IntegraisDefinidasData,
   IntegraisIndefinidasData,
-  LimitesData,
   OtimizacaoData,
   RegraCadeiaData,
   SequenciasData,
   SeriesData,
   TaylorData,
 } from "@/domains/calculo/entities/types";
+import {
+  limitesEnunciado,
+  limitesRespostaFinal,
+  limitesStepCalculo,
+  limitesStepExplicacao,
+} from "./calculo-limites";
 
 function isCalculo(p: Problem): boolean {
   return p.disciplinaId === "calculo";
@@ -39,11 +44,10 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
 
   enunciado(problem) {
     const d = problem.dados as { tipo?: string };
+    if (d.tipo?.startsWith("limite-")) {
+      return limitesEnunciado(problem);
+    }
     switch (d.tipo) {
-      case "limite-algebrico": {
-        const x = dados<Extract<LimitesData, { tipo: "limite-algebrico" }>>(problem);
-        return `Calcule ${lim(x.a, frac(`${num(x.coeficiente)}x^2 ${signed(-x.constante)}`, `x ${signed(-x.a)}`))}.`;
-      }
       case "continuidade-afim": {
         const x = dados<Extract<ContinuidadeData, { tipo: "continuidade-afim" }>>(problem);
         return `A função abaixo é contínua em $x = ${num(x.a)}$? ${piecewise([
@@ -102,11 +106,10 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
 
   respostaFinal(problem, solution) {
     const d = problem.dados as { tipo?: string };
+    if (d.tipo?.startsWith("limite-")) {
+      return limitesRespostaFinal(problem, solution);
+    }
     switch (d.tipo) {
-      case "limite-algebrico": {
-        const x = dados<Extract<LimitesData, { tipo: "limite-algebrico" }>>(problem);
-        return num(2 * x.coeficiente * x.a);
-      }
       case "continuidade-afim": {
         const x = dados<Extract<ContinuidadeData, { tipo: "continuidade-afim" }>>(problem);
         return x.continua ? text("Sim") : text("Não");
@@ -138,24 +141,10 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
 
   stepCalculo(problem, step) {
     const d = problem.dados as { tipo?: string };
+    if (d.tipo?.startsWith("limite-")) {
+      return limitesStepCalculo(problem, step);
+    }
     switch (d.tipo) {
-      case "limite-algebrico": {
-        const x = dados<Extract<LimitesData, { tipo: "limite-algebrico" }>>(problem);
-        const res = 2 * x.coeficiente * x.a;
-        if (step.ordem === 1) {
-          return `x = ${num(x.a)} \\Rightarrow ${frac(`${num(x.coeficiente)} \\cdot ${num(x.a)}^2 ${signed(-x.constante)}`, `${num(x.a)} ${signed(-x.a)}`)} = ${frac("0", "0")}`;
-        }
-        if (step.ordem === 2) {
-          return `${num(x.coeficiente)}x^2 ${signed(-x.constante)} = ${num(x.coeficiente)}(x ${signed(-x.a)})(x ${signed(x.a)})`;
-        }
-        if (step.ordem === 3) {
-          return `${frac(`${num(x.coeficiente)}(x ${signed(-x.a)})(x ${signed(x.a)})`, `x ${signed(-x.a)}`)} = ${num(x.coeficiente)}(x ${signed(x.a)})`;
-        }
-        if (step.ordem === 4) {
-          return `${lim(x.a, `${num(x.coeficiente)}(x ${signed(x.a)})`)} = ${num(x.coeficiente)}(${num(x.a)} ${signed(x.a)}) = ${num(res)}`;
-        }
-        break;
-      }
       case "derivadas-polinomio": {
         const x = dados<Extract<DerivadasData, { tipo: "derivadas-polinomio" }>>(problem);
         if (step.ordem === 1) {
@@ -276,17 +265,10 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
 
   stepExplicacao(problem, step) {
     const d = problem.dados as { tipo?: string };
+    if (d.tipo?.startsWith("limite-")) {
+      return limitesStepExplicacao(problem, step) ?? undefined;
+    }
     switch (d.tipo) {
-      case "limite-algebrico": {
-        const x = dados<Extract<LimitesData, { tipo: "limite-algebrico" }>>(problem);
-        if (step.ordem === 1) {
-          return `Substituímos $x = ${num(x.a)}$ e obtemos a forma indeterminada $\\frac{0}{0}$.`;
-        }
-        if (step.ordem === 2) {
-          return `Fatoramos ${num(x.coeficiente)}x^2 ${signed(-x.constante)} usando diferença de quadrados.`;
-        }
-        break;
-      }
       case "derivadas-polinomio": {
         if (step.ordem === 1) {
           return `Aplicamos a regra da potência: $\\frac{d}{dx}x^n = n x^{n-1}$.`;
