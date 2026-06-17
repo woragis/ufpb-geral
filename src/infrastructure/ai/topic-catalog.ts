@@ -29,9 +29,9 @@ calculo-vetorial.retas-planos → { tipo:"retas-planos", p1[3], p2[3] }
 calculo-vetorial.curvas → { tipo:"curvas", a, b, t0 }
 calculo-vetorial.campos → { tipo:"campos", x0, y0 }
 
-analise-exploratoria.tipos-dados → { tipo:"tipos-dados", variavel, exemplos[], escalaCorreta:"nominal"|"ordinal"|"intervalar"|"razao" }
-analise-exploratoria.medidas-tendencia → { tipo:"media-aritmetica", valores[] }
-analise-exploratoria.medidas-dispersao → { tipo:"medidas-dispersao", valores[], pergunta:"variancia"|"desvio"|"amplitude" }
-analise-exploratoria.distribuicoes → { tipo:"distribuicoes", q1, q2, q3 }
-analise-exploratoria.correlacao → { tipo:"correlacao", xs[], ys[] }
+analise-exploratoria.tipos-dados → tipos: tipos-dados (escala) | tipos-dados-grafico (gráfico adequado)
+analise-exploratoria.medidas-tendencia → tipos: media-aritmetica | medidas-tendencia-mediana | medidas-tendencia-moda | medidas-tendencia-ponderada
+analise-exploratoria.medidas-dispersao → tipos: medidas-dispersao (variancia|desvio|amplitude) | medidas-dispersao-cv
+analise-exploratoria.distribuicoes → tipos: distribuicoes (IQR) | distribuicoes-quartis | distribuicoes-outliers | distribuicoes-ler-boxplot
+analise-exploratoria.correlacao → tipos: correlacao | correlacao-negativa | correlacao-fraca
 `;

@@ -1,6 +1,6 @@
-import type { Problem, Solution, Step } from "@/core/domain/problem";
+import type { Problem, Solution } from "@/core/domain/problem";
 import type { DomainLatexEnricher } from "../enrich";
-import { expectX, frac, num, text } from "@/core/presentation/math/latex-helpers";
+import { frac, num, text } from "@/core/presentation/math/latex-helpers";
 import type {
   CorrelacaoData,
   DistribuicoesData,
@@ -8,6 +8,18 @@ import type {
   MedidasTendenciaData,
   TiposDadosData,
 } from "@/domains/analise-exploratoria/entities/types";
+import {
+  contarOutliers,
+  desvioAmostral,
+  media,
+  mediana,
+  mediaPonderada,
+  moda,
+  pearson,
+  quartis,
+  round2,
+  varianciaAmostral,
+} from "@/domains/analise-exploratoria/lib/stats";
 
 function isAE(p: Problem): boolean {
   return p.disciplinaId === "analise-exploratoria";
@@ -17,27 +29,6 @@ function dados<T>(p: Problem): T {
   return p.dados as T;
 }
 
-function media(vals: number[]): number {
-  return vals.reduce((a, b) => a + b, 0) / vals.length;
-}
-
-function pearson(xs: number[], ys: number[]): number {
-  const n = xs.length;
-  const mx = xs.reduce((a, b) => a + b, 0) / n;
-  const my = ys.reduce((a, b) => a + b, 0) / n;
-  let num = 0;
-  let denX = 0;
-  let denY = 0;
-  for (let i = 0; i < n; i++) {
-    const dx = xs[i]! - mx;
-    const dy = ys[i]! - my;
-    num += dx * dy;
-    denX += dx * dx;
-    denY += dy * dy;
-  }
-  return Math.round((num / Math.sqrt(denX * denY)) * 100) / 100;
-}
-
 export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
   matches: isAE,
 
@@ -45,15 +36,31 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
     const d = problem.dados as { tipo?: string };
     switch (d.tipo) {
       case "tipos-dados": {
-        const x = dados<TiposDadosData>(problem);
+        const x = dados<Extract<TiposDadosData, { tipo: "tipos-dados" }>>(problem);
         return `A variável ${text(x.variavel)} pertence a qual escala de medição?`;
       }
+      case "tipos-dados-grafico": {
+        const x = dados<Extract<TiposDadosData, { tipo: "tipos-dados-grafico" }>>(problem);
+        return `Para ${text(x.variavel)}, qual gráfico é mais adequado?`;
+      }
       case "media-aritmetica": {
-        const x = dados<MedidasTendenciaData>(problem);
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "media-aritmetica" }>>(problem);
         return `Dado ${setLatex(x.valores)}, calcule a média aritmética $\\bar{x}$.`;
       }
+      case "medidas-tendencia-mediana": {
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-mediana" }>>(problem);
+        return `Dado ${setLatex(x.valores)}, calcule a mediana.`;
+      }
+      case "medidas-tendencia-moda": {
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-moda" }>>(problem);
+        return `Dado ${setLatex(x.valores)}, identifique a moda.`;
+      }
+      case "medidas-tendencia-ponderada": {
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-ponderada" }>>(problem);
+        return `Calcule a média ponderada de ${setLatex(x.valores)} com pesos ${setLatex(x.pesos)}.`;
+      }
       case "medidas-dispersao": {
-        const x = dados<MedidasDispersaoData>(problem);
+        const x = dados<Extract<MedidasDispersaoData, { tipo: "medidas-dispersao" }>>(problem);
         const label =
           x.pergunta === "amplitude"
             ? "amplitude"
@@ -62,11 +69,32 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
               : "desvio padrão amostral $s$";
         return `Dado ${setLatex(x.valores)}, calcule a ${label}.`;
       }
+      case "medidas-dispersao-cv": {
+        const x = dados<Extract<MedidasDispersaoData, { tipo: "medidas-dispersao-cv" }>>(problem);
+        return `Dado ${setLatex(x.valores)}, calcule o coeficiente de variação $\\mathrm{CV}$.`;
+      }
       case "distribuicoes": {
-        const x = dados<DistribuicoesData>(problem);
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes" }>>(problem);
         return `Com $Q_1 = ${num(x.q1)}$, $Q_2 = ${num(x.q2)}$, $Q_3 = ${num(x.q3)}$, calcule $\\mathrm{IQR}$.`;
       }
-      case "correlacao": {
+      case "distribuicoes-ler-boxplot": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-ler-boxplot" }>>(problem);
+        if (x.pergunta === "mediana") {
+          return `Com $Q_2 = ${num(x.q2)}$ no boxplot, qual é a mediana?`;
+        }
+        return `Com $Q_1 = ${num(x.q1)}$, $Q_2 = ${num(x.q2)}$, $Q_3 = ${num(x.q3)}$, calcule $\\mathrm{IQR}$.`;
+      }
+      case "distribuicoes-quartis": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-quartis" }>>(problem);
+        return `Dado ${setLatex(x.valores)}, calcule $${x.pergunta.toUpperCase()}$.`;
+      }
+      case "distribuicoes-outliers": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-outliers" }>>(problem);
+        return `Dado ${setLatex(x.valores)}, quantos outliers existem (regra $1{,}5\\cdot\\mathrm{IQR}$)?`;
+      }
+      case "correlacao":
+      case "correlacao-negativa":
+      case "correlacao-fraca": {
         const x = dados<CorrelacaoData>(problem);
         const pares = x.xs.map((xi, i) => `(${num(xi)}, ${num(x.ys[i]!)})`).join(",\\,");
         return `Dados os pares ${pares}, calcule o coeficiente de correlação de Pearson $r$.`;
@@ -80,7 +108,7 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
     const d = problem.dados as { tipo?: string };
     switch (d.tipo) {
       case "tipos-dados": {
-        const x = dados<TiposDadosData>(problem);
+        const x = dados<Extract<TiposDadosData, { tipo: "tipos-dados" }>>(problem);
         const labels = {
           nominal: text("Nominal"),
           ordinal: text("Ordinal"),
@@ -89,28 +117,67 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
         };
         return labels[x.escalaCorreta];
       }
+      case "tipos-dados-grafico": {
+        const x = dados<Extract<TiposDadosData, { tipo: "tipos-dados-grafico" }>>(problem);
+        const labels = {
+          barras: text("Gráfico de barras"),
+          histograma: text("Histograma"),
+          linha: text("Gráfico de linhas"),
+          boxplot: text("Boxplot"),
+        };
+        return labels[x.graficoCorreto];
+      }
       case "media-aritmetica": {
-        const x = dados<MedidasTendenciaData>(problem);
-        const m = media(x.valores);
-        return num(Number.isInteger(m) ? m : Math.round(m * 100) / 100);
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "media-aritmetica" }>>(problem);
+        return num(round2(media(x.valores)));
+      }
+      case "medidas-tendencia-mediana": {
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-mediana" }>>(problem);
+        return num(round2(mediana(x.valores)));
+      }
+      case "medidas-tendencia-moda": {
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-moda" }>>(problem);
+        return num(moda(x.valores));
+      }
+      case "medidas-tendencia-ponderada": {
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-ponderada" }>>(problem);
+        return num(round2(mediaPonderada(x.valores, x.pesos)));
       }
       case "medidas-dispersao": {
-        const x = dados<MedidasDispersaoData>(problem);
-        const n = x.valores.length;
-        const m = media(x.valores);
+        const x = dados<Extract<MedidasDispersaoData, { tipo: "medidas-dispersao" }>>(problem);
         if (x.pergunta === "amplitude") {
           return num(Math.max(...x.valores) - Math.min(...x.valores));
         }
-        const sq = x.valores.reduce((acc, v) => acc + (v - m) ** 2, 0);
-        const variancia = Math.round((sq / (n - 1)) * 100) / 100;
-        if (x.pergunta === "variancia") return num(variancia);
-        return num(Math.round(Math.sqrt(variancia) * 100) / 100);
+        if (x.pergunta === "variancia") return num(varianciaAmostral(x.valores));
+        return num(desvioAmostral(x.valores));
+      }
+      case "medidas-dispersao-cv": {
+        const x = dados<Extract<MedidasDispersaoData, { tipo: "medidas-dispersao-cv" }>>(problem);
+        const m = media(x.valores);
+        const s = desvioAmostral(x.valores);
+        return num(round2((s / m) * 100));
       }
       case "distribuicoes": {
-        const x = dados<DistribuicoesData>(problem);
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes" }>>(problem);
         return num(x.q3 - x.q1);
       }
-      case "correlacao": {
+      case "distribuicoes-ler-boxplot": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-ler-boxplot" }>>(problem);
+        if (x.pergunta === "mediana") return num(x.q2);
+        return num(x.q3 - x.q1);
+      }
+      case "distribuicoes-quartis": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-quartis" }>>(problem);
+        const q = quartis(x.valores);
+        return num(x.pergunta === "q1" ? q.q1 : x.pergunta === "q2" ? q.q2 : q.q3);
+      }
+      case "distribuicoes-outliers": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-outliers" }>>(problem);
+        return num(contarOutliers(x.valores));
+      }
+      case "correlacao":
+      case "correlacao-negativa":
+      case "correlacao-fraca": {
         const x = dados<CorrelacaoData>(problem);
         return num(pearson(x.xs, x.ys));
       }
@@ -123,7 +190,7 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
     const d = problem.dados as { tipo?: string };
     switch (d.tipo) {
       case "media-aritmetica": {
-        const x = dados<MedidasTendenciaData>(problem);
+        const x = dados<Extract<MedidasTendenciaData, { tipo: "media-aritmetica" }>>(problem);
         const soma = x.valores.reduce((a, b) => a + b, 0);
         const m = soma / x.valores.length;
         if (step.ordem === 1) return `${x.valores.join(" + ")} = ${num(soma)}`;
@@ -134,21 +201,32 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
         break;
       }
       case "distribuicoes": {
-        const x = dados<DistribuicoesData>(problem);
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes" }>>(problem);
         if (step.ordem === 1) return `\\mathrm{IQR} = Q_3 - Q_1`;
         if (step.ordem === 2) {
           return `\\mathrm{IQR} = ${num(x.q3)} - ${num(x.q1)} = ${num(x.q3 - x.q1)}`;
         }
         break;
       }
-      case "correlacao": {
+      case "distribuicoes-ler-boxplot": {
+        const x = dados<Extract<DistribuicoesData, { tipo: "distribuicoes-ler-boxplot" }>>(problem);
+        if (x.pergunta === "mediana") break;
+        if (step.ordem === 1) return `\\mathrm{IQR} = Q_3 - Q_1`;
+        if (step.ordem === 2) {
+          return `\\mathrm{IQR} = ${num(x.q3)} - ${num(x.q1)} = ${num(x.q3 - x.q1)}`;
+        }
+        break;
+      }
+      case "correlacao":
+      case "correlacao-negativa":
+      case "correlacao-fraca": {
         const x = dados<CorrelacaoData>(problem);
         const n = x.xs.length;
-        const mx = x.xs.reduce((a, b) => a + b, 0) / n;
-        const my = x.ys.reduce((a, b) => a + b, 0) / n;
+        const mx = media(x.xs);
+        const my = media(x.ys);
         const r = pearson(x.xs, x.ys);
         if (step.ordem === 1) {
-          return `\\bar{x} = ${num(Math.round(mx * 100) / 100)},\\quad \\bar{y} = ${num(Math.round(my * 100) / 100)}`;
+          return `\\bar{x} = ${num(round2(mx))},\\quad \\bar{y} = ${num(round2(my))}`;
         }
         if (step.ordem === 2) {
           return `r = \\frac{\\sum (x_i - \\bar{x})(y_i - \\bar{y})}{\\sqrt{\\sum (x_i - \\bar{x})^2 \\sum (y_i - \\bar{y})^2}} = ${num(r)}`;

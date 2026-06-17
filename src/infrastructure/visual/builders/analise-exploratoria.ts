@@ -8,6 +8,7 @@ import type {
   MedidasTendenciaData,
   TiposDadosData,
 } from "@/domains/analise-exploratoria/entities/types";
+import { media, quartis } from "@/domains/analise-exploratoria/lib/stats";
 
 export function buildAnaliseExploratoriaVisuals(
   problem: Problem,
@@ -17,22 +18,37 @@ export function buildAnaliseExploratoriaVisuals(
 
   switch (d.tipo) {
     case "tipos-dados":
-      return [buildTiposDadosVisual(d as TiposDadosData)];
+      return [buildTiposDadosEscalaVisual(d as Extract<TiposDadosData, { tipo: "tipos-dados" }>)];
+    case "tipos-dados-grafico":
+      return [buildTiposDadosGraficoVisual(d as Extract<TiposDadosData, { tipo: "tipos-dados-grafico" }>)];
     case "media-aritmetica":
+    case "medidas-tendencia-mediana":
+    case "medidas-tendencia-moda":
+    case "medidas-tendencia-ponderada":
       return [buildMedidasTendenciaVisual(d as MedidasTendenciaData)];
     case "medidas-dispersao":
+    case "medidas-dispersao-cv":
       return [buildMedidasDispersaoVisual(d as MedidasDispersaoData)];
     case "distribuicoes":
-      return [buildDistribuicoesVisual(d as DistribuicoesData)];
+    case "distribuicoes-ler-boxplot":
+      return [buildDistribuicoesBoxVisual(d as Extract<DistribuicoesData, { tipo: "distribuicoes" | "distribuicoes-ler-boxplot" }>)];
+    case "distribuicoes-quartis":
+      return [buildDistribuicoesQuartisVisual(d as Extract<DistribuicoesData, { tipo: "distribuicoes-quartis" }>)];
+    case "distribuicoes-outliers":
+      return [buildDistribuicoesOutliersVisual(d as Extract<DistribuicoesData, { tipo: "distribuicoes-outliers" }>)];
     case "correlacao":
+    case "correlacao-negativa":
+    case "correlacao-fraca":
       return [buildCorrelacaoVisual(d as CorrelacaoData)];
     default:
       return [];
   }
 }
 
-function buildTiposDadosVisual(d: TiposDadosData): VisualSpec {
-  const escalaLabels: Record<TiposDadosData["escalaCorreta"], string> = {
+function buildTiposDadosEscalaVisual(
+  d: Extract<TiposDadosData, { tipo: "tipos-dados" }>,
+): VisualSpec {
+  const escalaLabels: Record<typeof d.escalaCorreta, string> = {
     nominal: "Nominal",
     ordinal: "Ordinal",
     intervalar: "Intervalar",
@@ -47,33 +63,50 @@ function buildTiposDadosVisual(d: TiposDadosData): VisualSpec {
   };
 }
 
+function buildTiposDadosGraficoVisual(
+  d: Extract<TiposDadosData, { tipo: "tipos-dados-grafico" }>,
+): VisualSpec {
+  return {
+    kind: "bar-chart",
+    title: `${d.variavel} — gráfico sugerido: ${d.graficoCorreto}`,
+    labels: ["A", "B", "C"],
+    values: [3, 5, 2],
+    ariaLabel: `Ilustração para variável ${d.variavel}`,
+  };
+}
+
 function buildMedidasTendenciaVisual(d: MedidasTendenciaData): VisualSpec {
-  const media =
-    d.valores.reduce((a, b) => a + b, 0) / d.valores.length;
+  const valores =
+    d.tipo === "medidas-tendencia-ponderada" ? d.valores : d.valores;
+  const m = media(valores);
   return {
     kind: "bar-chart",
     title: "Valores do conjunto",
-    labels: d.valores.map((_, i) => `x${i + 1}`),
-    values: d.valores,
-    referenceLine: media,
-    ariaLabel: `Gráfico de barras com ${d.valores.length} valores`,
+    labels: valores.map((_, i) => `x${i + 1}`),
+    values: valores,
+    referenceLine: m,
+    ariaLabel: `Gráfico de barras com ${valores.length} valores`,
   };
 }
 
 function buildMedidasDispersaoVisual(d: MedidasDispersaoData): VisualSpec {
-  const media =
-    d.valores.reduce((a, b) => a + b, 0) / d.valores.length;
+  const valores = d.valores;
+  const m = media(valores);
   return {
     kind: "bar-chart",
     title: "Dispersão dos dados",
-    labels: d.valores.map((_, i) => `${i + 1}`),
-    values: d.valores,
-    referenceLine: media,
-    ariaLabel: `Barras dos dados com média em ${media.toFixed(2)}`,
+    labels: valores.map((_, i) => `${i + 1}`),
+    values: valores,
+    referenceLine: m,
+    ariaLabel: `Barras dos dados com média em ${m.toFixed(2)}`,
   };
 }
 
-function buildDistribuicoesVisual(d: DistribuicoesData): VisualSpec {
+function buildDistribuicoesBoxVisual(d: {
+  q1: number;
+  q2: number;
+  q3: number;
+}): VisualSpec {
   const min = d.q1 - (d.q3 - d.q1);
   const max = d.q3 + (d.q3 - d.q1);
   return {
@@ -84,6 +117,23 @@ function buildDistribuicoesVisual(d: DistribuicoesData): VisualSpec {
     min,
     max,
     ariaLabel: `Boxplot com Q1=${d.q1}, mediana=${d.q2}, Q3=${d.q3}`,
+  };
+}
+
+function buildDistribuicoesQuartisVisual(
+  d: Extract<DistribuicoesData, { tipo: "distribuicoes-quartis" }>,
+): VisualSpec {
+  const q = quartis(d.valores);
+  return buildDistribuicoesBoxVisual(q);
+}
+
+function buildDistribuicoesOutliersVisual(
+  d: Extract<DistribuicoesData, { tipo: "distribuicoes-outliers" }>,
+): VisualSpec {
+  const q = quartis(d.valores);
+  return {
+    ...buildDistribuicoesBoxVisual(q),
+    ariaLabel: "Boxplot com possíveis outliers",
   };
 }
 

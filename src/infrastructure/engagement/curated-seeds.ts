@@ -38,19 +38,32 @@ export const CURATED_SEEDS: CuratedSeed[] = [
   { disciplinaId: "calculo", topicoId: "calculo.series", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Série geométrica" },
   { disciplinaId: "calculo", topicoId: "calculo.taylor", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Polinômio de Taylor" },
   { disciplinaId: "calculo", topicoId: "calculo.edos", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "EDO linear" },
-  // Cálculo Vetorial
-  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.vetores", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Módulo de vetor" },
-  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.produto-escalar", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Produto escalar" },
-  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.produto-vetorial", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Produto vetorial" },
-  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.retas-planos", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Vetor diretor" },
-  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.curvas", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Curva paramétrica" },
-  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.campos", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Gradiente" },
+  // Probabilidade v2
+  { disciplinaId: "probabilidade", topicoId: "probabilidade.espaco-amostral", seed: "showcase-v2-0", dificuldade: 3, generatorVersion: 2, label: "Baralho e modular" },
+  { disciplinaId: "probabilidade", topicoId: "probabilidade.classica", seed: "showcase-v2-5", dificuldade: 3, generatorVersion: 2, label: "Dado, baralho e composição" },
+  { disciplinaId: "probabilidade", topicoId: "probabilidade.condicional", seed: "showcase-v2-2", dificuldade: 3, generatorVersion: 2, label: "Bayes" },
+  { disciplinaId: "probabilidade", topicoId: "probabilidade.variaveis-discretas", seed: "showcase-v2-8", dificuldade: 3, generatorVersion: 2, label: "Binomial e geométrica" },
+  // Cálculo Vetorial v2
+  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.vetores", seed: "showcase-v2-1", dificuldade: 3, generatorVersion: 2, label: "Soma e vetor unitário" },
+  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.produto-escalar", seed: "showcase-v2-3", dificuldade: 3, generatorVersion: 2, label: "Ângulo e projeção" },
+  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.retas-planos", seed: "showcase-v2-4", dificuldade: 3, generatorVersion: 2, label: "Plano e distância" },
+  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.campos", seed: "showcase-v2-6", dificuldade: 3, generatorVersion: 2, label: "Gradiente, div e rot" },
+  // Cálculo Vetorial v3
+  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.vetores", seed: "showcase-v3-0", dificuldade: 3, generatorVersion: 3, label: "Distância e paralelismo" },
+  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.curvas", seed: "showcase-v3-4", dificuldade: 3, generatorVersion: 3, label: "Círculo, comprimento e hélice" },
+  { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.campos", seed: "showcase-v3-8", dificuldade: 3, generatorVersion: 3, label: "Gradiente e divergente 3D" },
   // Análise Exploratória
   { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.tipos-dados", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Escala de medição" },
   { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-tendencia", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Média aritmética" },
   { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-dispersao", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Desvio padrão" },
   { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.distribuicoes", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "IQR" },
   { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.correlacao", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Correlação de Pearson" },
+  // Análise Exploratória v2
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-tendencia", seed: "showcase-v2-2", dificuldade: 3, generatorVersion: 2, label: "Mediana e moda" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.medidas-dispersao", seed: "showcase-v2-5", dificuldade: 3, generatorVersion: 2, label: "Coeficiente de variação" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.distribuicoes", seed: "showcase-v2-7", dificuldade: 3, generatorVersion: 2, label: "Quartis e outliers" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.tipos-dados", seed: "showcase-v2-3", dificuldade: 3, generatorVersion: 2, label: "Gráfico adequado" },
+  { disciplinaId: "analise-exploratoria", topicoId: "analise-exploratoria.correlacao", seed: "showcase-v2-9", dificuldade: 3, generatorVersion: 2, label: "Correlação negativa" },
 ];
 
 export function getCuratedSeedsForTopico(topicoId: TopicoId): CuratedSeed[] {
