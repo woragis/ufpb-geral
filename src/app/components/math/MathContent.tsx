@@ -1,6 +1,7 @@
 "use client";
 
 import katex from "katex";
+import { prepareKaTeX } from "@/core/presentation/math/prepare-katex";
 import { looksLikeMath, toLatex } from "@/core/presentation/math/to-latex";
 
 interface MathContentProps {
@@ -27,7 +28,9 @@ export function MathContent({
     return <span className={className}>{text}</span>;
   }
 
-  const renderedLatex = isExplicitLatex ? source : toLatex(text);
+  const renderedLatex = prepareKaTeX(
+    isExplicitLatex ? source : toLatex(text),
+  );
 
   try {
     const html = katex.renderToString(renderedLatex, {
