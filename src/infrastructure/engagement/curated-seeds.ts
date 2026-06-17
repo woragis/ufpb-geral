@@ -43,6 +43,11 @@ export const CURATED_SEEDS: CuratedSeed[] = [
   { disciplinaId: "probabilidade", topicoId: "probabilidade.classica", seed: "showcase-v2-5", dificuldade: 3, generatorVersion: 2, label: "Dado, baralho e composição" },
   { disciplinaId: "probabilidade", topicoId: "probabilidade.condicional", seed: "showcase-v2-2", dificuldade: 3, generatorVersion: 2, label: "Bayes" },
   { disciplinaId: "probabilidade", topicoId: "probabilidade.variaveis-discretas", seed: "showcase-v2-8", dificuldade: 3, generatorVersion: 2, label: "Binomial e geométrica" },
+  // Pré-Cálculo
+  { disciplinaId: "pre-calculo", topicoId: "pre-calculo.conjuntos", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "União e interseção" },
+  { disciplinaId: "pre-calculo", topicoId: "pre-calculo.funcoes-elementares", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Função afim" },
+  { disciplinaId: "pre-calculo", topicoId: "pre-calculo.funcao-modular", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Equação modular" },
+  { disciplinaId: "pre-calculo", topicoId: "pre-calculo.binomio-newton", seed: "curated-1", dificuldade: 2, generatorVersion: 1, label: "Coeficiente binomial" },
   // Cálculo Vetorial v2
   { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.vetores", seed: "showcase-v2-1", dificuldade: 3, generatorVersion: 2, label: "Soma e vetor unitário" },
   { disciplinaId: "calculo-vetorial", topicoId: "calculo-vetorial.produto-escalar", seed: "showcase-v2-3", dificuldade: 3, generatorVersion: 2, label: "Ângulo e projeção" },

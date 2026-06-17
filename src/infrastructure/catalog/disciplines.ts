@@ -1,12 +1,14 @@
 import type { DisciplinaId, TopicoId } from "@/core/domain/ids";
 import type { DisciplinaMeta, TopicoMeta } from "@/core/domain/catalog";
 import { probabilidadeDomain } from "@/domains/probabilidade";
+import { preCalculoDomain } from "@/domains/pre-calculo";
 import { calculoDomain } from "@/domains/calculo";
 import { calculoVetorialDomain } from "@/domains/calculo-vetorial";
 import { analiseExploratoriaDomain } from "@/domains/analise-exploratoria";
 
 const domains = [
   probabilidadeDomain,
+  preCalculoDomain,
   calculoDomain,
   calculoVetorialDomain,
   analiseExploratoriaDomain,

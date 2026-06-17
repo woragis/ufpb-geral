@@ -1,6 +1,7 @@
 import type { Problem, Solution, Step } from "@/core/domain/problem";
 import { enrichCalculoLatex } from "./domains/calculo";
 import { enrichProbabilidadeLatex } from "./domains/probabilidade";
+import { enrichPreCalculoLatex } from "./domains/pre-calculo";
 import { enrichCalculoVetorialLatex } from "./domains/calculo-vetorial";
 import { enrichAnaliseExploratoriaLatex } from "./domains/analise-exploratoria";
 
@@ -8,6 +9,7 @@ export function enrichProblem(problem: Problem): Problem {
   const enrichers = [
     enrichCalculoLatex,
     enrichProbabilidadeLatex,
+    enrichPreCalculoLatex,
     enrichCalculoVetorialLatex,
     enrichAnaliseExploratoriaLatex,
   ];
@@ -25,6 +27,7 @@ export function enrichSolution(problem: Problem, solution: Solution): Solution {
   const enrichers = [
     enrichCalculoLatex,
     enrichProbabilidadeLatex,
+    enrichPreCalculoLatex,
     enrichCalculoVetorialLatex,
     enrichAnaliseExploratoriaLatex,
   ];

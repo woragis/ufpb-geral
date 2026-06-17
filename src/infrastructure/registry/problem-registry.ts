@@ -3,6 +3,7 @@ import type { ProblemGenerator } from "@/core/domain/generator";
 import type { ProblemSolver } from "@/core/domain/solver";
 import type { DomainModule } from "@/core/domain/domain-module";
 import { probabilidadeDomain } from "@/domains/probabilidade";
+import { preCalculoDomain } from "@/domains/pre-calculo";
 import { calculoDomain } from "@/domains/calculo";
 import { calculoVetorialDomain } from "@/domains/calculo-vetorial";
 import { analiseExploratoriaDomain } from "@/domains/analise-exploratoria";
@@ -37,6 +38,7 @@ function registerDomain(domain: DomainModule): void {
 }
 
 registerDomain(probabilidadeDomain);
+registerDomain(preCalculoDomain);
 registerDomain(calculoDomain);
 registerDomain(calculoVetorialDomain);
 registerDomain(analiseExploratoriaDomain);

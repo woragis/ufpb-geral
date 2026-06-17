@@ -3,6 +3,7 @@ import type { ComponentProps } from "react";
 
 const accentBorder: Record<DisciplinaId, string> = {
   probabilidade: "border-l-accent-prob",
+  "pre-calculo": "border-l-accent-precalc",
   calculo: "border-l-accent-calc",
   "calculo-vetorial": "border-l-accent-vet",
   "analise-exploratoria": "border-l-accent-ae",

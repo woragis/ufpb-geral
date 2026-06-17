@@ -1,5 +1,6 @@
 export type DisciplinaId =
   | "probabilidade"
+  | "pre-calculo"
   | "calculo"
   | "calculo-vetorial"
   | "analise-exploratoria";

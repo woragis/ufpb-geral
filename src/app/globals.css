@@ -38,6 +38,7 @@
   --destructive-muted: #fef2f2;
 
   --accent-prob: #0d9488;
+  --accent-precalc: #9333ea;
   --accent-calc: #1d4ed8;
   --accent-vet: #4f46e5;
   --accent-ae: #059669;
@@ -84,6 +85,7 @@
   --destructive-muted: #450a0a;
 
   --accent-prob: #2dd4bf;
+  --accent-precalc: #a78bfa;
   --accent-calc: #60a5fa;
   --accent-vet: #818cf8;
   --accent-ae: #34d399;
@@ -129,6 +131,7 @@
   --color-destructive-muted: var(--destructive-muted);
 
   --color-accent-prob: var(--accent-prob);
+  --color-accent-precalc: var(--accent-precalc);
   --color-accent-calc: var(--accent-calc);
   --color-accent-vet: var(--accent-vet);
   --color-accent-ae: var(--accent-ae);

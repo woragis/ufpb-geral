@@ -9,6 +9,11 @@ probabilidade.condicional → { tipo:"condicional", nOmega, nA, nB, nAinterB, de
 probabilidade.independencia → { tipo:"independencia", nOmega, nA, nB, nAinterB, descricaoA, descricaoB }
 probabilidade.variaveis-discretas → { tipo:"variaveis-discretas", pergunta:"esperanca"|"probabilidade", valores[], probabilidades[], valorAlvo? }
 
+pre-calculo.conjuntos → tipos: conjuntos-operacao | conjuntos-produto-cartesiano | conjuntos-pertinencia
+pre-calculo.funcoes-elementares → tipos: funcao-afim | funcao-quadratica | funcao-exponencial | funcao-logaritmica
+pre-calculo.funcao-modular → tipos: modular-equacao | modular-inequacao | modular-avaliar
+pre-calculo.binomio-newton → tipos: binomio-coeficiente | binomio-termo-geral | binomio-soma-coeficientes | binomio-expansao
+
 calculo.limites → tipos: limite-algebrico | limite-trig | limite-racional | limite-radical | limite-infinito | limite-infinito-neg | limite-substituicao | limite-exp-log | limite-lhopital
 calculo.continuidade → tipos: continuidade-afim | continuidade-classificar | continuidade-completar | continuidade-lateral | continuidade-tvi | continuidade-trig-ponto | continuidade-rolle
 calculo.derivadas → tipos: derivadas-polinomio | derivadas-trig | derivadas-exp-log | derivadas-produto | derivadas-quociente | derivadas-tangente | derivadas-definicao | derivadas-taxa-relacionada | derivadas-implicita | derivadas-aprox-linear | derivadas-segunda-teste | derivadas-inversa-trig
