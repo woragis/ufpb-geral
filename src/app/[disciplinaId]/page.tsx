@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getDisciplina } from "@/infrastructure/catalog/disciplines";
+import { TopSeedsList } from "@/app/components/catalog/TopSeedsList";
+import { getDisciplina, topicoSlugFromId } from "@/infrastructure/catalog/disciplines";
 
-export default function DisciplinaPage({
+export default async function DisciplinaPage({
   params,
 }: {
-  params: { disciplinaId: string };
+  params: Promise<{ disciplinaId: string }>;
 }) {
-  const disciplina = getDisciplina(params.disciplinaId as any);
+  const { disciplinaId } = await params;
+  const disciplina = getDisciplina(disciplinaId as any);
   if (!disciplina) notFound();
 
   return (
@@ -41,9 +43,9 @@ export default function DisciplinaPage({
                 Tópicos organizados para estudo.
               </p>
 
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-4 space-y-4">
                 {modulo.topicos.map((topico) => {
-                  const topicoSlug = topico.id.split(".").pop()!;
+                  const topicoSlug = topicoSlugFromId(topico.id);
                   const href = `/${disciplina.id}/${topicoSlug}`;
                   const disabled = topico.status !== "ativo";
                   return (
@@ -66,6 +68,13 @@ export default function DisciplinaPage({
                       <div className="text-sm text-zinc-600 dark:text-zinc-300">
                         {topico.descricao}
                       </div>
+                      {!disabled ? (
+                        <TopSeedsList
+                          topicoId={topico.id}
+                          topicoNome={topico.nome}
+                          disciplinaId={disciplina.id}
+                        />
+                      ) : null}
                     </li>
                   );
                 })}
@@ -77,4 +86,3 @@ export default function DisciplinaPage({
     </div>
   );
 }
-
