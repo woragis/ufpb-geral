@@ -1,34 +1,82 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
+import { nonZeroVec3, randVec3 } from "../lib/vec";
 import { TOPICO_PRODUTO_ESCULAR, type ProdutoEscalarData } from "../entities/types";
+
+const CENARIOS: Array<(ctx: GeneratorContext) => ProdutoEscalarData> = [
+  gerarDot,
+  gerarAngulo,
+  gerarProjecao,
+  gerarOrtogonal,
+];
+
+function gerarDot(ctx: GeneratorContext): ProdutoEscalarData {
+  return { tipo: "produto-escalar", u: randVec3(ctx.rng), v: randVec3(ctx.rng) };
+}
+
+function gerarAngulo(ctx: GeneratorContext): ProdutoEscalarData {
+  const u = nonZeroVec3(ctx.rng);
+  const v = nonZeroVec3(ctx.rng);
+  return { tipo: "produto-escalar-angulo", u, v };
+}
+
+function gerarProjecao(ctx: GeneratorContext): ProdutoEscalarData {
+  const u = randVec3(ctx.rng);
+  const v = nonZeroVec3(ctx.rng);
+  return { tipo: "produto-escalar-projecao", u, v };
+}
+
+function gerarOrtogonal(ctx: GeneratorContext): ProdutoEscalarData {
+  if (ctx.rng.next() > 0.5) {
+    const u = nonZeroVec3(ctx.rng);
+    const v: [number, number, number] = [
+      -u[1],
+      u[0],
+      0,
+    ];
+    return { tipo: "produto-escalar-ortogonal", u, v };
+  }
+  const u = nonZeroVec3(ctx.rng);
+  const v = randVec3(ctx.rng);
+  return { tipo: "produto-escalar-ortogonal", u, v };
+}
+
+function enunciado(d: ProdutoEscalarData): string {
+  const fmt = (v: [number, number, number]) => `(${v.join(", ")})`;
+  switch (d.tipo) {
+    case "produto-escalar":
+      return `Calcule o produto escalar u·v, onde u = ${fmt(d.u)} e v = ${fmt(d.v)}.`;
+    case "produto-escalar-angulo":
+      return `Calcule o ângulo θ entre u = ${fmt(d.u)} e v = ${fmt(d.v)} (em graus, arredondado).`;
+    case "produto-escalar-projecao":
+      return `Calcule a projeção escalar de u sobre v, onde u = ${fmt(d.u)} e v = ${fmt(d.v)}.`;
+    case "produto-escalar-ortogonal":
+      return `Os vetores u = ${fmt(d.u)} e v = ${fmt(d.v)} são ortogonais? Responda Sim ou Não.`;
+  }
+}
 
 export const produtoEscalarGenerator = {
   topicoId: TOPICO_PRODUTO_ESCULAR,
-  version: 1,
+  version: 3,
 
   gerar(ctx: GeneratorContext): Problem {
-    const u: [number, number, number] = [
-      ctx.rng.nextInt(-3, 3),
-      ctx.rng.nextInt(-3, 3),
-      ctx.rng.nextInt(-3, 3),
-    ];
-    const v: [number, number, number] = [
-      ctx.rng.nextInt(-3, 3),
-      ctx.rng.nextInt(-3, 3),
-      ctx.rng.nextInt(-3, 3),
-    ];
-
-    const dados: ProdutoEscalarData = { tipo: "produto-escalar", u, v };
-    const enunciado = `Calcule o produto escalar u·v, onde u = (${u.join(", ")}) e v = (${v.join(", ")}).`;
+    const pool =
+      ctx.dificuldade === 1 ? [gerarDot, gerarAngulo] : CENARIOS;
+    const dados = ctx.rng.pick(pool)(ctx);
 
     return {
       id: "",
       disciplinaId: "calculo-vetorial",
       topicoId: TOPICO_PRODUTO_ESCULAR,
-      enunciado,
+      enunciado: enunciado(dados),
       dados,
       dificuldade: ctx.dificuldade,
-      seed: { topicoId: TOPICO_PRODUTO_ESCULAR, dificuldade: ctx.dificuldade, seed: "", generatorVersion: 1 },
+      seed: {
+        topicoId: TOPICO_PRODUTO_ESCULAR,
+        dificuldade: ctx.dificuldade,
+        seed: "",
+        generatorVersion: 3,
+      },
       geradoEm: "",
     };
   },
