@@ -34,7 +34,7 @@ export const enrichProbabilidadeLatex: DomainLatexEnricher = {
     const d = problem.dados as { tipo?: string };
     switch (d.tipo) {
       case "espaco-amostral": {
-        const x = dados<EspacoAmostralData>(problem);
+        const x = dados<Extract<EspacoAmostralData, { tipo: "espaco-amostral" }>>(problem);
         const exp =
           x.experimento === "moeda"
             ? text("lançamento de uma moeda")
@@ -46,14 +46,14 @@ export const enrichProbabilidadeLatex: DomainLatexEnricher = {
           : `Considere o experimento: ${exp}. Liste $\\Omega$ e informe $|\\Omega|$.`;
       }
       case "probabilidade-classica": {
-        const x = dados<ProbabilidadeClassicaData>(problem);
+        const x = dados<Extract<ProbabilidadeClassicaData, { tipo: "probabilidade-classica" }>>(problem);
         const desc = Object.entries(x.cores)
           .map(([cor, qtd]) => `${num(qtd)}\\;${text(`bola${qtd > 1 ? "s" : ""} ${cor}`)}`)
           .join(",\\,");
         return `Uma urna contém ${desc}. Qual é ${prob(text(`bola ${x.corAlvo}`))}?`;
       }
       case "eventos": {
-        const x = dados<EventosData>(problem);
+        const x = dados<Extract<EventosData, { tipo: "eventos" }>>(problem);
         if (x.operacao === "complemento") {
           return `Em $\\Omega$ com $|\\Omega| = ${num(x.nOmega)}$, $|A| = ${num(x.nA)}$ (${text(x.descricaoA)}). Calcule $|A^c|$.`;
         }
@@ -63,15 +63,15 @@ export const enrichProbabilidadeLatex: DomainLatexEnricher = {
         return `Em $\\Omega$ com $|\\Omega| = ${num(x.nOmega)}$, $|A \\cap B| = ${num(x.nAinterB)}$. Calcule $|A \\cap B|$.`;
       }
       case "condicional": {
-        const x = dados<CondicionalData>(problem);
+        const x = dados<Extract<CondicionalData, { tipo: "condicional" }>>(problem);
         return `Em um grupo de ${num(x.nOmega)} pessoas, ${num(x.nB)} satisfazem ${text(x.descricaoB)} e ${num(x.nAinterB)} satisfazem ${text(x.descricaoA)} e ${text(x.descricaoB)}. Calcule ${condProb("A", "B")}.`;
       }
       case "independencia": {
-        const x = dados<IndependenciaData>(problem);
+        const x = dados<Extract<IndependenciaData, { tipo: "independencia" }>>(problem);
         return `Com $|\\Omega| = ${num(x.nOmega)}$, $|A| = ${num(x.nA)}$, $|B| = ${num(x.nB)}$, $|A \\cap B| = ${num(x.nAinterB)}$. Os eventos $A$ e $B$ são independentes?`;
       }
       case "variaveis-discretas": {
-        const x = dados<VariaveisDiscretasData>(problem);
+        const x = dados<Extract<VariaveisDiscretasData, { tipo: "variaveis-discretas" }>>(problem);
         const tabela = x.valores
           .map((v, i) => `${prob(`X = ${num(v)}`)} = ${num(x.probabilidades[i]!)}`)
           .join(",\\,");
@@ -88,34 +88,34 @@ export const enrichProbabilidadeLatex: DomainLatexEnricher = {
     const d = problem.dados as { tipo?: string };
     switch (d.tipo) {
       case "espaco-amostral": {
-        const x = dados<EspacoAmostralData>(problem);
+        const x = dados<Extract<EspacoAmostralData, { tipo: "espaco-amostral" }>>(problem);
         const card =
           x.experimento === "moeda" ? 2 : x.experimento === "dado" ? 6 : 36;
         return num(card);
       }
       case "probabilidade-classica": {
-        const x = dados<ProbabilidadeClassicaData>(problem);
+        const x = dados<Extract<ProbabilidadeClassicaData, { tipo: "probabilidade-classica" }>>(problem);
         const fav = x.cores[x.corAlvo] ?? 0;
         const total = Object.values(x.cores).reduce((a, b) => a + b, 0);
         return frac(fav, total);
       }
       case "condicional": {
-        const x = dados<CondicionalData>(problem);
+        const x = dados<Extract<CondicionalData, { tipo: "condicional" }>>(problem);
         return frac(x.nAinterB, x.nB);
       }
       case "eventos": {
-        const x = dados<EventosData>(problem);
+        const x = dados<Extract<EventosData, { tipo: "eventos" }>>(problem);
         if (x.operacao === "complemento") return num(x.nOmega - x.nA);
         if (x.operacao === "uniao") return num(x.nA + x.nB - x.nAinterB);
         return num(x.nAinterB);
       }
       case "independencia": {
-        const x = dados<IndependenciaData>(problem);
+        const x = dados<Extract<IndependenciaData, { tipo: "independencia" }>>(problem);
         const indep = x.nAinterB * x.nOmega === x.nA * x.nB;
         return indep ? text("Sim") : text("Não");
       }
       case "variaveis-discretas": {
-        const x = dados<VariaveisDiscretasData>(problem);
+        const x = dados<Extract<VariaveisDiscretasData, { tipo: "variaveis-discretas" }>>(problem);
         if (x.pergunta === "probabilidade") {
           const idx = x.valores.indexOf(x.valorAlvo!);
           return num(x.probabilidades[idx]!);
@@ -135,7 +135,7 @@ export const enrichProbabilidadeLatex: DomainLatexEnricher = {
     const d = problem.dados as { tipo?: string };
     switch (d.tipo) {
       case "probabilidade-classica": {
-        const x = dados<ProbabilidadeClassicaData>(problem);
+        const x = dados<Extract<ProbabilidadeClassicaData, { tipo: "probabilidade-classica" }>>(problem);
         const fav = x.cores[x.corAlvo] ?? 0;
         const total = Object.values(x.cores).reduce((a, b) => a + b, 0);
         if (step.ordem === 1) {
@@ -148,7 +148,7 @@ export const enrichProbabilidadeLatex: DomainLatexEnricher = {
         break;
       }
       case "condicional": {
-        const x = dados<CondicionalData>(problem);
+        const x = dados<Extract<CondicionalData, { tipo: "condicional" }>>(problem);
         if (step.ordem === 1) {
           return `${condProb("A", "B")} = ${frac(prob("A \\cap B"), prob("B"))} = ${frac("n(A \\cap B)", "n(B)")}`;
         }
@@ -161,7 +161,7 @@ export const enrichProbabilidadeLatex: DomainLatexEnricher = {
         break;
       }
       case "eventos": {
-        const x = dados<EventosData>(problem);
+        const x = dados<Extract<EventosData, { tipo: "eventos" }>>(problem);
         if (x.operacao === "uniao" && step.ordem === 1) {
           return `|A \\cup B| = |A| + |B| - |A \\cap B|`;
         }
@@ -181,7 +181,7 @@ export const enrichProbabilidadeLatex: DomainLatexEnricher = {
         break;
       }
       case "espaco-amostral": {
-        const x = dados<EspacoAmostralData>(problem);
+        const x = dados<Extract<EspacoAmostralData, { tipo: "espaco-amostral" }>>(problem);
         const card =
           x.experimento === "moeda" ? 2 : x.experimento === "dado" ? 6 : 36;
         if (step.ordem === 1) {
@@ -193,7 +193,7 @@ export const enrichProbabilidadeLatex: DomainLatexEnricher = {
         break;
       }
       case "variaveis-discretas": {
-        const x = dados<VariaveisDiscretasData>(problem);
+        const x = dados<Extract<VariaveisDiscretasData, { tipo: "variaveis-discretas" }>>(problem);
         if (x.pergunta === "esperanca" && step.ordem === 1) {
           const terms = x.valores.map(
             (v, i) => `${num(v)} \\cdot ${num(x.probabilidades[i]!)}`,
@@ -207,7 +207,7 @@ export const enrichProbabilidadeLatex: DomainLatexEnricher = {
         break;
       }
       case "independencia": {
-        const x = dados<IndependenciaData>(problem);
+        const x = dados<Extract<IndependenciaData, { tipo: "independencia" }>>(problem);
         const indep = x.nAinterB * x.nOmega === x.nA * x.nB;
         if (step.ordem === 1) {
           return `${prob("A")} = ${frac(num(x.nA), num(x.nOmega))},\\quad ${prob("B")} = ${frac(num(x.nB), num(x.nOmega))}`;

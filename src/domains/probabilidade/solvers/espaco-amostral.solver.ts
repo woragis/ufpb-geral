@@ -1,89 +1,141 @@
 import type { Problem, Solution } from "@/core/domain/problem";
 import type { ProblemSolver } from "@/core/domain/solver";
-import {
-  TOPICO_ESPACO_AMOSTRAL,
-  type EspacoAmostralData,
-} from "../entities/types";
-
-function espacoMoeda(): string[] {
-  return ["C", "K"];
-}
-
-function espacoDado(): string[] {
-  return ["1", "2", "3", "4", "5", "6"];
-}
-
-function espacoDadoDuplo(): string[] {
-  const result: string[] = [];
-  for (let i = 1; i <= 6; i++) {
-    for (let j = 1; j <= 6; j++) {
-      result.push(`(${i},${j})`);
-    }
-  }
-  return result;
-}
+import { countDadoSomaModulo } from "../utils/math";
+import { TOPICO_ESPACO_AMOSTRAL, type EspacoAmostralData } from "../entities/types";
 
 export const espacoAmostralSolver: ProblemSolver = {
   topicoId: TOPICO_ESPACO_AMOSTRAL,
 
   resolver(problema: Problem): Solution {
-    const dados = problema.dados as EspacoAmostralData;
-
-    const espaco =
-      dados.experimento === "moeda"
-        ? espacoMoeda()
-        : dados.experimento === "dado"
-          ? espacoDado()
-          : espacoDadoDuplo();
-
-    const cardinalidade = espaco.length;
-    const lista = espaco.join(", ");
-
-    const steps =
-      dados.pergunta === "cardinalidade"
-        ? [
-            {
-              ordem: 1,
-              titulo: "Identificar o experimento",
-              explicacao:
-                "O espaço amostral é o conjunto de todos os resultados possíveis do experimento aleatório.",
-              calculo:
-                dados.experimento === "moeda"
-                  ? "Ω = {Cara, Coroa}"
-                  : dados.experimento === "dado"
-                    ? "Ω = {1, 2, 3, 4, 5, 6}"
-                    : "Ω = {(i,j) | i,j ∈ {1,...,6}}",
-            },
-            {
-              ordem: 2,
-              titulo: "Contar os resultados",
-              explicacao:
-                "A cardinalidade |Ω| é o número de elementos do espaço amostral.",
-              calculo: `|Ω| = ${cardinalidade}`,
-              resultado: String(cardinalidade),
-            },
-          ]
-        : [
-            {
-              ordem: 1,
-              titulo: "Listar o espaço amostral",
-              explicacao:
-                "Enumeramos cada resultado possível do experimento, sem repetir nem omitir casos.",
-              calculo: `Ω = {${lista}}`,
-            },
-            {
-              ordem: 2,
-              titulo: "Contar os elementos",
-              explicacao: "Contamos quantos resultados foram listados.",
-              calculo: `|Ω| = ${cardinalidade}`,
-              resultado: String(cardinalidade),
-            },
-          ];
-
-    return {
-      problemaId: problema.id,
-      respostaFinal: String(cardinalidade),
-      steps,
-    };
+    const d = problema.dados as EspacoAmostralData;
+    switch (d.tipo) {
+      case "espaco-amostral":
+        return solveBasico(d, problema.id);
+      case "espaco-amostral-baralho":
+        return solveBaralho(d, problema.id);
+      case "espaco-amostral-moeda-dado":
+        return solveMoedaDado(d, problema.id);
+      case "espaco-amostral-modular":
+        return solveModular(d, problema.id);
+    }
   },
 };
+
+function solveBasico(
+  d: Extract<EspacoAmostralData, { tipo: "espaco-amostral" }>,
+  problemaId: string,
+): Solution {
+  const card =
+    d.experimento === "moeda" ? 2 : d.experimento === "dado" ? 6 : 36;
+  return {
+    problemaId,
+    respostaFinal: String(card),
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Identificar os resultados",
+        explicacao: "Listamos ou contamos todos os resultados possíveis do experimento.",
+        calculo:
+          d.experimento === "moeda"
+            ? "Ω = {Cara, Coroa}"
+            : d.experimento === "dado"
+              ? "Ω = {1, 2, 3, 4, 5, 6}"
+              : "Ω = {(i,j) : i,j ∈ {1,...,6}}",
+      },
+      {
+        ordem: 2,
+        titulo: "Cardinalidade",
+        explicacao: "|Ω| é o número de resultados possíveis.",
+        calculo: `|Ω| = ${card}`,
+        resultado: String(card),
+      },
+    ],
+  };
+}
+
+function solveBaralho(
+  d: Extract<EspacoAmostralData, { tipo: "espaco-amostral-baralho" }>,
+  problemaId: string,
+): Solution {
+  const resultado = d.pergunta === "cardinalidade" ? "52" : "13";
+  return {
+    problemaId,
+    respostaFinal: resultado,
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Espaço amostral do baralho",
+        explicacao: "Um baralho padrão tem 52 cartas distintas.",
+        calculo: d.pergunta === "cardinalidade" ? "|Ω| = 52" : `Cada naipe tem 13 cartas`,
+      },
+      {
+        ordem: 2,
+        titulo: "Resultado",
+        explicacao:
+          d.pergunta === "cardinalidade"
+            ? "Ao sortear uma carta, há 52 resultados possíveis."
+            : `Há 13 cartas de ${d.naipeAlvo}.`,
+        calculo: resultado,
+        resultado,
+      },
+    ],
+  };
+}
+
+function solveMoedaDado(
+  d: Extract<EspacoAmostralData, { tipo: "espaco-amostral-moeda-dado" }>,
+  problemaId: string,
+): Solution {
+  return {
+    problemaId,
+    respostaFinal: "12",
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Produto de espaços",
+        explicacao: "Moeda (2 resultados) × dado (6 resultados).",
+        calculo: "|Ω| = 2 × 6",
+      },
+      {
+        ordem: 2,
+        titulo: "Calcular",
+        explicacao: "Multiplicamos as cardinalidades.",
+        calculo: "|Ω| = 12",
+        resultado: "12",
+      },
+    ],
+  };
+}
+
+function solveModular(
+  d: Extract<EspacoAmostralData, { tipo: "espaco-amostral-modular" }>,
+  problemaId: string,
+): Solution {
+  const fav = countDadoSomaModulo(d.modulo, d.resto);
+  const resultado = d.pergunta === "cardinalidade" ? "36" : String(fav);
+  return {
+    problemaId,
+    respostaFinal: resultado,
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Espaço amostral",
+        explicacao: "Dois dados produzem 6 × 6 = 36 pares ordenados.",
+        calculo: "|Ω| = 36",
+      },
+      {
+        ordem: 2,
+        titulo: d.pergunta === "cardinalidade" ? "Cardinalidade" : "Contar favoráveis",
+        explicacao:
+          d.pergunta === "cardinalidade"
+            ? "O espaço amostral tem 36 elementos."
+            : `Contamos pares cuja soma ≡ ${d.resto} (mod ${d.modulo}).`,
+        calculo:
+          d.pergunta === "cardinalidade"
+            ? "|Ω| = 36"
+            : `Favoráveis = ${fav}`,
+        resultado,
+      },
+    ],
+  };
+}
