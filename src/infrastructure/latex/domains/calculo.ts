@@ -273,4 +273,35 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
       steps: [],
     });
   },
+
+  stepExplicacao(problem, step) {
+    const d = problem.dados as { tipo?: string };
+    switch (d.tipo) {
+      case "limite-algebrico": {
+        const x = dados<LimitesData>(problem);
+        if (step.ordem === 1) {
+          return `Substituímos $x = ${num(x.a)}$ e obtemos a forma indeterminada $\\frac{0}{0}$.`;
+        }
+        if (step.ordem === 2) {
+          return `Fatoramos ${num(x.coeficiente)}x^2 ${signed(-x.constante)} usando diferença de quadrados.`;
+        }
+        break;
+      }
+      case "derivadas": {
+        if (step.ordem === 1) {
+          return `Aplicamos a regra da potência: $\\frac{d}{dx}x^n = n x^{n-1}$.`;
+        }
+        break;
+      }
+      case "integrais-definidas": {
+        if (step.ordem === 1) {
+          return `Encontramos uma primitiva $F(x)$ da função integranda.`;
+        }
+        break;
+      }
+      default:
+        break;
+    }
+    return undefined;
+  },
 };

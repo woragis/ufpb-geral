@@ -45,13 +45,12 @@ export function enrichSolution(problem: Problem, solution: Solution): Solution {
 function enrichStep(
   problem: Problem,
   step: Step,
-  enrich: {
-    stepCalculo: (p: Problem, s: Step) => string | undefined;
-    stepResultado: (p: Problem, s: Step) => string | undefined;
-  },
+  enrich: DomainLatexEnricher,
 ): Step {
   return {
     ...step,
+    explicacaoLatex:
+      enrich.stepExplicacao?.(problem, step) ?? step.explicacaoLatex,
     calculoLatex: enrich.stepCalculo(problem, step) ?? step.calculoLatex,
     resultadoLatex: enrich.stepResultado(problem, step) ?? step.resultadoLatex,
   };
@@ -63,4 +62,5 @@ export interface DomainLatexEnricher {
   respostaFinal: (problem: Problem, solution: Solution) => string | undefined;
   stepCalculo: (problem: Problem, step: Step) => string | undefined;
   stepResultado: (problem: Problem, step: Step) => string | undefined;
+  stepExplicacao?: (problem: Problem, step: Step) => string | undefined;
 }
