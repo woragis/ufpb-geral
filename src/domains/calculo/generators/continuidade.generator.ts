@@ -7,6 +7,9 @@ const CENARIOS: Array<(ctx: GeneratorContext) => ContinuidadeData> = [
   gerarClassificar,
   gerarCompletar,
   gerarLateral,
+  gerarTvi,
+  gerarTrigPonto,
+  gerarRolle,
 ];
 
 function gerarAfim(ctx: GeneratorContext): ContinuidadeData {
@@ -49,6 +52,27 @@ function gerarLateral(ctx: GeneratorContext): ContinuidadeData {
   return { tipo: "continuidade-lateral", a, variante };
 }
 
+function gerarTvi(ctx: GeneratorContext): ContinuidadeData {
+  const a = ctx.rng.nextInt(0, 2);
+  const b = a + ctx.rng.nextInt(2, 4);
+  const fa = ctx.rng.nextInt(1, 4);
+  const fb = fa + ctx.rng.nextInt(2, 5);
+  const k = fa + ctx.rng.nextInt(1, fb - fa - 1);
+  return { tipo: "continuidade-tvi", a, b, fa, fb, k };
+}
+
+function gerarTrigPonto(ctx: GeneratorContext): ContinuidadeData {
+  const funcao = ctx.rng.pick(["sin", "cos"] as const);
+  return { tipo: "continuidade-trig-ponto", funcao, x0: 0 };
+}
+
+function gerarRolle(ctx: GeneratorContext): ContinuidadeData {
+  const a = ctx.rng.pick([-2, -1, 0]);
+  const b = -a;
+  const coef = ctx.rng.pick([1, 2, 3]);
+  return { tipo: "continuidade-rolle", a, b, coef };
+}
+
 function enunciado(d: ContinuidadeData): string {
   switch (d.tipo) {
     case "continuidade-afim":
@@ -71,12 +95,20 @@ function enunciado(d: ContinuidadeData): string {
         return `Calcule lim(x→${d.a}⁻) 1/(x − ${d.a}) e lim(x→${d.a}⁺) 1/(x − ${d.a}). Os limites laterais existem e são iguais?`;
       }
       return `Calcule lim(x→0⁻) |x|/x e lim(x→0⁺) |x|/x.`;
+    case "continuidade-tvi":
+      return `Se f é contínua em [${d.a}, ${d.b}], f(${d.a}) = ${d.fa}, f(${d.b}) = ${d.fb} e ${d.k} está entre f(${d.a}) e f(${d.b}), existe c em (${d.a}, ${d.b}) com f(c) = ${d.k}? (T.V.I.)`;
+    case "continuidade-trig-ponto":
+      return d.funcao === "sin"
+        ? `Defina f(x) = sin(x)/x para x ≠ 0 e f(0) = 1. A função é contínua em x = 0?`
+        : `A função g(x) = cos(x) é contínua em x = 0? Justifique.`;
+    case "continuidade-rolle":
+      return `Para f(x) = ${d.coef}x² em [${d.a}, ${d.b}], existe c em (${d.a}, ${d.b}) tal que f'(c) = 0? (Teorema de Rolle)`;
   }
 }
 
 export const continuidadeGenerator = {
   topicoId: TOPICO_CONTINUIDADE,
-  version: 2,
+  version: 3,
 
   gerar(ctx: GeneratorContext): Problem {
     const dados = ctx.rng.pick(CENARIOS)(ctx);
@@ -91,7 +123,7 @@ export const continuidadeGenerator = {
         topicoId: TOPICO_CONTINUIDADE,
         dificuldade: ctx.dificuldade,
         seed: "",
-        generatorVersion: 2,
+        generatorVersion: 3,
       },
       geradoEm: "",
     };

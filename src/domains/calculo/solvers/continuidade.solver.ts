@@ -16,6 +16,12 @@ export const continuidadeSolver: ProblemSolver = {
         return solveCompletar(d, problema.id);
       case "continuidade-lateral":
         return solveLateral(d, problema.id);
+      case "continuidade-tvi":
+        return solveTvi(d, problema.id);
+      case "continuidade-trig-ponto":
+        return solveTrigPonto(d, problema.id);
+      case "continuidade-rolle":
+        return solveRolle(d, problema.id);
       default:
         throw new Error("Tipo de continuidade desconhecido");
     }
@@ -220,6 +226,96 @@ function solveLateral(
         explicacao: "Limites laterais existem mas diferem.",
         calculo: "−1 ≠ 1",
         resultado: "Não",
+      },
+    ],
+  };
+}
+
+function solveTvi(
+  d: Extract<ContinuidadeData, { tipo: "continuidade-tvi" }>,
+  problemaId: string,
+): Solution {
+  return {
+    problemaId,
+    respostaFinal: "Sim",
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Verificar hipóteses",
+        explicacao: "f contínua em [a,b] e k entre f(a) e f(b).",
+        calculo: `f(${d.a})=${d.fa}, f(${d.b})=${d.fb}, k=${d.k}`,
+      },
+      {
+        ordem: 2,
+        titulo: "Teorema do Valor Intermediário",
+        explicacao: "Existe c ∈ (a,b) com f(c) = k.",
+        calculo: `${d.fa} < ${d.k} < ${d.fb}`,
+        resultado: "Sim",
+      },
+    ],
+  };
+}
+
+function solveTrigPonto(
+  d: Extract<ContinuidadeData, { tipo: "continuidade-trig-ponto" }>,
+  problemaId: string,
+): Solution {
+  if (d.funcao === "sin") {
+    return {
+      problemaId,
+      respostaFinal: "Sim",
+      steps: [
+        {
+          ordem: 1,
+          titulo: "Limite fundamental",
+          explicacao: "lim(x→0) sin(x)/x = 1 = f(0).",
+          calculo: "lim(x→0) sin(x)/x = 1",
+        },
+        {
+          ordem: 2,
+          titulo: "Conclusão",
+          explicacao: "Limite coincide com o valor definido em zero.",
+          calculo: "f é contínua em 0",
+          resultado: "Sim",
+        },
+      ],
+    };
+  }
+  return {
+    problemaId,
+    respostaFinal: "Sim",
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Continuidade de cos",
+        explicacao: "cos é contínuo em todo ℝ.",
+        calculo: "lim(x→0) cos(x) = cos(0) = 1",
+        resultado: "Sim",
+      },
+    ],
+  };
+}
+
+function solveRolle(
+  d: Extract<ContinuidadeData, { tipo: "continuidade-rolle" }>,
+  problemaId: string,
+): Solution {
+  return {
+    problemaId,
+    respostaFinal: "Sim, c = 0",
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Verificar Rolle",
+        explicacao: "f(a) = f(b) pois f(x)=ax² é par.",
+        calculo: `f(${d.a}) = f(${d.b}) = ${d.coef * d.a * d.a}`,
+      },
+      {
+        ordem: 2,
+        titulo: "Derivada",
+        explicacao: "f'(x) = 2ax. Em c=0 temos f'(0)=0.",
+        calculo: "f'(0) = 0",
+        resultado: "Sim, c = 0",
       },
     ],
   };
