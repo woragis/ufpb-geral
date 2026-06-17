@@ -89,24 +89,26 @@ function solveProjecao(
   problemaId: string,
 ): Solution {
   const uv = dot(d.u, d.v);
-  const mv = modulo(d.v);
-  const proj = round2(uv / mv);
+  const mv2 = dot(d.v, d.v);
+  const scalar = uv / mv2;
+  const vec = d.v.map((vi) => round2(scalar * vi));
+  const resultado = `(${vec.join(", ")})`;
   return {
     problemaId,
-    respostaFinal: String(proj),
+    respostaFinal: resultado,
     steps: [
       {
         ordem: 1,
-        titulo: "Fórmula da projeção escalar",
-        explicacao: "proj_v(u) = (u·v) / |v|.",
-        calculo: `u·v = ${uv}, |v| = ${round2(mv)}`,
+        titulo: "Fórmula da projeção vetorial",
+        explicacao: "proj_v(u) = [(u·v) / (v·v)] v.",
+        calculo: `u·v = ${uv}, v·v = ${round2(mv2)}`,
       },
       {
         ordem: 2,
         titulo: "Calcular",
-        explicacao: "Dividimos o produto escalar pelo módulo de v.",
-        calculo: `proj_v(u) = ${uv}/${round2(mv)} = ${proj}`,
-        resultado: String(proj),
+        explicacao: "Multiplicamos o escalar pelo vetor v.",
+        calculo: `proj_v(u) = ${round2(scalar)}·(${d.v.join(", ")}) = ${resultado}`,
+        resultado,
       },
     ],
   };

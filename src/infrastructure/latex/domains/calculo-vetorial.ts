@@ -3,7 +3,6 @@ import type { DomainLatexEnricher } from "../enrich";
 import {
   num,
   signed,
-  sqrtLatex,
   text,
   vecInline,
 } from "@/core/presentation/math/latex-helpers";
@@ -16,6 +15,7 @@ import type {
   VetoresData,
 } from "@/domains/calculo-vetorial/entities/types";
 import { cross, dot, modulo, round2 } from "@/domains/calculo-vetorial/lib/vec";
+import { cvStepCalculo } from "./calculo-vetorial-steps";
 
 function isCV(p: Problem): boolean {
   return p.disciplinaId === "calculo-vetorial";
@@ -95,7 +95,7 @@ export const enrichCalculoVetorialLatex: DomainLatexEnricher = {
       }
       case "retas-planos-parametrica": {
         const x = dados<Extract<RetasPlanosData, { tipo: "retas-planos-parametrica" }>>(problem);
-        return `Dada a reta $\\mathbf{r}(t) = ${vecInline(...x.p0)} + t\\,${vecInline(...x.diretor)}$, identifique o vetor diretor.`;
+        return `Dada a reta $\\mathbf{r}(t) = ${vecInline(...x.p0)} + t\\,${vecInline(...x.diretor)}$, calcule $\\mathbf{r}(1)$.`;
       }
       case "retas-planos-plano": {
         const x = dados<Extract<RetasPlanosData, { tipo: "retas-planos-plano" }>>(problem);
@@ -233,7 +233,8 @@ export const enrichCalculoVetorialLatex: DomainLatexEnricher = {
       }
       case "retas-planos-parametrica": {
         const x = dados<Extract<RetasPlanosData, { tipo: "retas-planos-parametrica" }>>(problem);
-        return vecInline(...x.diretor);
+        const ponto = x.p0.map((v, i) => v + x.diretor[i]!) as [number, number, number];
+        return vecInline(...ponto);
       }
       case "retas-planos-plano":
         return solution.respostaFinal;
@@ -295,80 +296,7 @@ export const enrichCalculoVetorialLatex: DomainLatexEnricher = {
   },
 
   stepCalculo(problem, step) {
-    const d = problem.dados as { tipo?: string };
-    switch (d.tipo) {
-      case "vetores": {
-        const x = dados<Extract<VetoresData, { tipo: "vetores" }>>(problem);
-        const terms = x.componentes.map((c) => `${num(c)}^2`).join(" + ");
-        const sq = x.componentes.reduce((a, c) => a + c * c, 0);
-        if (step.ordem === 1) return `\\|\\mathbf{v}\\| = ${sqrtLatex(terms)}`;
-        if (step.ordem === 2) {
-          return `\\|\\mathbf{v}\\| = ${sqrtLatex(num(sq))} = ${num(Math.sqrt(sq))}`;
-        }
-        break;
-      }
-      case "produto-escalar": {
-        const x = dados<Extract<ProdutoEscalarData, { tipo: "produto-escalar" }>>(problem);
-        const res = dot(x.u, x.v);
-        if (step.ordem === 1) {
-          const terms = x.u.map((ui, i) => `${num(ui)} \\cdot ${num(x.v[i]!)}`);
-          return `\\mathbf{u} \\cdot \\mathbf{v} = ${terms.join(" + ")}`;
-        }
-        if (step.ordem === 2) return `\\mathbf{u} \\cdot \\mathbf{v} = ${num(res)}`;
-        break;
-      }
-      case "produto-vetorial": {
-        const x = dados<Extract<ProdutoVetorialData, { tipo: "produto-vetorial" }>>(problem);
-        const r = cross(x.u, x.v);
-        if (step.ordem === 2) return `\\mathbf{u} \\times \\mathbf{v} = ${vecInline(...r)}`;
-        break;
-      }
-      case "campos": {
-        const x = dados<Extract<CamposData, { tipo: "campos" }>>(problem);
-        const fn = campoFnLatex(x.funcao);
-        if (step.ordem === 1) return `\\nabla f = \\left(\\frac{\\partial f}{\\partial x},\\; \\frac{\\partial f}{\\partial y}\\right)`;
-        if (step.ordem === 2) {
-          if (x.funcao === "xy") return `\\nabla f(${num(x.x0)}, ${num(x.y0)}) = ${vecInline(x.y0, x.x0)}`;
-          if (x.funcao === "x2y") {
-            return `\\nabla f(${num(x.x0)}, ${num(x.y0)}) = ${vecInline(2 * x.x0 * x.y0, x.x0 * x.x0)}`;
-          }
-          return `\\nabla f(${num(x.x0)}, ${num(x.y0)}) = ${vecInline(2 * x.x0, 2 * x.y0)}`;
-        }
-        break;
-      }
-      case "curvas": {
-        const x = dados<Extract<CurvasData, { tipo: "curvas" }>>(problem);
-        const rx = x.a;
-        const ry = 2 * x.t0;
-        const mod = Math.sqrt(rx * rx + ry * ry);
-        if (step.ordem === 1) return `\\mathbf{r}'(t) = (${num(x.a)},\\; 2t)`;
-        if (step.ordem === 2) return `\\mathbf{r}'(${num(x.t0)}) = (${num(rx)},\\; ${num(ry)})`;
-        if (step.ordem === 3) {
-          return `\\|\\mathbf{r}'(${num(x.t0)})\\| = ${sqrtLatex(`${num(rx)}^2 + ${num(ry)}^2`)} = ${num(mod)}`;
-        }
-        break;
-      }
-      case "curvas-circulo":
-        if (step.ordem === 2) return `\\|\\mathbf{r}'(t)\\| = 1`;
-        break;
-      case "curvas-helice":
-        if (step.ordem === 2) return `\\|\\mathbf{r}'(t)\\| = ${sqrtLatex("2")}`;
-        break;
-      case "campos-divergente":
-      case "campos-rotacional":
-      case "campos-divergente-3d":
-        if (step.ordem === 2) {
-          return enrichCalculoVetorialLatex.respostaFinal(problem, {
-            problemaId: problem.id,
-            respostaFinal: step.resultado ?? "",
-            steps: [],
-          });
-        }
-        break;
-      default:
-        break;
-    }
-    return undefined;
+    return cvStepCalculo(problem, step);
   },
 
   stepResultado(problem, step) {
