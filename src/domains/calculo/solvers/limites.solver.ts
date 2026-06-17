@@ -21,6 +21,12 @@ export const limitesSolver: ProblemSolver = {
         return solveInfinito(d, problema.id);
       case "limite-substituicao":
         return solveSubstituicao(d, problema.id);
+      case "limite-exp-log":
+        return solveExpLog(d, problema.id);
+      case "limite-infinito-neg":
+        return solveInfinitoNeg(d, problema.id);
+      case "limite-lhopital":
+        return solveLhopital(d, problema.id);
       default:
         throw new Error("Tipo de limite desconhecido");
     }
@@ -100,20 +106,36 @@ function solveTrig(
 
   const resposta = Number.isInteger(resultado) ? String(resultado) : fmtNum(resultado);
 
+  const extraStep =
+    d.variante === "sin-ax"
+      ? {
+          ordem: 2,
+          titulo: "Reescrever a fração",
+          explicacao: `Multiplicamos por ${d.a}/${d.a} para usar o limite fundamental.`,
+          calculo: enunciadoCalc,
+        }
+      : {
+          ordem: 2,
+          titulo: "Aplicar limite conhecido",
+          explicacao: explicacao,
+          calculo: enunciadoCalc,
+        };
+
   return {
     problemaId,
     respostaFinal: resposta,
     steps: [
       {
         ordem: 1,
-        titulo: "Identificar limite fundamental",
-        explicacao,
-        calculo: enunciadoCalc,
+        titulo: "Verificar forma",
+        explicacao: "Substituição direta leva a indeterminação 0/0 ou expressão fundamental.",
+        calculo: "Forma indeterminada ou limite padrão",
       },
+      extraStep,
       {
-        ordem: 2,
+        ordem: 3,
         titulo: "Resultado",
-        explicacao: "Aplicando os limites conhecidos.",
+        explicacao: "Conclusão do limite.",
         calculo: `= ${resposta}`,
         resultado: resposta,
       },
@@ -256,6 +278,152 @@ function solveSubstituicao(
         explicacao: `Calculamos f(${d.a}).`,
         calculo: `f(${d.a}) = ${valor}`,
         resultado: String(valor),
+      },
+    ],
+  };
+}
+
+function solveExpLog(
+  d: Extract<LimitesData, { tipo: "limite-exp-log" }>,
+  problemaId: string,
+): Solution {
+  const resposta = "1";
+  const steps =
+    d.variante === "exp-x"
+      ? [
+          {
+            ordem: 1,
+            titulo: "Forma indeterminada",
+            explicacao: "Substituindo x = 0 obtemos 0/0.",
+            calculo: "0/0",
+          },
+          {
+            ordem: 2,
+            titulo: "Limite fundamental",
+            explicacao: "É o limite clássico que define a derivada de eˣ em zero.",
+            calculo: "lim(x→0) (eˣ−1)/x = 1",
+          },
+          {
+            ordem: 3,
+            titulo: "Resultado",
+            explicacao: "Aplicando o limite conhecido.",
+            calculo: "= 1",
+            resultado: resposta,
+          },
+        ]
+      : [
+          {
+            ordem: 1,
+            titulo: "Forma indeterminada",
+            explicacao: "Substituindo x = 0 obtemos 0/0.",
+            calculo: "0/0",
+          },
+          {
+            ordem: 2,
+            titulo: "Substituição ou limite fundamental",
+            explicacao: "Com t = 1+x, quando x→0 temos ln(1+x)/x → 1.",
+            calculo: "lim(x→0) ln(1+x)/x = 1",
+          },
+          {
+            ordem: 3,
+            titulo: "Resultado",
+            explicacao: "Limite padrão do logaritmo.",
+            calculo: "= 1",
+            resultado: resposta,
+          },
+        ];
+
+  return { problemaId, respostaFinal: resposta, steps };
+}
+
+function solveInfinitoNeg(
+  d: Extract<LimitesData, { tipo: "limite-infinito-neg" }>,
+  problemaId: string,
+): Solution {
+  const resultado = Math.round((d.numA / d.denA) * 1000) / 1000;
+  const resposta = fmtNum(resultado);
+
+  return {
+    problemaId,
+    respostaFinal: resposta,
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Forma indeterminada ∞/∞",
+        explicacao: "Para x → −∞, x² é positivo — mesmo grau no topo e embaixo.",
+        calculo: "∞/∞",
+      },
+      {
+        ordem: 2,
+        titulo: "Dividir por x²",
+        explicacao: "Dividimos numerador e denominador por x².",
+        calculo: `(${d.numA} + ${d.numB}/x²) / (${d.denA} + ${d.denB}/x²)`,
+      },
+      {
+        ordem: 3,
+        titulo: "Calcular",
+        explicacao: "Termos com 1/x² tendem a zero quando x → −∞.",
+        calculo: `${d.numA}/${d.denA} = ${resposta}`,
+        resultado: resposta,
+      },
+    ],
+  };
+}
+
+function solveLhopital(
+  d: Extract<LimitesData, { tipo: "limite-lhopital" }>,
+  problemaId: string,
+): Solution {
+  if (d.variante === "exp-menos-x") {
+    return {
+      problemaId,
+      respostaFinal: "0.5",
+      steps: [
+        {
+          ordem: 1,
+          titulo: "Verificar 0/0",
+          explicacao: "Substituição direta dá 0/0.",
+          calculo: "0/0",
+        },
+        {
+          ordem: 2,
+          titulo: "1ª aplicação de L'Hôpital",
+          explicacao: "Derivamos numerador e denominador.",
+          calculo: "lim (eˣ − 1) / (2x) → ainda 0/0",
+        },
+        {
+          ordem: 3,
+          titulo: "2ª aplicação",
+          explicacao: "Derivamos novamente.",
+          calculo: "lim eˣ / 2 = 1/2",
+          resultado: "0.5",
+        },
+      ],
+    };
+  }
+
+  return {
+    problemaId,
+    respostaFinal: "-1/6",
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Verificar 0/0",
+        explicacao: "Substituição direta dá 0/0.",
+        calculo: "0/0",
+      },
+      {
+        ordem: 2,
+        titulo: "1ª L'Hôpital",
+        explicacao: "Derivamos: (cos x − 1) / (3x²).",
+        calculo: "Ainda 0/0",
+      },
+      {
+        ordem: 3,
+        titulo: "2ª L'Hôpital",
+        explicacao: "Derivamos: (−sin x) / (6x) → 0/0.",
+        calculo: "−1/6 após mais uma aplicação ou série",
+        resultado: "-1/6",
       },
     ],
   };

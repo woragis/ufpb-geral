@@ -8,7 +8,10 @@ const CENARIOS: Array<(ctx: GeneratorContext) => LimitesData> = [
   gerarRacional,
   gerarRadical,
   gerarInfinito,
+  gerarInfinitoNeg,
   gerarSubstituicao,
+  gerarExpLog,
+  gerarLhopital,
 ];
 
 function gerarAlgebrico(ctx: GeneratorContext): LimitesData {
@@ -57,6 +60,24 @@ function gerarInfinito(ctx: GeneratorContext): LimitesData {
   return { tipo: "limite-infinito", numA, numB, denA, denB };
 }
 
+function gerarInfinitoNeg(ctx: GeneratorContext): LimitesData {
+  const numA = ctx.rng.pick([2, 3, 4]);
+  const denA = ctx.rng.pick([1, 2]);
+  const numB = ctx.rng.nextInt(0, 4);
+  const denB = ctx.rng.nextInt(0, 4);
+  return { tipo: "limite-infinito-neg", numA, numB, denA, denB };
+}
+
+function gerarExpLog(ctx: GeneratorContext): LimitesData {
+  const variante = ctx.rng.pick(["exp-x", "ln-1px"] as const);
+  return { tipo: "limite-exp-log", variante };
+}
+
+function gerarLhopital(ctx: GeneratorContext): LimitesData {
+  const variante = ctx.rng.pick(["exp-menos-x", "sin-menos-x"] as const);
+  return { tipo: "limite-lhopital", variante };
+}
+
 function gerarSubstituicao(ctx: GeneratorContext): LimitesData {
   const a = ctx.rng.nextInt(1, 4);
   const templates = [
@@ -101,6 +122,16 @@ function enunciado(d: LimitesData): string {
       return `Calcule o limite: lim(x→0) [(√(x + ${d.k}) − √${d.k}) / x]`;
     case "limite-infinito":
       return `Calcule o limite: lim(x→∞) [(${d.numA}x² ${d.numB >= 0 ? "+" : "−"} ${Math.abs(d.numB)}) / (${d.denA}x² ${d.denB >= 0 ? "+" : "−"} ${Math.abs(d.denB)})]`;
+    case "limite-infinito-neg":
+      return `Calcule o limite: lim(x→−∞) [(${d.numA}x² ${d.numB >= 0 ? "+" : "−"} ${Math.abs(d.numB)}) / (${d.denA}x² ${d.denB >= 0 ? "+" : "−"} ${Math.abs(d.denB)})]`;
+    case "limite-exp-log":
+      return d.variante === "exp-x"
+        ? "Calcule o limite: lim(x→0) [(eˣ − 1) / x]"
+        : "Calcule o limite: lim(x→0) [ln(1 + x) / x]";
+    case "limite-lhopital":
+      return d.variante === "exp-menos-x"
+        ? "Calcule o limite: lim(x→0) [(eˣ − 1 − x) / x²] (use L'Hôpital)"
+        : "Calcule o limite: lim(x→0) [(sin(x) − x) / x³] (use L'Hôpital)";
     case "limite-substituicao": {
       const terms = d.coeficientes.map((c, i) => {
         const exp = d.expoentes[i]!;
@@ -116,7 +147,7 @@ function enunciado(d: LimitesData): string {
 
 export const limitesGenerator = {
   topicoId: TOPICO_LIMITES,
-  version: 2,
+  version: 3,
 
   gerar(ctx: GeneratorContext): Problem {
     const dados = ctx.rng.pick(CENARIOS)(ctx);
@@ -132,7 +163,7 @@ export const limitesGenerator = {
         topicoId: TOPICO_LIMITES,
         dificuldade: ctx.dificuldade,
         seed: "",
-        generatorVersion: 2,
+        generatorVersion: 3,
       },
       geradoEm: "",
     };
