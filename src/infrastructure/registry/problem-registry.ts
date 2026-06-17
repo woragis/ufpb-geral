@@ -57,3 +57,15 @@ export function isTopicoImplementado(topicoId: TopicoId): boolean {
 export function getLatestVersion(topicoId: TopicoId): number | undefined {
   return latestVersionByTopico.get(topicoId);
 }
+
+export interface RegisteredTopico {
+  topicoId: TopicoId;
+  version: number;
+}
+
+export function listRegisteredTopicos(): RegisteredTopico[] {
+  return [...latestVersionByTopico.entries()].map(([topicoId, version]) => ({
+    topicoId,
+    version,
+  }));
+}
