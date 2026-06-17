@@ -41,26 +41,26 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
     const d = problem.dados as { tipo?: string };
     switch (d.tipo) {
       case "limite-algebrico": {
-        const x = dados<LimitesData>(problem);
+        const x = dados<Extract<LimitesData, { tipo: "limite-algebrico" }>>(problem);
         return `Calcule ${lim(x.a, frac(`${num(x.coeficiente)}x^2 ${signed(-x.constante)}`, `x ${signed(-x.a)}`))}.`;
       }
-      case "continuidade": {
-        const x = dados<ContinuidadeData>(problem);
+      case "continuidade-afim": {
+        const x = dados<Extract<ContinuidadeData, { tipo: "continuidade-afim" }>>(problem);
         return `A função abaixo é contínua em $x = ${num(x.a)}$? ${piecewise([
           { expr: `${num(x.m1)}x ${signed(x.b1)}`, cond: `x < ${num(x.a)}` },
           { expr: `${num(x.m2)}x ${signed(x.b2)}`, cond: `x \\geq ${num(x.a)}` },
         ])}`;
       }
-      case "derivadas": {
-        const x = dados<DerivadasData>(problem);
+      case "derivadas-polinomio": {
+        const x = dados<Extract<DerivadasData, { tipo: "derivadas-polinomio" }>>(problem);
         return `Dada $f(x) = ${polyLatex(x.coeficientes, x.expoentes)}$, calcule $f'(${num(x.x0)})$.`;
       }
-      case "regra-cadeia": {
-        const x = dados<RegraCadeiaData>(problem);
+      case "regra-cadeia-potencia": {
+        const x = dados<Extract<RegraCadeiaData, { tipo: "regra-cadeia-potencia" }>>(problem);
         return `Seja $h(x) = (${num(x.a)}x ${signed(x.b)})^{${num(x.n)}}$. Calcule $h'(${num(x.x0)})$.`;
       }
-      case "otimizacao": {
-        const x = dados<OtimizacaoData>(problem);
+      case "otimizacao-parabola": {
+        const x = dados<Extract<OtimizacaoData, { tipo: "otimizacao-parabola" }>>(problem);
         return `Encontre o $x$ que minimiza $f(x) = ${num(x.a)}x^2 ${signed(x.b)}x ${signed(x.c)}$.`;
       }
       case "integrais-indefinidas": {
@@ -104,15 +104,15 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
     const d = problem.dados as { tipo?: string };
     switch (d.tipo) {
       case "limite-algebrico": {
-        const x = dados<LimitesData>(problem);
+        const x = dados<Extract<LimitesData, { tipo: "limite-algebrico" }>>(problem);
         return num(2 * x.coeficiente * x.a);
       }
-      case "continuidade": {
-        const x = dados<ContinuidadeData>(problem);
+      case "continuidade-afim": {
+        const x = dados<Extract<ContinuidadeData, { tipo: "continuidade-afim" }>>(problem);
         return x.continua ? text("Sim") : text("Não");
       }
-      case "otimizacao": {
-        const x = dados<OtimizacaoData>(problem);
+      case "otimizacao-parabola": {
+        const x = dados<Extract<OtimizacaoData, { tipo: "otimizacao-parabola" }>>(problem);
         const xv = -x.b / (2 * x.a);
         return num(xv);
       }
@@ -140,7 +140,7 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
     const d = problem.dados as { tipo?: string };
     switch (d.tipo) {
       case "limite-algebrico": {
-        const x = dados<LimitesData>(problem);
+        const x = dados<Extract<LimitesData, { tipo: "limite-algebrico" }>>(problem);
         const res = 2 * x.coeficiente * x.a;
         if (step.ordem === 1) {
           return `x = ${num(x.a)} \\Rightarrow ${frac(`${num(x.coeficiente)} \\cdot ${num(x.a)}^2 ${signed(-x.constante)}`, `${num(x.a)} ${signed(-x.a)}`)} = ${frac("0", "0")}`;
@@ -156,8 +156,8 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
         }
         break;
       }
-      case "derivadas": {
-        const x = dados<DerivadasData>(problem);
+      case "derivadas-polinomio": {
+        const x = dados<Extract<DerivadasData, { tipo: "derivadas-polinomio" }>>(problem);
         if (step.ordem === 1) {
           const derivTerms = x.coeficientes.map((c, i) => {
             const n = x.expoentes[i]!;
@@ -178,8 +178,8 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
         }
         break;
       }
-      case "regra-cadeia": {
-        const x = dados<RegraCadeiaData>(problem);
+      case "regra-cadeia-potencia": {
+        const x = dados<Extract<RegraCadeiaData, { tipo: "regra-cadeia-potencia" }>>(problem);
         const gx = x.a * x.x0 + x.b;
         const res = x.n * Math.pow(gx, x.n - 1) * x.a;
         if (step.ordem === 1) {
@@ -278,7 +278,7 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
     const d = problem.dados as { tipo?: string };
     switch (d.tipo) {
       case "limite-algebrico": {
-        const x = dados<LimitesData>(problem);
+        const x = dados<Extract<LimitesData, { tipo: "limite-algebrico" }>>(problem);
         if (step.ordem === 1) {
           return `Substituímos $x = ${num(x.a)}$ e obtemos a forma indeterminada $\\frac{0}{0}$.`;
         }
@@ -287,7 +287,7 @@ export const enrichCalculoLatex: DomainLatexEnricher = {
         }
         break;
       }
-      case "derivadas": {
+      case "derivadas-polinomio": {
         if (step.ordem === 1) {
           return `Aplicamos a regra da potência: $\\frac{d}{dx}x^n = n x^{n-1}$.`;
         }

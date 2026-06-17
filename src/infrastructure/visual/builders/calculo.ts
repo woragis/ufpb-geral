@@ -26,21 +26,31 @@ export function buildCalculoVisuals(problem: Problem): VisualSpec[] {
 
   switch (d.tipo) {
     case "limite-algebrico":
-      return [buildLimitesVisual(d as LimitesData)];
-    case "continuidade":
-      return [buildContinuidadeVisual(d as ContinuidadeData)];
-    case "derivadas":
-      return [buildDerivadasVisual(d as DerivadasData)];
-    case "otimizacao":
-      return [buildOtimizacaoVisual(d as OtimizacaoData)];
+      return [buildLimitesAlgebricoVisual(d as Extract<LimitesData, { tipo: "limite-algebrico" }>)];
+    case "limite-racional": {
+      const rd = d as Extract<LimitesData, { tipo: "limite-racional" }>;
+      return [buildLimitesRacionalVisual(rd)];
+    }
+    case "continuidade-afim":
+      return [buildContinuidadeAfimVisual(d as Extract<ContinuidadeData, { tipo: "continuidade-afim" }>)];
+    case "derivadas-polinomio":
+      return [buildDerivadasPolinomioVisual(d as Extract<DerivadasData, { tipo: "derivadas-polinomio" }>)];
+    case "derivadas-trig":
+      return [buildDerivadasTrigVisual(d as Extract<DerivadasData, { tipo: "derivadas-trig" }>)];
+    case "otimizacao-parabola":
+      return [buildOtimizacaoParabolaVisual(d as Extract<OtimizacaoData, { tipo: "otimizacao-parabola" }>)];
+    case "otimizacao-geometrica": {
+      const od = d as Extract<OtimizacaoData, { tipo: "otimizacao-geometrica" }>;
+      return [buildOtimizacaoGeometricaVisual(od)];
+    }
+    case "regra-cadeia-potencia":
+      return [buildRegraCadeiaPotenciaVisual(d as Extract<RegraCadeiaData, { tipo: "regra-cadeia-potencia" }>)];
     case "integrais-definidas":
       return [buildIntegralDefinidaVisual(d as IntegraisDefinidasData)];
     case "area":
       return [buildAreaVisual(d as AreaData)];
     case "edos":
       return [buildEdosVisual(d as EdosData)];
-    case "regra-cadeia":
-      return [buildRegraCadeiaVisual(d as RegraCadeiaData)];
     case "integrais-indefinidas":
       return [buildIntegralIndefinidaVisual(d as IntegraisIndefinidasData)];
     case "sequencias":
@@ -54,7 +64,9 @@ export function buildCalculoVisuals(problem: Problem): VisualSpec[] {
   }
 }
 
-function buildLimitesVisual(d: LimitesData): VisualSpec {
+function buildLimitesAlgebricoVisual(
+  d: Extract<LimitesData, { tipo: "limite-algebrico" }>,
+): VisualSpec {
   const fn = (x: number) =>
     (d.coeficiente * x * x - d.constante) / (x - d.a);
   const left = sampleRange(fn, d.a - 3, d.a - 0.15, 60);
@@ -79,7 +91,32 @@ function buildLimitesVisual(d: LimitesData): VisualSpec {
   };
 }
 
-function buildContinuidadeVisual(d: ContinuidadeData): VisualSpec {
+function buildLimitesRacionalVisual(
+  d: Extract<LimitesData, { tipo: "limite-racional" }>,
+): VisualSpec {
+  const sum = d.r1 + d.r2;
+  const prod = d.r1 * d.r2;
+  const fn = (x: number) => (x * x - sum * x + prod) / (x - d.a);
+  const left = sampleRange(fn, d.a - 3, d.a - 0.15, 60);
+  const right = sampleRange(fn, d.a + 0.15, d.a + 3, 60);
+  const bounds = mergeBounds(boundsFromPoints(left), boundsFromPoints(right));
+  const yHole = d.r1 + d.r2;
+  return {
+    kind: "function-plot",
+    title: `f(x) = (x² − ${sum}x + ${prod})/(x − ${d.a})`,
+    bounds,
+    curves: [
+      { points: left, color: "#2563eb" },
+      { points: right, color: "#2563eb" },
+    ],
+    markers: [{ x: d.a, y: yHole, label: `x=${d.a}`, style: "hole" }],
+    ariaLabel: `Gráfico racional com buraco em x=${d.a}`,
+  };
+}
+
+function buildContinuidadeAfimVisual(
+  d: Extract<ContinuidadeData, { tipo: "continuidade-afim" }>,
+): VisualSpec {
   const left = sampleRange(
     (x) => d.m1 * x + d.b1,
     d.a - 3,
@@ -114,7 +151,9 @@ function buildContinuidadeVisual(d: ContinuidadeData): VisualSpec {
   };
 }
 
-function buildDerivadasVisual(d: DerivadasData): VisualSpec {
+function buildDerivadasPolinomioVisual(
+  d: Extract<DerivadasData, { tipo: "derivadas-polinomio" }>,
+): VisualSpec {
   const fn = (x: number) =>
     d.coeficientes.reduce(
       (acc, c, i) => acc + c * Math.pow(x, d.expoentes[i]!),
@@ -132,7 +171,30 @@ function buildDerivadasVisual(d: DerivadasData): VisualSpec {
   };
 }
 
-function buildOtimizacaoVisual(d: OtimizacaoData): VisualSpec {
+function buildDerivadasTrigVisual(
+  d: Extract<DerivadasData, { tipo: "derivadas-trig" }>,
+): VisualSpec {
+  const fn = (x: number) => {
+    const arg = d.k * x + d.b;
+    if (d.funcao === "sin") return Math.sin(arg);
+    if (d.funcao === "cos") return Math.cos(arg);
+    return Math.tan(arg);
+  };
+  const points = sampleRange(fn, d.x0 - 3, d.x0 + 3);
+  const bounds = boundsFromPoints(points);
+  return {
+    kind: "function-plot",
+    title: `f(x) = ${d.funcao}(x)`,
+    bounds,
+    curves: [{ points, color: "#2563eb" }],
+    markers: [{ x: d.x0, y: fn(d.x0), label: `x₀`, style: "point" }],
+    ariaLabel: `Gráfico trigonométrico`,
+  };
+}
+
+function buildOtimizacaoParabolaVisual(
+  d: Extract<OtimizacaoData, { tipo: "otimizacao-parabola" }>,
+): VisualSpec {
   const fn = (x: number) => d.a * x * x + d.b * x + d.c;
   const xv = -d.b / (2 * d.a);
   const points = sampleRange(fn, xv - 4, xv + 4);
@@ -193,7 +255,26 @@ function buildEdosVisual(d: EdosData): VisualSpec {
   };
 }
 
-function buildRegraCadeiaVisual(d: RegraCadeiaData): VisualSpec {
+function buildOtimizacaoGeometricaVisual(
+  d: Extract<OtimizacaoData, { tipo: "otimizacao-geometrica" }>,
+): VisualSpec {
+  const fn = (x: number) => x * (d.perimetro / 2 - x);
+  const xv = d.perimetro / 4;
+  const points = sampleRange(fn, 0, d.perimetro / 2);
+  const bounds = boundsFromPoints(points);
+  return {
+    kind: "function-plot",
+    title: `A(x) = x(${d.perimetro}/2 − x)`,
+    bounds,
+    curves: [{ points, color: "#2563eb" }],
+    markers: [{ x: xv, y: fn(xv), label: "máx", style: "vertex" }],
+    ariaLabel: `Área do retângulo em função da largura`,
+  };
+}
+
+function buildRegraCadeiaPotenciaVisual(
+  d: Extract<RegraCadeiaData, { tipo: "regra-cadeia-potencia" }>,
+): VisualSpec {
   const fn = (x: number) => Math.pow(d.a * x + d.b, d.n);
   const points = sampleRange(fn, d.x0 - 3, d.x0 + 3);
   const bounds = boundsFromPoints(points);
