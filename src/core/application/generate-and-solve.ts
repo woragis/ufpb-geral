@@ -5,6 +5,7 @@ import { createSeededRandom } from "./create-seeded-random";
 import { randomShareableSeed } from "./random-shareable-seed";
 import { stableProblemId } from "./hash";
 import { getRegistryEntry } from "@/infrastructure/registry/problem-registry";
+import { enrichProblem, enrichSolution } from "@/infrastructure/latex/enrich";
 
 export interface GenerateAndSolveInput {
   topicoId: TopicoId;
@@ -48,7 +49,7 @@ export function generateAndSolve(
     rng,
   });
 
-  const problemWithMeta: Problem = {
+  const problemWithMeta: Problem = enrichProblem({
     ...problem,
     id: stableProblemId(seedKey),
     disciplinaId: input.disciplinaId,
@@ -56,9 +57,12 @@ export function generateAndSolve(
     dificuldade: exerciseSeed.dificuldade,
     seed: exerciseSeed,
     geradoEm: new Date().toISOString(),
-  };
+  });
 
-  const solution = entry.solver.resolver(problemWithMeta);
+  const solution = enrichSolution(
+    problemWithMeta,
+    entry.solver.resolver(problemWithMeta),
+  );
   const revealSteps = input.revealSteps ?? 0;
   const stepsVisiveis = solution.steps.slice(0, revealSteps);
 

@@ -153,7 +153,10 @@ export default function TopicPage({
               </Link>
             ) : (
               <div className="text-sm text-zinc-700 dark:text-zinc-300">
-                Resposta final: <MathContent>{solution.respostaFinal}</MathContent>
+                Resposta final:{" "}
+                <MathContent latex={solution.respostaFinalLatex}>
+                  {solution.respostaFinal}
+                </MathContent>
               </div>
             )}
 

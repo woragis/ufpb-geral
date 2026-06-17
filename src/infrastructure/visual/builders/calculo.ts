@@ -11,8 +11,13 @@ import type {
   DerivadasData,
   EdosData,
   IntegraisDefinidasData,
+  IntegraisIndefinidasData,
   LimitesData,
   OtimizacaoData,
+  RegraCadeiaData,
+  SequenciasData,
+  SeriesData,
+  TaylorData,
 } from "@/domains/calculo/entities/types";
 
 export function buildCalculoVisuals(problem: Problem): VisualSpec[] {
@@ -34,6 +39,16 @@ export function buildCalculoVisuals(problem: Problem): VisualSpec[] {
       return [buildAreaVisual(d as AreaData)];
     case "edos":
       return [buildEdosVisual(d as EdosData)];
+    case "regra-cadeia":
+      return [buildRegraCadeiaVisual(d as RegraCadeiaData)];
+    case "integrais-indefinidas":
+      return [buildIntegralIndefinidaVisual(d as IntegraisIndefinidasData)];
+    case "sequencias":
+      return [buildSequenciasVisual(d as SequenciasData)];
+    case "series":
+      return [buildSeriesVisual(d as SeriesData)];
+    case "taylor":
+      return [buildTaylorVisual(d as TaylorData)];
     default:
       return [];
   }
@@ -175,5 +190,90 @@ function buildEdosVisual(d: EdosData): VisualSpec {
       { x: d.x, y: fn(d.x), label: `x=${d.x}`, style: "point" },
     ],
     ariaLabel: `Solução exponencial da EDO em x=${d.x}`,
+  };
+}
+
+function buildRegraCadeiaVisual(d: RegraCadeiaData): VisualSpec {
+  const fn = (x: number) => Math.pow(d.a * x + d.b, d.n);
+  const points = sampleRange(fn, d.x0 - 3, d.x0 + 3);
+  const bounds = boundsFromPoints(points);
+  return {
+    kind: "function-plot",
+    title: `h(x) = (${d.a}x + ${d.b})^${d.n}`,
+    bounds,
+    curves: [{ points, color: "#7c3aed" }],
+    markers: [{ x: d.x0, y: fn(d.x0), label: `x₀=${d.x0}`, style: "point" }],
+    ariaLabel: `Gráfico de h(x) com ponto em x=${d.x0}`,
+  };
+}
+
+function buildIntegralIndefinidaVisual(d: IntegraisIndefinidasData): VisualSpec {
+  const fn = (x: number) => Math.pow(x, d.n);
+  const points = sampleRange(fn, 0.5, 4);
+  const bounds = boundsFromPoints(points);
+  return {
+    kind: "function-plot",
+    title: `f(x) = x^${d.n}`,
+    bounds,
+    curves: [{ points, color: "#2563eb" }],
+    ariaLabel: `Gráfico de x elevado a ${d.n}`,
+  };
+}
+
+function buildSequenciasVisual(d: SequenciasData): VisualSpec {
+  const terms = Array.from({ length: 6 }, (_, i) => {
+    const n = i + 1;
+    const num = (d.numeradorCoef * n + d.numeradorConst) / (d.denominadorCoef * n + d.denominadorConst);
+    return { label: `a${n}`, value: Math.round(num * 100) / 100 };
+  });
+  return {
+    kind: "bar-chart",
+    title: "Primeiros termos da sequência",
+    labels: terms.map((t) => t.label),
+    values: terms.map((t) => t.value),
+    ariaLabel: "Barras com os primeiros termos da sequência",
+  };
+}
+
+function buildSeriesVisual(d: SeriesData): VisualSpec {
+  const count = Math.abs(d.r) < 1 ? 6 : Math.min(d.n, 6);
+  const terms = Array.from({ length: count }, (_, i) => d.a1 * Math.pow(d.r, i));
+  return {
+    kind: "bar-chart",
+    title: Math.abs(d.r) < 1 ? "Termos da série geométrica" : `Termos até n=${d.n}`,
+    labels: terms.map((_, i) => `a${i + 1}`),
+    values: terms.map((v) => Math.round(v * 100) / 100),
+    ariaLabel: "Barras com termos da série geométrica",
+  };
+}
+
+function buildTaylorVisual(d: TaylorData): VisualSpec {
+  const f =
+    d.funcao === "exponencial"
+      ? (x: number) => Math.exp(x)
+      : (x: number) => Math.sin(x);
+  const taylor =
+    d.funcao === "exponencial"
+      ? d.grau === 1
+        ? (x: number) => 1 + x
+        : (x: number) => 1 + x + (x * x) / 2
+      : d.grau === 1
+        ? (x: number) => x
+        : (x: number) => x - (x * x * x) / 6;
+  const left = d.x0 - 2;
+  const right = d.x0 + 2;
+  const fPoints = sampleRange(f, left, right);
+  const pPoints = sampleRange(taylor, left, right);
+  const bounds = mergeBounds(boundsFromPoints(fPoints), boundsFromPoints(pPoints));
+  return {
+    kind: "function-plot",
+    title: d.funcao === "exponencial" ? "eˣ e aproximação de Taylor" : "sen(x) e aproximação de Taylor",
+    bounds,
+    curves: [
+      { points: fPoints, color: "#2563eb" },
+      { points: pPoints, color: "#dc2626", dashed: true },
+    ],
+    markers: [{ x: d.x0, y: f(d.x0), label: `x₀=${d.x0}`, style: "point" }],
+    ariaLabel: `Comparação entre função e polinômio de Taylor grau ${d.grau}`,
   };
 }

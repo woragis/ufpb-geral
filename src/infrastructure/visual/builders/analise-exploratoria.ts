@@ -6,6 +6,7 @@ import type {
   DistribuicoesData,
   MedidasDispersaoData,
   MedidasTendenciaData,
+  TiposDadosData,
 } from "@/domains/analise-exploratoria/entities/types";
 
 export function buildAnaliseExploratoriaVisuals(
@@ -15,6 +16,8 @@ export function buildAnaliseExploratoriaVisuals(
   if (!d?.tipo) return [];
 
   switch (d.tipo) {
+    case "tipos-dados":
+      return [buildTiposDadosVisual(d as TiposDadosData)];
     case "media-aritmetica":
       return [buildMedidasTendenciaVisual(d as MedidasTendenciaData)];
     case "medidas-dispersao":
@@ -26,6 +29,22 @@ export function buildAnaliseExploratoriaVisuals(
     default:
       return [];
   }
+}
+
+function buildTiposDadosVisual(d: TiposDadosData): VisualSpec {
+  const escalaLabels: Record<TiposDadosData["escalaCorreta"], string> = {
+    nominal: "Nominal",
+    ordinal: "Ordinal",
+    intervalar: "Intervalar",
+    razao: "Razão",
+  };
+  return {
+    kind: "bar-chart",
+    title: `${d.variavel} — escala ${escalaLabels[d.escalaCorreta]}`,
+    labels: d.exemplos.slice(0, 6),
+    values: d.exemplos.slice(0, 6).map(() => 1),
+    ariaLabel: `Exemplos da variável ${d.variavel} na escala ${d.escalaCorreta}`,
+  };
 }
 
 function buildMedidasTendenciaVisual(d: MedidasTendenciaData): VisualSpec {
