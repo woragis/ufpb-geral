@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { disciplinas } from "@/infrastructure/catalog/disciplines";
 import { CopyCodeForm } from "./components/CopyCodeForm";
+import { PersonalPanels } from "./components/personal/PersonalPanels";
 import { topicoSlugFromId } from "@/infrastructure/catalog/disciplines";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,8 @@ export default function Home() {
           </h2>
           <CopyCodeForm />
         </section>
+
+        <PersonalPanels />
 
         <section className="grid gap-4">
           {disciplinas.map((disciplina) => {

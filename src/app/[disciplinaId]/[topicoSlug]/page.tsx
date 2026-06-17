@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyButton } from "@/app/components/CopyButton";
 import { ExerciseView } from "@/app/components/exercise/ExerciseView";
+import { EngagementActions } from "@/app/components/engagement/EngagementActions";
+import { PersonalExerciseTracker } from "@/app/components/personal/PersonalExerciseTracker";
 import { generateAndSolve } from "@/core/application/generate-and-solve";
 import { encodeExerciseSeed } from "@/core/application/seed-codec";
 import { resolveVisualSpecs } from "@/core/presentation/visual/resolve-visual-specs";
@@ -126,7 +128,18 @@ export default function TopicPage({
                 Dificuldade: {exerciseSeed.dificuldade} · Passos visíveis:{" "}
                 {currentStep}/{solution.steps.length}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <EngagementActions
+                  disciplinaId={disciplina.id as any}
+                  exerciseSeed={exerciseSeed}
+                />
+                <PersonalExerciseTracker
+                  disciplinaId={disciplina.id as any}
+                  exerciseSeed={exerciseSeed}
+                  topicoNome={topico.nome}
+                  enunciadoPreview={problem.enunciado}
+                  currentStep={currentStep}
+                />
                 <CopyButton value={shareCode} label="Copiar código" />
                 <CopyButton value={shareUrl} label="Copiar link" />
               </div>
