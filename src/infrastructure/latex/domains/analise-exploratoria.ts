@@ -28,6 +28,7 @@ import {
   varianciaAmostral,
   varianciaPopulacional,
 } from "@/domains/analise-exploratoria/lib/stats";
+import { aeExplicacaoToLatex, aePlainToLatex } from "./ae-plain-to-latex";
 
 function isAE(p: Problem): boolean {
   return p.disciplinaId === "analise-exploratoria";
@@ -395,7 +396,11 @@ export const enrichAnaliseExploratoriaLatex: DomainLatexEnricher = {
       default:
         break;
     }
-    return undefined;
+    return aePlainToLatex(step.calculo);
+  },
+
+  stepExplicacao(_problem, step) {
+    return aeExplicacaoToLatex(step.explicacao);
   },
 
   stepResultado(problem, step) {

@@ -19,6 +19,33 @@ import type {
   SeriesData,
   TaylorData,
 } from "@/domains/calculo/entities/types";
+import {
+  buildContinuidadeClassificarVisual,
+  buildContinuidadeCompletarVisual,
+  buildContinuidadeLateralVisual,
+  buildContinuidadeRolleVisual,
+  buildContinuidadeTviVisual,
+  buildContinuidadeTrigPontoVisual,
+  buildDerivadasAproxLinearVisual,
+  buildDerivadasDefinicaoVisual,
+  buildDerivadasExpLogVisual,
+  buildDerivadasImplicitaVisual,
+  buildDerivadasInversaTrigVisual,
+  buildDerivadasProdutoVisual,
+  buildDerivadasQuocienteVisual,
+  buildDerivadasSegundaTesteVisual,
+  buildDerivadasTangenteVisual,
+  buildDerivadasTaxaVisual,
+  buildOtimizacaoCaixaVisual,
+  buildOtimizacaoCilindroVisual,
+  buildOtimizacaoConcavidadeVisual,
+  buildOtimizacaoCrescimentoVisual,
+  buildOtimizacaoEsboçoVisual,
+  buildOtimizacaoSegundaDerivadaVisual,
+  buildRegraCadeiaAvancadaVisual,
+  buildRegraCadeiaExpLogVisual,
+  buildRegraCadeiaTrigVisual,
+} from "./calculo-visuals-extra";
 
 export function buildCalculoVisuals(problem: Problem): VisualSpec[] {
   const d = problem.dados as { tipo?: string };
@@ -47,18 +74,68 @@ export function buildCalculoVisuals(problem: Problem): VisualSpec[] {
       return [buildLimitesSubstituicaoVisual(d as Extract<LimitesData, { tipo: "limite-substituicao" }>)];
     case "continuidade-afim":
       return [buildContinuidadeAfimVisual(d as Extract<ContinuidadeData, { tipo: "continuidade-afim" }>)];
+    case "continuidade-classificar":
+      return [buildContinuidadeClassificarVisual(d as Extract<ContinuidadeData, { tipo: "continuidade-classificar" }>)];
+    case "continuidade-completar":
+      return [buildContinuidadeCompletarVisual(d as Extract<ContinuidadeData, { tipo: "continuidade-completar" }>)];
+    case "continuidade-lateral":
+      return [buildContinuidadeLateralVisual(d as Extract<ContinuidadeData, { tipo: "continuidade-lateral" }>)];
+    case "continuidade-tvi":
+      return [buildContinuidadeTviVisual(d as Extract<ContinuidadeData, { tipo: "continuidade-tvi" }>)];
+    case "continuidade-trig-ponto":
+      return [buildContinuidadeTrigPontoVisual(d as Extract<ContinuidadeData, { tipo: "continuidade-trig-ponto" }>)];
+    case "continuidade-rolle":
+      return [buildContinuidadeRolleVisual(d as Extract<ContinuidadeData, { tipo: "continuidade-rolle" }>)];
     case "derivadas-polinomio":
       return [buildDerivadasPolinomioVisual(d as Extract<DerivadasData, { tipo: "derivadas-polinomio" }>)];
     case "derivadas-trig":
       return [buildDerivadasTrigVisual(d as Extract<DerivadasData, { tipo: "derivadas-trig" }>)];
+    case "derivadas-exp-log":
+      return [buildDerivadasExpLogVisual(d as Extract<DerivadasData, { tipo: "derivadas-exp-log" }>)];
+    case "derivadas-produto":
+      return [buildDerivadasProdutoVisual(d as Extract<DerivadasData, { tipo: "derivadas-produto" }>)];
+    case "derivadas-quociente":
+      return [buildDerivadasQuocienteVisual(d as Extract<DerivadasData, { tipo: "derivadas-quociente" }>)];
+    case "derivadas-tangente":
+      return [buildDerivadasTangenteVisual(d as Extract<DerivadasData, { tipo: "derivadas-tangente" }>)];
+    case "derivadas-definicao":
+      return [buildDerivadasDefinicaoVisual(d as Extract<DerivadasData, { tipo: "derivadas-definicao" }>)];
+    case "derivadas-taxa-relacionada":
+      return [buildDerivadasTaxaVisual(d as Extract<DerivadasData, { tipo: "derivadas-taxa-relacionada" }>)];
+    case "derivadas-implicita":
+      return [buildDerivadasImplicitaVisual(d as Extract<DerivadasData, { tipo: "derivadas-implicita" }>)];
+    case "derivadas-aprox-linear":
+      return [buildDerivadasAproxLinearVisual(d as Extract<DerivadasData, { tipo: "derivadas-aprox-linear" }>)];
+    case "derivadas-segunda-teste":
+      return [buildDerivadasSegundaTesteVisual(d as Extract<DerivadasData, { tipo: "derivadas-segunda-teste" }>)];
+    case "derivadas-inversa-trig":
+      return [buildDerivadasInversaTrigVisual(d as Extract<DerivadasData, { tipo: "derivadas-inversa-trig" }>)];
     case "otimizacao-parabola":
       return [buildOtimizacaoParabolaVisual(d as Extract<OtimizacaoData, { tipo: "otimizacao-parabola" }>)];
     case "otimizacao-geometrica": {
       const od = d as Extract<OtimizacaoData, { tipo: "otimizacao-geometrica" }>;
       return [buildOtimizacaoGeometricaVisual(od)];
     }
+    case "otimizacao-crescimento":
+      return [buildOtimizacaoCrescimentoVisual(d as Extract<OtimizacaoData, { tipo: "otimizacao-crescimento" }>)];
+    case "otimizacao-concavidade":
+      return [buildOtimizacaoConcavidadeVisual(d as Extract<OtimizacaoData, { tipo: "otimizacao-concavidade" }>)];
+    case "otimizacao-cilindro":
+      return [buildOtimizacaoCilindroVisual(d as Extract<OtimizacaoData, { tipo: "otimizacao-cilindro" }>)];
+    case "otimizacao-caixa":
+      return [buildOtimizacaoCaixaVisual(d as Extract<OtimizacaoData, { tipo: "otimizacao-caixa" }>)];
+    case "otimizacao-segunda-derivada":
+      return [buildOtimizacaoSegundaDerivadaVisual(d as Extract<OtimizacaoData, { tipo: "otimizacao-segunda-derivada" }>)];
+    case "otimizacao-esboco":
+      return [buildOtimizacaoEsboçoVisual(d as Extract<OtimizacaoData, { tipo: "otimizacao-esboco" }>)];
     case "regra-cadeia-potencia":
       return [buildRegraCadeiaPotenciaVisual(d as Extract<RegraCadeiaData, { tipo: "regra-cadeia-potencia" }>)];
+    case "regra-cadeia-trig":
+      return [buildRegraCadeiaTrigVisual(d as Extract<RegraCadeiaData, { tipo: "regra-cadeia-trig" }>)];
+    case "regra-cadeia-exp-log":
+      return [buildRegraCadeiaExpLogVisual(d as Extract<RegraCadeiaData, { tipo: "regra-cadeia-exp-log" }>)];
+    case "regra-cadeia-avancada":
+      return [buildRegraCadeiaAvancadaVisual(d as Extract<RegraCadeiaData, { tipo: "regra-cadeia-avancada" }>)];
     case "integrais-definidas":
       return [buildIntegralDefinidaVisual(d as IntegraisDefinidasData)];
     case "area":

@@ -8,7 +8,37 @@ import type {
   MedidasTendenciaData,
   TiposDadosData,
 } from "@/domains/analise-exploratoria/entities/types";
-import { media, quartis } from "@/domains/analise-exploratoria/lib/stats";
+import {
+  media,
+  quartis,
+  scatterPointsForR,
+} from "@/domains/analise-exploratoria/lib/stats";
+
+function hashStr(s: string): number {
+  let h = 0;
+  for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0;
+  return Math.abs(h);
+}
+
+function freqTable(
+  title: string,
+  categorias: string[],
+  frequencias: number[],
+  ariaLabel: string,
+): VisualSpec {
+  const total = frequencias.reduce((a, b) => a + b, 0);
+  return {
+    kind: "data-table",
+    title,
+    headers: ["Categoria", "Frequência", "Freq. relativa (%)"],
+    rows: categorias.map((c, i) => {
+      const f = frequencias[i]!;
+      const pct = total > 0 ? Math.round((f / total) * 1000) / 10 : 0;
+      return [c, String(f), String(pct)];
+    }),
+    ariaLabel,
+  };
+}
 
 export function buildAnaliseExploratoriaVisuals(
   problem: Problem,
@@ -22,16 +52,11 @@ export function buildAnaliseExploratoriaVisuals(
     case "tipos-dados-grafico":
       return [buildTiposDadosGraficoVisual(d as Extract<TiposDadosData, { tipo: "tipos-dados-grafico" }>)];
     case "tipos-dados-frequencia":
-      return [buildTiposDadosFrequenciaVisual(d as Extract<TiposDadosData, { tipo: "tipos-dados-frequencia" }>)];
-    case "tipos-dados-media-escala": {
-      const x = d as Extract<TiposDadosData, { tipo: "tipos-dados-media-escala" }>;
-      return [buildTiposDadosEscalaVisual({
-        tipo: "tipos-dados",
-        variavel: x.variavel,
-        exemplos: ["amostra 1", "amostra 2", "amostra 3"],
-        escalaCorreta: x.escalaCorreta,
-      })];
-    }
+      return buildTiposDadosFrequenciaVisuals(
+        d as Extract<TiposDadosData, { tipo: "tipos-dados-frequencia" }>,
+      );
+    case "tipos-dados-media-escala":
+      return [buildTiposDadosMediaEscalaVisual(d as Extract<TiposDadosData, { tipo: "tipos-dados-media-escala" }>)];
     case "media-aritmetica":
     case "medidas-tendencia-mediana":
     case "medidas-tendencia-moda":
@@ -52,7 +77,9 @@ export function buildAnaliseExploratoriaVisuals(
     case "distribuicoes-outliers":
       return [buildDistribuicoesOutliersVisual(d as Extract<DistribuicoesData, { tipo: "distribuicoes-outliers" }>)];
     case "distribuicoes-histograma":
-      return [buildDistribuicoesHistogramaVisual(d as Extract<DistribuicoesData, { tipo: "distribuicoes-histograma" }>)];
+      return buildDistribuicoesHistogramaVisuals(
+        d as Extract<DistribuicoesData, { tipo: "distribuicoes-histograma" }>,
+      );
     case "distribuicoes-assimetria":
       return [buildDistribuicoesAssimetriaVisual(d as Extract<DistribuicoesData, { tipo: "distribuicoes-assimetria" }>)];
     case "distribuicoes-cinco-numeros":
@@ -80,31 +107,78 @@ function buildTiposDadosEscalaVisual(
     razao: "Razão",
   };
   return {
-    kind: "bar-chart",
+    kind: "data-table",
     title: `${d.variavel} — escala ${escalaLabels[d.escalaCorreta]}`,
-    labels: d.exemplos.slice(0, 6),
-    values: d.exemplos.slice(0, 6).map(() => 1),
+    headers: ["Exemplo"],
+    rows: d.exemplos.slice(0, 6).map((e) => [e]),
     ariaLabel: `Exemplos da variável ${d.variavel} na escala ${d.escalaCorreta}`,
   };
+}
+
+function buildTiposDadosMediaEscalaVisual(
+  d: Extract<TiposDadosData, { tipo: "tipos-dados-media-escala" }>,
+): VisualSpec {
+  const exemplos =
+    d.escalaCorreta === "razao"
+      ? ["120", "250", "480"]
+      : ["18 °C", "22 °C", "26 °C"];
+  const escala = d.escalaCorreta === "razao" ? "Razão" : "Intervalar";
+  return {
+    kind: "data-table",
+    title: `${d.variavel} — escala ${escala}`,
+    headers: ["Observação", "Valor"],
+    rows: exemplos.map((v, i) => [`Amostra ${i + 1}`, v]),
+    ariaLabel: `Valores de ${d.variavel} em escala ${escala}`,
+  };
+}
+
+function sampleCategorica(variavel: string): { labels: string[]; values: number[] } {
+  const h = hashStr(variavel);
+  const labels = ["A", "B", "C", "D"];
+  const values = labels.map((_, i) => 3 + ((h >> (i * 3)) % 8));
+  return { labels, values };
+}
+
+function sampleDiscreta(variavel: string): { labels: string[]; values: number[] } {
+  const h = hashStr(variavel);
+  const labels = ["0", "1", "2", "3", "4"];
+  return {
+    labels,
+    values: labels.map((_, i) => 1 + ((h >> i) % 6) + (i % 2)),
+  };
+}
+
+function sampleTemporal(variavel: string): { points: { x: number; y: number }[] } {
+  const h = hashStr(variavel);
+  const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"];
+  const points = months.map((_, i) => ({
+    x: i + 1,
+    y: 10 + ((h >> (i * 2)) % 15),
+  }));
+  return { points };
+}
+
+function sampleContinua(variavel: string): number[] {
+  const h = hashStr(variavel);
+  return Array.from({ length: 12 }, (_, i) => 20 + (h % 20) + i * 2 + (i % 3));
 }
 
 function buildTiposDadosGraficoVisual(
   d: Extract<TiposDadosData, { tipo: "tipos-dados-grafico" }>,
 ): VisualSpec {
-  const labels = ["A", "B", "C", "D"];
-  const values = [4, 7, 3, 5];
-
   switch (d.graficoCorreto) {
-    case "histograma":
+    case "histograma": {
+      const { labels, values } = sampleDiscreta(d.variavel);
       return {
         kind: "bar-chart",
         title: `${d.variavel} — histograma`,
-        labels: ["1–2", "2–3", "3–4", "4–5"],
-        values: [2, 5, 8, 3],
-        ariaLabel: `Histograma ilustrativo para ${d.variavel}`,
+        labels,
+        values,
+        ariaLabel: `Histograma para ${d.variavel}`,
       };
+    }
     case "linha": {
-      const points = labels.map((_, i) => ({ x: i + 1, y: values[i]! }));
+      const { points } = sampleTemporal(d.variavel);
       return {
         kind: "function-plot",
         title: `${d.variavel} — série temporal`,
@@ -114,17 +188,18 @@ function buildTiposDadosGraficoVisual(
       };
     }
     case "boxplot": {
-      const sorted = [...values].sort((a, b) => a - b);
-      const q = quartis(sorted);
+      const vals = sampleContinua(d.variavel);
+      const q = quartis(vals);
       return {
         kind: "box-plot",
         ...q,
-        min: Math.min(...sorted),
-        max: Math.max(...sorted),
-        ariaLabel: `Boxplot ilustrativo para ${d.variavel}`,
+        min: Math.min(...vals),
+        max: Math.max(...vals),
+        ariaLabel: `Boxplot para ${d.variavel}`,
       };
     }
-    default:
+    default: {
+      const { labels, values } = sampleCategorica(d.variavel);
       return {
         kind: "bar-chart",
         title: `${d.variavel} — gráfico de barras`,
@@ -132,19 +207,28 @@ function buildTiposDadosGraficoVisual(
         values,
         ariaLabel: `Gráfico de barras para ${d.variavel}`,
       };
+    }
   }
 }
 
-function buildTiposDadosFrequenciaVisual(
+function buildTiposDadosFrequenciaVisuals(
   d: Extract<TiposDadosData, { tipo: "tipos-dados-frequencia" }>,
-): VisualSpec {
-  return {
-    kind: "bar-chart",
-    title: "Tabela de frequências",
-    labels: d.categorias,
-    values: d.frequencias,
-    ariaLabel: `Frequências por categoria: ${d.categorias.join(", ")}`,
-  };
+): VisualSpec[] {
+  return [
+    freqTable(
+      "Tabela de frequências",
+      d.categorias,
+      d.frequencias,
+      `Frequências: ${d.categorias.join(", ")}`,
+    ),
+    {
+      kind: "bar-chart",
+      title: "Gráfico de frequências",
+      labels: d.categorias,
+      values: d.frequencias,
+      ariaLabel: `Barras das frequências por categoria`,
+    },
+  ];
 }
 
 function buildMedidasTendenciaVisual(d: MedidasTendenciaData): VisualSpec {
@@ -178,8 +262,9 @@ function buildDistribuicoesBoxVisual(d: {
   q2: number;
   q3: number;
 }): VisualSpec {
-  const min = d.q1 - (d.q3 - d.q1);
-  const max = d.q3 + (d.q3 - d.q1);
+  const iqr = d.q3 - d.q1;
+  const min = d.q1 - iqr;
+  const max = d.q3 + iqr;
   return {
     kind: "box-plot",
     q1: d.q1,
@@ -195,29 +280,50 @@ function buildDistribuicoesQuartisVisual(
   d: Extract<DistribuicoesData, { tipo: "distribuicoes-quartis" }>,
 ): VisualSpec {
   const q = quartis(d.valores);
-  return buildDistribuicoesBoxVisual(q);
+  const min = Math.min(...d.valores);
+  const max = Math.max(...d.valores);
+  return {
+    kind: "box-plot",
+    ...q,
+    min,
+    max,
+    ariaLabel: `Boxplot dos dados com quartis`,
+  };
 }
 
 function buildDistribuicoesOutliersVisual(
   d: Extract<DistribuicoesData, { tipo: "distribuicoes-outliers" }>,
 ): VisualSpec {
   const q = quartis(d.valores);
+  const min = Math.min(...d.valores);
+  const max = Math.max(...d.valores);
   return {
-    ...buildDistribuicoesBoxVisual(q),
+    kind: "box-plot",
+    ...q,
+    min,
+    max,
     ariaLabel: "Boxplot com possíveis outliers",
   };
 }
 
-function buildDistribuicoesHistogramaVisual(
+function buildDistribuicoesHistogramaVisuals(
   d: Extract<DistribuicoesData, { tipo: "distribuicoes-histograma" }>,
-): VisualSpec {
-  return {
-    kind: "bar-chart",
-    title: "Histograma",
-    labels: d.bins,
-    values: d.frequencias,
-    ariaLabel: `Histograma com ${d.bins.length} classes`,
-  };
+): VisualSpec[] {
+  return [
+    freqTable(
+      "Distribuição por classes",
+      d.bins,
+      d.frequencias,
+      `Histograma com ${d.bins.length} classes`,
+    ),
+    {
+      kind: "bar-chart",
+      title: "Histograma",
+      labels: d.bins,
+      values: d.frequencias,
+      ariaLabel: `Histograma com ${d.bins.length} classes`,
+    },
+  ];
 }
 
 function buildDistribuicoesAssimetriaVisual(
@@ -257,7 +363,7 @@ function buildCorrelacaoVisual(d: {
   const bounds = boundsFromPoints(points);
   return {
     kind: "scatter-plot",
-    title: "Correlação",
+    title: "Diagrama de dispersão",
     bounds,
     points,
     ariaLabel: `Diagrama de dispersão com ${points.length} pontos`,
@@ -267,16 +373,12 @@ function buildCorrelacaoVisual(d: {
 function buildCorrelacaoInterpretacaoVisual(
   d: Extract<CorrelacaoData, { tipo: "correlacao-interpretacao" }>,
 ): VisualSpec {
-  const n = 8;
-  const xs = Array.from({ length: n }, (_, i) => i + 1);
-  const slope = d.r >= 0 ? 1 : -1;
-  const ys = xs.map((x) => slope * x * Math.abs(d.r) + (1 - Math.abs(d.r)) * 3);
-  const points = xs.map((x, i) => ({ x, y: ys[i]! }));
+  const points = scatterPointsForR(d.r);
   return {
     kind: "scatter-plot",
     title: `Correlação r = ${d.r}`,
     bounds: boundsFromPoints(points),
     points,
-    ariaLabel: `Dispersão ilustrativa com r = ${d.r}`,
+    ariaLabel: `Dispersão com correlação aproximada r = ${d.r}`,
   };
 }

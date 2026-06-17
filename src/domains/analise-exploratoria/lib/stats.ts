@@ -156,3 +156,27 @@ export function assimetriaPorMediaMediana(
   if (Math.abs(diff) < 0.5) return "simetrica";
   return diff > 0 ? "positiva" : "negativa";
 }
+
+/** Pontos de dispersão com correlação aproximada r (para visualização). */
+export function scatterPointsForR(r: number, n = 8): { x: number; y: number }[] {
+  const xs = Array.from({ length: n }, (_, i) => i + 1);
+  const mx = media(xs);
+  const vx = xs.reduce((s, x) => s + (x - mx) ** 2, 0) / (n - 1);
+  const sdx = Math.sqrt(vx) || 1;
+  const sign = r >= 0 ? 1 : -1;
+  const absR = Math.min(0.99, Math.abs(r));
+  const ys = xs.map((x, i) => {
+    const zx = (x - mx) / sdx;
+    const orth = (((i * 5 + 2) % 7) - 3) * (1 - absR);
+    const zy = sign * absR * zx + orth * Math.sqrt(1 - absR * absR);
+    return round2(mx + zy * sdx);
+  });
+  return xs.map((x, i) => ({ x, y: ys[i]! }));
+}
+
+export function hashLabel(seed: string): number {
+  let h = 0;
+  for (const c of seed) h = (h * 31 + c.charCodeAt(0)) | 0;
+  return Math.abs(h);
+}
+

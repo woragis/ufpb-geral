@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "smoke": "tsx scripts/smoke-test.ts",
-    "audit:latex": "tsx scripts/audit-calculo-latex.ts"
+    "audit:latex": "tsx scripts/audit-calculo-latex.ts",
+    "audit:visuals": "tsx scripts/audit-calculo-visuals.ts",
+    "audit:ae": "tsx scripts/audit-ae.ts"
   },
   "dependencies": {
     "katex": "^0.17.0",

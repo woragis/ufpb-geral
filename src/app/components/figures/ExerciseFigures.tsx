@@ -8,6 +8,7 @@ import { ParametricCurveFigure } from "./parametric-curve";
 import { BoxPlotFigure } from "./box-plot";
 import { ScatterPlotFigure } from "./scatter-plot";
 import { BarChartFigure } from "./bar-chart";
+import { DataTableFigure } from "./data-table";
 import { VennDiagramFigure } from "./venn-diagram";
 import { UrnDiagramFigure } from "./urn-diagram";
 
@@ -43,6 +44,8 @@ function Figure({ spec }: { spec: VisualSpec }) {
       return <ScatterPlotFigure spec={spec} />;
     case "bar-chart":
       return <BarChartFigure spec={spec} />;
+    case "data-table":
+      return <DataTableFigure spec={spec} />;
     case "venn-diagram":
       return <VennDiagramFigure spec={spec} />;
     case "urn-diagram":

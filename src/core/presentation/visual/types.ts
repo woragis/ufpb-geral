@@ -112,6 +112,14 @@ export interface VennDiagramSpec {
   ariaLabel: string;
 }
 
+export interface DataTableSpec {
+  kind: "data-table";
+  title?: string;
+  headers: string[];
+  rows: string[][];
+  ariaLabel: string;
+}
+
 export interface UrnDiagramSpec {
   kind: "urn-diagram";
   colors: Record<string, number>;
@@ -129,5 +137,6 @@ export type VisualSpec =
   | BoxPlotSpec
   | ScatterPlotSpec
   | BarChartSpec
+  | DataTableSpec
   | VennDiagramSpec
   | UrnDiagramSpec;

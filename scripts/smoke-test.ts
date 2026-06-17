@@ -63,7 +63,8 @@ function main(): void {
         const specs = resolveVisualSpecs(result.problem);
         if (
           specs.length === 0 &&
-          (result.problem.disciplinaId === "calculo-vetorial" ||
+          (result.problem.disciplinaId === "calculo" ||
+            result.problem.disciplinaId === "calculo-vetorial" ||
             result.problem.disciplinaId === "analise-exploratoria")
         ) {
           const tipo = (result.problem.dados as { tipo?: string }).tipo;
