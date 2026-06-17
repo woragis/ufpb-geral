@@ -10,6 +10,9 @@ const CENARIOS: Array<(ctx: GeneratorContext) => DistribuicoesData> = [
   gerarQuartis,
   gerarOutliers,
   gerarLerBoxplot,
+  gerarHistograma,
+  gerarAssimetria,
+  gerarCincoNumeros,
 ];
 
 function gerarIqr(ctx: GeneratorContext): DistribuicoesData {
@@ -28,12 +31,8 @@ function gerarQuartis(ctx: GeneratorContext): DistribuicoesData {
 
 function gerarOutliers(ctx: GeneratorContext): DistribuicoesData {
   const base = Array.from({ length: 6 }, () => ctx.rng.nextInt(10, 15));
-  if (ctx.dificuldade >= 2) {
-    base.push(ctx.rng.nextInt(30, 40));
-  }
-  if (ctx.dificuldade === 3) {
-    base.push(ctx.rng.nextInt(1, 3));
-  }
+  if (ctx.dificuldade >= 2) base.push(ctx.rng.nextInt(30, 40));
+  if (ctx.dificuldade === 3) base.push(ctx.rng.nextInt(1, 3));
   ctx.rng.shuffle(base);
   return { tipo: "distribuicoes-outliers", valores: base };
 }
@@ -44,6 +43,35 @@ function gerarLerBoxplot(ctx: GeneratorContext): DistribuicoesData {
   const q3 = q2 + ctx.rng.nextInt(3, 5);
   const pergunta = ctx.rng.pick(["iqr", "mediana"] as const);
   return { tipo: "distribuicoes-ler-boxplot", q1, q2, q3, pergunta };
+}
+
+function gerarHistograma(ctx: GeneratorContext): DistribuicoesData {
+  const bins = ["0-10", "10-20", "20-30", "30-40"];
+  const frequencias = bins.map(() => ctx.rng.nextInt(1, 8));
+  const pergunta = ctx.rng.pick(["classe-moda", "frequencia-total"] as const);
+  return { tipo: "distribuicoes-histograma", bins, frequencias, pergunta };
+}
+
+function gerarAssimetria(ctx: GeneratorContext): DistribuicoesData {
+  const tipo = ctx.rng.pick(["positiva", "negativa", "simetrica"] as const);
+  let valores: number[];
+  if (tipo === "positiva") {
+    valores = Array.from({ length: 8 }, () => ctx.rng.nextInt(2, 6));
+    valores.push(ctx.rng.nextInt(18, 25));
+  } else if (tipo === "negativa") {
+    valores = Array.from({ length: 8 }, () => ctx.rng.nextInt(15, 20));
+    valores.push(ctx.rng.nextInt(2, 5));
+  } else {
+    valores = Array.from({ length: 7 }, () => ctx.rng.nextInt(8, 14));
+  }
+  ctx.rng.shuffle(valores);
+  return { tipo: "distribuicoes-assimetria", valores, assimetria: tipo };
+}
+
+function gerarCincoNumeros(ctx: GeneratorContext): DistribuicoesData {
+  const valores = Array.from({ length: 7 }, () => ctx.rng.nextInt(5, 40));
+  const pergunta = ctx.rng.pick(["min", "max", "amplitude"] as const);
+  return { tipo: "distribuicoes-cinco-numeros", valores, pergunta };
 }
 
 function enunciado(d: DistribuicoesData): string {
@@ -60,17 +88,30 @@ function enunciado(d: DistribuicoesData): string {
       return d.pergunta === "iqr"
         ? `Um boxplot apresenta Q1 = ${d.q1}, Q2 = ${d.q2} e Q3 = ${d.q3}. Qual é o IQR?`
         : `Um boxplot apresenta Q1 = ${d.q1}, Q2 = ${d.q2} e Q3 = ${d.q3}. Qual é a mediana?`;
+    case "distribuicoes-histograma": {
+      const linhas = d.bins.map((b, i) => `${b}: ${d.frequencias[i]}`).join(", ");
+      if (d.pergunta === "frequencia-total") {
+        return `No histograma com classes {${linhas}}, qual é a frequência total?`;
+      }
+      return `No histograma {${linhas}}, qual classe tem maior frequência?`;
+    }
+    case "distribuicoes-assimetria":
+      return `Dado {${d.valores.join(", ")}}, a distribuição é assimétrica positiva, negativa ou simétrica?`;
+    case "distribuicoes-cinco-numeros": {
+      const labels = { min: "valor mínimo", max: "valor máximo", amplitude: "amplitude (máx − mín)" };
+      return `Dado {${d.valores.join(", ")}}, calcule o ${labels[d.pergunta]}.`;
+    }
   }
 }
 
 export const distribuicoesGenerator = {
   topicoId: TOPICO_DISTRIBUICOES,
-  version: 2,
+  version: 3,
 
   gerar(ctx: GeneratorContext): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [gerarIqr, gerarLerBoxplot]
+        ? [gerarIqr, gerarLerBoxplot, gerarHistograma]
         : CENARIOS;
     const dados = ctx.rng.pick(pool)(ctx);
 
@@ -85,7 +126,7 @@ export const distribuicoesGenerator = {
         topicoId: TOPICO_DISTRIBUICOES,
         dificuldade: ctx.dificuldade,
         seed: "",
-        generatorVersion: 2,
+        generatorVersion: 3,
       },
       geradoEm: "",
     };

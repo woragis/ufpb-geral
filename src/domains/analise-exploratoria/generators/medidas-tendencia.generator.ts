@@ -10,6 +10,8 @@ const CENARIOS: Array<(ctx: GeneratorContext) => MedidasTendenciaData> = [
   gerarMediana,
   gerarModa,
   gerarPonderada,
+  gerarEscolha,
+  gerarGeometrica,
 ];
 
 function tamanho(ctx: GeneratorContext): number {
@@ -47,6 +49,25 @@ function gerarPonderada(ctx: GeneratorContext): MedidasTendenciaData {
   return { tipo: "medidas-tendencia-ponderada", valores, pesos };
 }
 
+function gerarEscolha(ctx: GeneratorContext): MedidasTendenciaData {
+  const base = Array.from({ length: 5 }, () => ctx.rng.nextInt(3, 8));
+  base.push(ctx.rng.nextInt(40, 60));
+  ctx.rng.shuffle(base);
+  return { tipo: "medidas-tendencia-escolha", valores: base, resposta: "mediana" };
+}
+
+function gerarGeometrica(ctx: GeneratorContext): MedidasTendenciaData {
+  const n = ctx.dificuldade === 1 ? 3 : 4;
+  const valores = Array.from({ length: n }, () =>
+    roundGrowth(ctx.rng.nextInt(102, 115) / 100),
+  );
+  return { tipo: "medidas-tendencia-geometrica", valores };
+}
+
+function roundGrowth(x: number): number {
+  return Math.round(x * 100) / 100;
+}
+
 function enunciado(d: MedidasTendenciaData): string {
   switch (d.tipo) {
     case "media-aritmetica":
@@ -59,12 +80,16 @@ function enunciado(d: MedidasTendenciaData): string {
       const pares = d.valores.map((v, i) => `(${v}, peso ${d.pesos[i]})`).join(", ");
       return `Calcule a média ponderada dos pares valor-peso: ${pares}.`;
     }
+    case "medidas-tendencia-escolha":
+      return `Dado {${d.valores.join(", ")}}, qual medida de tendência central é mais representativa: média ou mediana?`;
+    case "medidas-tendencia-geometrica":
+      return `Dados os fatores de crescimento {${d.valores.join(", ")}}, calcule a média geométrica (2 casas decimais).`;
   }
 }
 
 export const medidasTendenciaGenerator = {
   topicoId: TOPICO_MEDIDAS_TENDENCIA,
-  version: 2,
+  version: 3,
 
   gerar(ctx: GeneratorContext): Problem {
     const pool =
@@ -84,7 +109,7 @@ export const medidasTendenciaGenerator = {
         topicoId: TOPICO_MEDIDAS_TENDENCIA,
         dificuldade: ctx.dificuldade,
         seed: "",
-        generatorVersion: 2,
+        generatorVersion: 3,
       },
       geradoEm: "",
     };

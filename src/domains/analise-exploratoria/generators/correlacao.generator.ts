@@ -6,6 +6,9 @@ const CENARIOS: Array<(ctx: GeneratorContext) => CorrelacaoData> = [
   gerarPositiva,
   gerarNegativa,
   gerarFraca,
+  gerarSpearman,
+  gerarInterpretacao,
+  gerarCovariancia,
 ];
 
 function gerarPares(
@@ -36,18 +39,49 @@ function gerarFraca(ctx: GeneratorContext): CorrelacaoData {
   return { tipo: "correlacao-fraca", xs, ys };
 }
 
+function gerarSpearman(ctx: GeneratorContext): CorrelacaoData {
+  const n = 5;
+  const xs = Array.from({ length: n }, (_, i) => i + 1);
+  const ys = [...xs].sort(() => ctx.rng.nextInt(0, 1) * 2 - 1);
+  return { tipo: "correlacao-spearman", xs, ys };
+}
+
+function gerarInterpretacao(ctx: GeneratorContext): CorrelacaoData {
+  const r = ctx.rng.pick([0.82, -0.75, 0.45, -0.35, 0.12, -0.18] as const);
+  return { tipo: "correlacao-interpretacao", r };
+}
+
+function gerarCovariancia(ctx: GeneratorContext): CorrelacaoData {
+  const { xs, ys } = gerarPares(ctx, 3, 2);
+  return { tipo: "correlacao-covariancia", xs, ys };
+}
+
 function enunciado(d: CorrelacaoData): string {
-  const pares = d.xs.map((x, i) => `(${x}, ${d.ys[i]})`).join(", ");
-  return `Dados os pares ${pares}, calcule o coeficiente de correlação de Pearson r (arredonde para 2 casas decimais).`;
+  switch (d.tipo) {
+    case "correlacao-interpretacao":
+      return `O coeficiente de correlação de Pearson é r = ${d.r}. Classifique a correlação (forte/moderada/fraca e positiva/negativa).`;
+    case "correlacao-spearman": {
+      const pares = d.xs.map((x, i) => `(${x}, ${d.ys[i]})`).join(", ");
+      return `Dados os pares ${pares}, calcule o coeficiente de correlação de Spearman ρ (2 casas decimais).`;
+    }
+    case "correlacao-covariancia": {
+      const pares = d.xs.map((x, i) => `(${x}, ${d.ys[i]})`).join(", ");
+      return `Dados os pares ${pares}, calcule a covariância amostral Cov(X,Y) (2 casas decimais).`;
+    }
+    default: {
+      const pares = d.xs.map((x, i) => `(${x}, ${d.ys[i]})`).join(", ");
+      return `Dados os pares ${pares}, calcule o coeficiente de correlação de Pearson r (arredonde para 2 casas decimais).`;
+    }
+  }
 }
 
 export const correlacaoGenerator = {
   topicoId: TOPICO_CORRELACAO,
-  version: 2,
+  version: 3,
 
   gerar(ctx: GeneratorContext): Problem {
     const pool =
-      ctx.dificuldade === 1 ? [gerarPositiva] : CENARIOS;
+      ctx.dificuldade === 1 ? [gerarPositiva, gerarInterpretacao] : CENARIOS;
     const dados = ctx.rng.pick(pool)(ctx);
 
     return {
@@ -61,7 +95,7 @@ export const correlacaoGenerator = {
         topicoId: TOPICO_CORRELACAO,
         dificuldade: ctx.dificuldade,
         seed: "",
-        generatorVersion: 2,
+        generatorVersion: 3,
       },
       geradoEm: "",
     };
