@@ -77,6 +77,22 @@ Ver [05-fase-ia-tutor-explicar.md](./05-fase-ia-tutor-explicar.md).
 | 10 | [10-fase-latex-explicacoes.md](./10-fase-latex-explicacoes.md) | `explicacaoLatex` completo |
 | 11 | [11-fase-deploy.md](./11-fase-deploy.md) | Vercel, env, persistência em produção |
 
+## Estado de implementação (atualizado)
+
+| Fase | Status |
+|------|--------|
+| 1 Smoke tests | ✅ `npm run smoke` |
+| 2 Engajamento + catálogo | ✅ |
+| 3 Histórico / favoritos | ✅ |
+| 4 IA importação | ✅ (requer `OPENAI_API_KEY`) |
+| 5 Tutor Explicar | ✅ (requer `OPENAI_API_KEY`) |
+| 6 Variação geradores | ✅ parcial (limites, derivadas, eventos) |
+| 7 Modo prova | ✅ |
+| 8 Export PDF | ✅ rota `/print` |
+| 9 Painel admin | ✅ |
+| 10 LaTeX explicações | ✅ parcial (cálculo) |
+| 11 Deploy | ✅ push + Vercel config; KV pendente em prod |
+
 ## Estado atual (baseline)
 
 - 29 tópicos ativos com gerador + solver
