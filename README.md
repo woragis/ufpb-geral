@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# UFPB Study — exercícios com seeds
 
-## Getting Started
+Plataforma de estudos para disciplinas da UFPB: exercícios aleatórios determinísticos, solução passo a passo, LaTeX, figuras SVG, compartilhamento por link/código, engajamento no catálogo e tutor IA.
 
-First, run the development server:
+## Comandos
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+npm run build
+npm run smoke    # 2900 exercícios (29 tópicos × 100 seeds)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variáveis de ambiente
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copie `.env.example` para `.env.local`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variável | Uso |
+|----------|-----|
+| `OPENAI_API_KEY` | Importação de exercícios e botão **Explicar** |
+| `OPENAI_MODEL` | Padrão: `gpt-4o-mini` |
+| `ADMIN_TOKEN` | Acesso a `/admin?token=...` |
 
-## Learn More
+## Funcionalidades
 
-To learn more about Next.js, take a look at the following resources:
+- **29 tópicos** com gerador + solver
+- **Seeds** reproduzíveis (`?s=&d=&v=&step=`)
+- **Importação IA** — cole enunciado na home
+- **Tutor Explicar** — na página do exercício, com perguntas sugeridas
+- **Destaques no catálogo** — visitas e curtidas por seed
+- **Histórico / favoritos** — `localStorage`
+- **Modo prova** — `?mode=prova&minutes=30`
+- **PDF** — rota `/[disciplina]/[topico]/print`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Roadmap
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Ver `docs/roadmap/00-overview.md`.
 
-## Deploy on Vercel
+## Deploy (Vercel)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Conecte o repositório na Vercel
+2. Configure env vars (`OPENAI_API_KEY`, `ADMIN_TOKEN`)
+3. **Nota:** engajamento em `data/engagement.json` é gravável só em dev; em produção use Vercel KV (fase 11 do roadmap)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+git push origin main
+```
+
+## Admin
+
+`/admin?token=SEU_ADMIN_TOKEN` — lista seeds curadas e estatísticas.
