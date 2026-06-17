@@ -20,6 +20,12 @@ export const distribuicoesSolver: ProblemSolver = {
         return solveOutliers(d, problema.id);
       case "distribuicoes-ler-boxplot":
         return solveLerBoxplot(d, problema.id);
+      case "distribuicoes-histograma":
+        return solveHistograma(d, problema.id);
+      case "distribuicoes-assimetria":
+        return solveAssimetria(d, problema.id);
+      case "distribuicoes-cinco-numeros":
+        return solveCincoNumeros(d, problema.id);
     }
   },
 };
@@ -144,6 +150,124 @@ function solveLerBoxplot(
         explicacao: "Usamos os valores lidos do boxplot.",
         calculo: `IQR = ${d.q3} − ${d.q1} = ${iqr}`,
         resultado: String(iqr),
+      },
+    ],
+  };
+}
+
+function solveHistograma(
+  d: Extract<DistribuicoesData, { tipo: "distribuicoes-histograma" }>,
+  problemaId: string,
+): Solution {
+  if (d.pergunta === "frequencia-total") {
+    const total = d.frequencias.reduce((a, b) => a + b, 0);
+    return {
+      problemaId,
+      respostaFinal: String(total),
+      steps: [
+        {
+          ordem: 1,
+          titulo: "Somar frequências",
+          explicacao: "A área total do histograma corresponde ao total de observações.",
+          calculo: `${d.frequencias.join(" + ")} = ${total}`,
+          resultado: String(total),
+        },
+      ],
+    };
+  }
+  let idx = 0;
+  let max = 0;
+  for (let i = 0; i < d.frequencias.length; i++) {
+    if (d.frequencias[i]! > max) {
+      max = d.frequencias[i]!;
+      idx = i;
+    }
+  }
+  const resposta = d.bins[idx]!;
+  return {
+    problemaId,
+    respostaFinal: resposta,
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Comparar barras",
+        explicacao: "A classe modal tem a maior frequência no histograma.",
+        calculo: d.bins.map((b, i) => `${b}: ${d.frequencias[i]}`).join(", "),
+      },
+      {
+        ordem: 2,
+        titulo: "Classe modal",
+        explicacao: "Identificamos a classe com maior altura.",
+        calculo: `Classe: ${resposta}`,
+        resultado: resposta,
+      },
+    ],
+  };
+}
+
+function solveAssimetria(
+  d: Extract<DistribuicoesData, { tipo: "distribuicoes-assimetria" }>,
+  problemaId: string,
+): Solution {
+  const labels = {
+    positiva: "Assimétrica positiva",
+    negativa: "Assimétrica negativa",
+    simetrica: "Simétrica",
+  };
+  const resposta = labels[d.assimetria];
+  return {
+    problemaId,
+    respostaFinal: resposta,
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Comparar média e mediana",
+        explicacao: "A cauda longa puxa a média na direção da assimetria.",
+        calculo: `Dados: {${d.valores.join(", ")}}`,
+      },
+      {
+        ordem: 2,
+        titulo: "Classificar",
+        explicacao:
+          d.assimetria === "positiva"
+            ? "Cauda à direita — média > mediana."
+            : d.assimetria === "negativa"
+              ? "Cauda à esquerda — média < mediana."
+              : "Média e mediana próximas.",
+        calculo: resposta,
+        resultado: resposta,
+      },
+    ],
+  };
+}
+
+function solveCincoNumeros(
+  d: Extract<DistribuicoesData, { tipo: "distribuicoes-cinco-numeros" }>,
+  problemaId: string,
+): Solution {
+  const min = Math.min(...d.valores);
+  const max = Math.max(...d.valores);
+  const resposta =
+    d.pergunta === "min" ? String(min) : d.pergunta === "max" ? String(max) : String(max - min);
+  return {
+    problemaId,
+    respostaFinal: resposta,
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Ordenar mentalmente",
+        explicacao: "O resumo dos cinco números usa extremos e quartis.",
+        calculo: `min = ${min}, max = ${max}`,
+      },
+      {
+        ordem: 2,
+        titulo: "Responder",
+        explicacao:
+          d.pergunta === "amplitude"
+            ? "Amplitude = máximo − mínimo."
+            : `Valor solicitado: ${d.pergunta}.`,
+        calculo: resposta,
+        resultado: resposta,
       },
     ],
   };

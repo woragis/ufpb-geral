@@ -4,7 +4,7 @@ import {
   TOPICO_MEDIDAS_TENDENCIA,
   type MedidasTendenciaData,
 } from "../entities/types";
-import { media, mediana, moda, mediaPonderada, round2 } from "../lib/stats";
+import { media, mediana, moda, mediaPonderada, mediaGeometrica, round2 } from "../lib/stats";
 
 function fmt(n: number): string {
   return Number.isInteger(n) ? String(n) : n.toFixed(2);
@@ -24,6 +24,10 @@ export const medidasTendenciaSolver: ProblemSolver = {
         return solveModa(d, problema.id);
       case "medidas-tendencia-ponderada":
         return solvePonderada(d, problema.id);
+      case "medidas-tendencia-escolha":
+        return solveEscolha(d, problema.id);
+      case "medidas-tendencia-geometrica":
+        return solveGeometrica(d, problema.id);
     }
   },
 };
@@ -151,6 +155,59 @@ function solvePonderada(
         titulo: "Aplicar a fórmula",
         explicacao: "x̄_p = Σ(x·w) / Σw",
         calculo: `x̄_p = ${soma} / ${somaPesos} = ${resposta}`,
+        resultado: resposta,
+      },
+    ],
+  };
+}
+
+function solveEscolha(
+  d: Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-escolha" }>,
+  problemaId: string,
+): Solution {
+  const resposta = d.resposta === "mediana" ? "Mediana" : "Média";
+  return {
+    problemaId,
+    respostaFinal: resposta,
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Detectar valores extremos",
+        explicacao: "Outliers distorcem a média aritmética.",
+        calculo: `Conjunto: {${d.valores.join(", ")}}`,
+      },
+      {
+        ordem: 2,
+        titulo: "Escolher a medida",
+        explicacao: "A mediana é robusta a valores extremos.",
+        calculo: `Medida mais representativa: ${resposta}`,
+        resultado: resposta,
+      },
+    ],
+  };
+}
+
+function solveGeometrica(
+  d: Extract<MedidasTendenciaData, { tipo: "medidas-tendencia-geometrica" }>,
+  problemaId: string,
+): Solution {
+  const mg = mediaGeometrica(d.valores);
+  const resposta = fmt(mg);
+  return {
+    problemaId,
+    respostaFinal: resposta,
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Produto dos fatores",
+        explicacao: "A média geométrica usa o produto dos valores positivos.",
+        calculo: `Valores: ${d.valores.join(" × ")}`,
+      },
+      {
+        ordem: 2,
+        titulo: "Extrair raiz n-ésima",
+        explicacao: "MG = (x₁·x₂·…·xₙ)^(1/n).",
+        calculo: `MG = ${resposta}`,
         resultado: resposta,
       },
     ],

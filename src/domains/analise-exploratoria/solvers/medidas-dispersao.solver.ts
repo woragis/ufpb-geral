@@ -4,7 +4,7 @@ import {
   TOPICO_MEDIDAS_DISPERSAO,
   type MedidasDispersaoData,
 } from "../entities/types";
-import { desvioAmostral, media, round2, varianciaAmostral } from "../lib/stats";
+import { desvioAmostral, desvioMedioAbsoluto, desvioPopulacional, media, round2, varianciaAmostral, varianciaPopulacional } from "../lib/stats";
 
 export const medidasDispersaoSolver: ProblemSolver = {
   topicoId: TOPICO_MEDIDAS_DISPERSAO,
@@ -16,6 +16,10 @@ export const medidasDispersaoSolver: ProblemSolver = {
         return solveBasico(d, problema.id);
       case "medidas-dispersao-cv":
         return solveCv(d, problema.id);
+      case "medidas-dispersao-populacional":
+        return solvePopulacional(d, problema.id);
+      case "medidas-dispersao-mad":
+        return solveMad(d, problema.id);
     }
   },
 };
@@ -128,6 +132,60 @@ function solveCv(
         explicacao: "CV = (s / x̄) × 100%",
         calculo: `CV = (${s} / ${round2(m)}) × 100 = ${cv}%`,
         resultado: String(cv),
+      },
+    ],
+  };
+}
+
+function solvePopulacional(
+  d: Extract<MedidasDispersaoData, { tipo: "medidas-dispersao-populacional" }>,
+  problemaId: string,
+): Solution {
+  const variancia = varianciaPopulacional(d.valores);
+  const desvio = desvioPopulacional(d.valores);
+  const resposta = d.pergunta === "variancia" ? String(variancia) : String(desvio);
+  return {
+    problemaId,
+    respostaFinal: resposta,
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Variância populacional",
+        explicacao: "Divide-se por N (toda a população).",
+        calculo: `σ² = ${variancia}`,
+      },
+      {
+        ordem: 2,
+        titulo: d.pergunta === "variancia" ? "Resultado" : "Desvio populacional",
+        explicacao: d.pergunta === "variancia" ? "σ² obtida." : "σ = √σ².",
+        calculo: d.pergunta === "variancia" ? `σ² = ${variancia}` : `σ = ${desvio}`,
+        resultado: resposta,
+      },
+    ],
+  };
+}
+
+function solveMad(
+  d: Extract<MedidasDispersaoData, { tipo: "medidas-dispersao-mad" }>,
+  problemaId: string,
+): Solution {
+  const mad = desvioMedioAbsoluto(d.valores);
+  return {
+    problemaId,
+    respostaFinal: String(mad),
+    steps: [
+      {
+        ordem: 1,
+        titulo: "Calcular desvios absolutos",
+        explicacao: "MAD = média de |xᵢ − x̄|.",
+        calculo: `x̄ = ${round2(media(d.valores))}`,
+      },
+      {
+        ordem: 2,
+        titulo: "Resultado",
+        explicacao: "MAD mede dispersão em torno da média.",
+        calculo: `MAD = ${mad}`,
+        resultado: String(mad),
       },
     ],
   };
