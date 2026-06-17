@@ -1,6 +1,7 @@
 import type { Problem, Solution } from "@/core/domain/problem";
 import type { ProblemSolver } from "@/core/domain/solver";
 import { fmtNum } from "../lib/format";
+import { solveDerivadasV3 } from "./derivadas-v3.solver";
 import { TOPICO_DERIVADAS, type DerivadasData } from "../entities/types";
 
 export const derivadasSolver: ProblemSolver = {
@@ -23,8 +24,11 @@ export const derivadasSolver: ProblemSolver = {
         return solveTangente(d, problema.id);
       case "derivadas-definicao":
         return solveDefinicao(d, problema.id);
-      default:
+      default: {
+        const v3 = solveDerivadasV3(d, problema.id);
+        if (v3) return v3;
         throw new Error("Tipo de derivada desconhecido");
+      }
     }
   },
 };
