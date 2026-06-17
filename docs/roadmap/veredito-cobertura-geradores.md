@@ -1,7 +1,7 @@
 # Veredito de cobertura dos geradores
 
 Documento de referência para retomar pendências depois.  
-**Atualizado em:** 16/06/2026 (v2 implementado para CV e Prob)  
+**Atualizado em:** 16/06/2026 (CV v3 + AE v2 + polish infra)  
 **Repositório:** `ufpb-geral`  
 **Meta do roadmap:** [06-fase-variacao-geradores.md](./06-fase-variacao-geradores.md) — Probabilidade ≥4 cenários/tópico, Cálculo ≥4, Cálculo Vetorial ≥3.
 
@@ -12,10 +12,11 @@ Documento de referência para retomar pendências depois.
 | Disciplina        | Versão geradores | Cenários (aprox.) | Cobertura ementa típica | Meta roadmap |
 |-------------------|------------------|-------------------|-------------------------|--------------|
 | **Cálculo 1**     | v3               | 40 tipos / 5 tópicos | ~85–90%                 | ✅ atingida  |
-| **Cálculo Vetorial** | v1            | 6 tipos / 6 tópicos  | ~35–45%                 | ❌ não atingida |
-| **Probabilidade** | v1               | ~11 tipos / 6 tópicos | ~50–60%              | ❌ não atingida |
+| **Cálculo Vetorial** | v3            | 30 tipos / 6 tópicos | ~70–80%                 | ✅ atingida  |
+| **Probabilidade** | v2               | ~30 tipos / 6 tópicos | ~65–75%              | ✅ atingida  |
+| **Análise Exploratória** | v2        | ~18 tipos / 5 tópicos | ~75–85%          | ✅ atingida  |
 
-**Infraestrutura comum:** LaTeX e visuais existem para Probabilidade e Cálculo Vetorial (v1), mas sem cenários novos. Seeds curadas usam só `curated-1` v1 (Cálculo 1 tem 13 seeds v3 showcase).
+**Infraestrutura comum:** LaTeX e visuais cobrem todos os tipos v2/v3 de CV e AE. Smoke test inclui assert de diversidade (≥3 tipos) para geradores v2+. Seeds showcase v2/v3 para Prob, CV e AE.
 
 ---
 
@@ -66,9 +67,53 @@ O motor cobre **~85–90%** de um Cálculo 1 típico (limites, derivadas, aplica
 
 ---
 
-## Cálculo Vetorial — inventário completo
+## Cálculo Vetorial — estado após v3
 
-### Estado atual (todos os geradores em **v1**, 1 exercício por tópico)
+### O que está implementado (6 tópicos, 30 cenários)
+
+| Tópico | Cenários | Tipos |
+|--------|----------|-------|
+| Vetores | 6 | módulo, soma, escalar, unitário, distância, paralelismo |
+| Produto escalar | 4 | dot, ângulo, projeção, ortogonalidade |
+| Produto vetorial | 3 | cross, área, produto misto |
+| Retas/planos | 6 | diretor, paramétrica, plano, dist. ponto–plano, dist. ponto–reta, interseção reta–plano |
+| Curvas | 6 | \|r'\|, vetor r', tangente, círculo, comprimento, hélice |
+| Campos | 5 | ∇f 2D (3 funções), div 2D, rot 2D, ∇f 3D, div 3D |
+
+**Arquivos principais:** `src/domains/calculo-vetorial/`, LaTeX em `latex/domains/calculo-vetorial.ts`, visuais em `visual/builders/calculo-vetorial.ts`.
+
+### Veredito
+
+Cobertura estimada **~70–80%** de um Cálculo Vetorial 1 típico. Meta roadmap **≥3 cenários/tópico** ✅ em todos os 6 tópicos.
+
+### Lacunas de conteúdo (v4+)
+
+| Área | O que falta |
+|------|-------------|
+| Vetores | subtração explícita, notação î ĵ k̂ |
+| Retas/planos | eq. simétrica, plano por 3 pontos, reta–reta, plano–plano, reversas |
+| Curvas | equação da reta tangente, aceleração r''(t), hélice 3D completa |
+| Campos | curl 3D, linhas de campo, mais funções no gradiente 3D |
+| Disciplina avançada | integrais de linha/superfície, Green, Stokes, Gauss |
+
+### Infraestrutura
+
+| Recurso | Estado |
+|---------|--------|
+| Solvers | ✅ 6/6 tópicos, 30 tipos |
+| LaTeX | ✅ todos os 30 tipos |
+| Visuais | ✅ todos os tipos (hélice = projeção xy; campos 3D = componentes) |
+| Seeds | ✅ showcase v2 + v3 por tópico |
+| Smoke | ✅ 2900/2900 + diversidade ≥3 tipos (v2+) |
+
+---
+
+## Cálculo Vetorial — inventário legado (v1, substituído)
+
+<details>
+<summary>Estado v1 (histórico)</summary>
+
+### Estado anterior (todos os geradores em **v1**, 1 exercício por tópico)
 
 | Tópico | O que gera hoje | Variação real |
 |--------|-----------------|---------------|
@@ -153,6 +198,8 @@ Priorizar cenários com maior impacto pedagógico:
 6. **Campos:** gradiente variado + divergente 2D + rotacional 2D
 
 Meta v2: **≥3 cenários/tópico** (18+ tipos no total).
+
+</details>
 
 ---
 
@@ -279,11 +326,12 @@ Probabilidade e Cálculo Vetorial ainda usam geradores **monolíticos v1** sem e
 ## Checklist global de retomada
 
 - [ ] Cálculo 1 v4: MVT, squeeze, LaTeX/visuais v2/v3
-- [ ] Cálculo Vetorial v2: ≥3 cenários/tópico + planos + curl/div
-- [ ] Probabilidade v2: ≥4 cenários/tópico + Bayes + binomial + urna sem reposição
-- [ ] Seeds curadas v2 para prob. e calc. vetorial
-- [ ] Smoke: opcional assert de diversidade
-- [ ] Push dos commits locais (theme + Cálculo v2/v3)
+- [x] Cálculo Vetorial v3: ≥3 cenários/tópico + LaTeX/visuais/seeds
+- [x] Probabilidade v2: ≥4 cenários/tópico + Bayes + binomial
+- [x] Análise Exploratória v2: cenários variados + infra
+- [x] Smoke: assert de diversidade (v2+)
+- [ ] Cálculo Vetorial v4: reta–reta, curl 3D, visuais 3D avançados
+- [ ] Push dos commits locais
 
 ---
 
