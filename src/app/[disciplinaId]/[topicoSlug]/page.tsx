@@ -1,15 +1,18 @@
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import type { DisciplinaId } from "@/core/domain/ids";
 import { ButtonLink } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 import { disciplineAccentText } from "@/lib/discipline-accent";
-import type { DisciplinaId } from "@/core/domain/ids";
-import { CopyButton } from "@/app/components/CopyButton";
 import { ExerciseView } from "@/app/components/exercise/ExerciseView";
+import { ExerciseUrlSync } from "@/app/components/exercise/ExerciseUrlSync";
+import { ShareExerciseButton } from "@/app/components/exercise/ShareExerciseButton";
 import { EngagementActions } from "@/app/components/engagement/EngagementActions";
 import { PersonalExerciseTracker } from "@/app/components/personal/PersonalExerciseTracker";
 import { ExplainPanel } from "@/app/components/ai/ExplainPanel";
 import { ExamTimer } from "@/app/components/exam/ExamTimer";
 import { generateAndSolve } from "@/core/application/generate-and-solve";
+import { buildExerciseHref } from "@/core/application/exercise-url";
 import { decodeImportPayload } from "@/core/application/import-payload-codec";
 import { solveFromDados } from "@/core/application/solve-from-dados";
 import { encodeExerciseSeed } from "@/core/application/seed-codec";
@@ -120,48 +123,68 @@ export default async function TopicPage({
 
   const currentStep = stepsVisiveis.length;
   const respostaFinalRevelada = currentStep >= solution.steps.length;
-
-  const basePath = `/${disciplina.id}/${params.topicoSlug}`;
-  const shareParams = new URLSearchParams();
-  if (importPayload && param(searchParams, "p")) {
-    shareParams.set("p", param(searchParams, "p")!);
-  } else {
-    shareParams.set("s", exerciseSeed.seed);
-    shareParams.set("d", String(exerciseSeed.dificuldade));
-    if (exerciseSeed.generatorVersion !== 1) {
-      shareParams.set("v", String(exerciseSeed.generatorVersion));
-    }
-  }
-  if (examMode) {
-    shareParams.set("mode", "prova");
-    shareParams.set("minutes", String(examMinutes));
-  }
-  shareParams.set("step", String(currentStep));
-
-  const shareUrl = `${basePath}?${shareParams.toString()}`;
-  const shareCode = importPayload ? null : encodeExerciseSeed(exerciseSeed);
-
-  const printParams = new URLSearchParams(shareParams);
-  printParams.delete("step");
-  printParams.delete("mode");
-  printParams.delete("minutes");
-  const printUrl = `${basePath}/print?${printParams.toString()}`;
-
   const nextStep = currentStep + 1;
   const hasNext = !examMode && nextStep <= solution.steps.length;
 
-  const nextParams = new URLSearchParams(shareParams);
-  nextParams.set("step", String(nextStep));
-  const nextUrl = `${basePath}?${nextParams.toString()}`;
+  const importPayloadParam = param(searchParams, "p");
+  const basePath = `/${disciplina.id}/${params.topicoSlug}`;
 
-  const submitParams = new URLSearchParams(shareParams);
-  submitParams.set("step", String(solution.steps.length));
-  const submitUrl = `${basePath}?${submitParams.toString()}`;
+  const urlOptions = {
+    seed: exerciseSeed,
+    step: currentStep,
+    examMode,
+    examMinutes,
+    importPayload: importPayloadParam,
+  };
 
-  const examStartUrl = `${basePath}?mode=prova&minutes=30&s=${exerciseSeed.seed}&d=${exerciseSeed.dificuldade}`;
+  const exerciseHref = buildExerciseHref(
+    disciplina.id,
+    params.topicoSlug,
+    urlOptions,
+  );
+
+  const nextHref = buildExerciseHref(disciplina.id, params.topicoSlug, {
+    ...urlOptions,
+    step: nextStep,
+  });
+
+  const submitHref = buildExerciseHref(disciplina.id, params.topicoSlug, {
+    ...urlOptions,
+    step: solution.steps.length,
+  });
+
+  const printQuery = buildExerciseHref(disciplina.id, params.topicoSlug, {
+    seed: exerciseSeed,
+    importPayload: importPayloadParam,
+  }).split("?")[1];
+  const printUrl = `${basePath}/print${printQuery ? `?${printQuery}` : ""}`;
+
+  const examStartHref = buildExerciseHref(disciplina.id, params.topicoSlug, {
+    seed: exerciseSeed,
+    examMode: true,
+    examMinutes: 30,
+  });
+
+  const novoExercicioHref = importPayloadParam
+    ? basePath
+    : `${basePath}?d=${exerciseSeed.dificuldade}`;
+
+  const shareCode = importPayload ? null : encodeExerciseSeed(exerciseSeed);
+  const shareText = `Exercício de ${disciplina.nome} — ${topico.nome}`;
 
   return (
     <div className="flex flex-col flex-1">
+      <Suspense fallback={null}>
+        <ExerciseUrlSync
+          disciplinaId={disciplina.id}
+          topicoSlug={params.topicoSlug}
+          exerciseSeed={exerciseSeed}
+          currentStep={currentStep}
+          examMode={examMode}
+          examMinutes={examMinutes}
+          importPayloadParam={importPayloadParam}
+        />
+      </Suspense>
       <main className="w-full max-w-4xl mx-auto px-4 py-10">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
@@ -201,15 +224,17 @@ export default async function TopicPage({
                   enunciadoPreview={problem.enunciado}
                   currentStep={currentStep}
                 />
-                {shareCode ? (
-                  <CopyButton value={shareCode} label="Copiar código" />
-                ) : null}
-                <CopyButton value={shareUrl} label="Copiar link" />
+                <ShareExerciseButton
+                  relativeHref={exerciseHref}
+                  title={shareText}
+                  text={shareText}
+                  shareCode={shareCode}
+                />
                 <ButtonLink href={printUrl} variant="secondary" target="_blank">
                   PDF
                 </ButtonLink>
                 {!examMode ? (
-                  <ButtonLink href={examStartUrl} variant="warningSoft">
+                  <ButtonLink href={examStartHref} variant="warningSoft">
                     Modo prova
                   </ButtonLink>
                 ) : null}
@@ -239,11 +264,11 @@ export default async function TopicPage({
 
           <div className="mt-6 flex items-center gap-3 flex-wrap">
             {examMode && !respostaFinalRevelada ? (
-              <ButtonLink href={submitUrl} variant="warning">
+              <ButtonLink href={submitHref} variant="warning">
                 Entregar prova
               </ButtonLink>
             ) : hasNext ? (
-              <ButtonLink href={nextUrl} variant="primary">
+              <ButtonLink href={nextHref} variant="primary">
                 Revelar próximo passo
               </ButtonLink>
             ) : (
@@ -255,14 +280,7 @@ export default async function TopicPage({
               </div>
             )}
 
-            <ButtonLink
-              href={
-                importPayload
-                  ? basePath
-                  : `${basePath}?${new URLSearchParams({ d: String(exerciseSeed.dificuldade) }).toString()}`
-              }
-              variant="secondary"
-            >
+            <ButtonLink href={novoExercicioHref} variant="secondary">
               Novo exercício
             </ButtonLink>
           </div>
