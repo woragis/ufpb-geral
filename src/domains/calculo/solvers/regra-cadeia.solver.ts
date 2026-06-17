@@ -1,6 +1,7 @@
 import type { Problem, Solution } from "@/core/domain/problem";
 import type { ProblemSolver } from "@/core/domain/solver";
 import { fmtNum } from "../lib/format";
+import { solveRegraCadeiaV3 } from "./regra-cadeia-v3.solver";
 import { TOPICO_REGRA_CADEIA, type RegraCadeiaData } from "../entities/types";
 
 export const regraCadeiaSolver: ProblemSolver = {
@@ -15,8 +16,11 @@ export const regraCadeiaSolver: ProblemSolver = {
         return solveTrig(d, problema.id);
       case "regra-cadeia-exp-log":
         return solveExpLog(d, problema.id);
-      default:
+      default: {
+        const v3 = solveRegraCadeiaV3(d, problema.id);
+        if (v3) return v3;
         throw new Error("Tipo de regra da cadeia desconhecido");
+      }
     }
   },
 };

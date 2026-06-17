@@ -6,6 +6,7 @@ const CENARIOS: Array<(ctx: GeneratorContext) => RegraCadeiaData> = [
   gerarPotencia,
   gerarTrig,
   gerarExpLog,
+  gerarAvancada,
 ];
 
 function gerarPotencia(ctx: GeneratorContext): RegraCadeiaData {
@@ -32,6 +33,17 @@ function gerarExpLog(ctx: GeneratorContext): RegraCadeiaData {
   return { tipo: "regra-cadeia-exp-log", funcao, a, b, x0 };
 }
 
+function gerarAvancada(ctx: GeneratorContext): RegraCadeiaData {
+  const variante = ctx.rng.pick([
+    "sin-quadrado",
+    "exp-quadrado",
+    "ln-quadrado",
+    "sqrt-composta",
+  ] as const);
+  const x0 = ctx.rng.pick([0, 1, 2]);
+  return { tipo: "regra-cadeia-avancada", variante, x0 };
+}
+
 function enunciado(d: RegraCadeiaData): string {
   switch (d.tipo) {
     case "regra-cadeia-potencia":
@@ -44,12 +56,23 @@ function enunciado(d: RegraCadeiaData): string {
       return d.funcao === "exp"
         ? `Seja h(x) = e^(${d.a}x + ${d.b}). Calcule h'(${d.x0}).`
         : `Seja h(x) = ln(${d.a}x + ${d.b}). Calcule h'(${d.x0}).`;
+    case "regra-cadeia-avancada":
+      switch (d.variante) {
+        case "sin-quadrado":
+          return `Seja h(x) = sin²(x). Calcule h'(${d.x0}).`;
+        case "exp-quadrado":
+          return `Seja h(x) = e^(x²). Calcule h'(${d.x0}).`;
+        case "ln-quadrado":
+          return `Seja h(x) = ln(x² + 1). Calcule h'(${d.x0}).`;
+        case "sqrt-composta":
+          return `Seja h(x) = √(1 + x²). Calcule h'(${d.x0}).`;
+      }
   }
 }
 
 export const regraCadeiaGenerator = {
   topicoId: TOPICO_REGRA_CADEIA,
-  version: 2,
+  version: 3,
 
   gerar(ctx: GeneratorContext): Problem {
     const dados = ctx.rng.pick(CENARIOS)(ctx);
@@ -64,7 +87,7 @@ export const regraCadeiaGenerator = {
         topicoId: TOPICO_REGRA_CADEIA,
         dificuldade: ctx.dificuldade,
         seed: "",
-        generatorVersion: 2,
+        generatorVersion: 3,
       },
       geradoEm: "",
     };

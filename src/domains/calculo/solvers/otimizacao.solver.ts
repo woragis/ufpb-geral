@@ -1,6 +1,7 @@
 import type { Problem, Solution } from "@/core/domain/problem";
 import type { ProblemSolver } from "@/core/domain/solver";
 import { fmtNum } from "../lib/format";
+import { solveOtimizacaoV3, solveConcavidadeFixed } from "./otimizacao-v3.solver";
 import { TOPICO_OTIMIZACAO, type OtimizacaoData } from "../entities/types";
 
 export const otimizacaoSolver: ProblemSolver = {
@@ -16,9 +17,12 @@ export const otimizacaoSolver: ProblemSolver = {
       case "otimizacao-crescimento":
         return solveCrescimento(d, problema.id);
       case "otimizacao-concavidade":
-        return solveConcavidade(d, problema.id);
-      default:
+        return solveConcavidadeFixed(d, problema.id);
+      default: {
+        const v3 = solveOtimizacaoV3(d, problema.id);
+        if (v3) return v3;
         throw new Error("Tipo de otimização desconhecido");
+      }
     }
   },
 };
@@ -114,33 +118,6 @@ function solveCrescimento(
             : "3x² + a > 0 para todo x (a > 0).",
         calculo: resposta,
         resultado: resposta,
-      },
-    ],
-  };
-}
-
-function solveConcavidade(
-  d: Extract<OtimizacaoData, { tipo: "otimizacao-concavidade" }>,
-  problemaId: string,
-): Solution {
-  const finalAnswer = "x > 0";
-
-  return {
-    problemaId,
-    respostaFinal: finalAnswer,
-    steps: [
-      {
-        ordem: 1,
-        titulo: "Segunda derivada",
-        explicacao: "f'' > 0 indica concavidade para cima.",
-        calculo: `f''(x) = 6x`,
-      },
-      {
-        ordem: 2,
-        titulo: "Resolver f'' > 0",
-        explicacao: "6x > 0 → x > 0.",
-        calculo: `x > 0`,
-        resultado: finalAnswer,
       },
     ],
   };
