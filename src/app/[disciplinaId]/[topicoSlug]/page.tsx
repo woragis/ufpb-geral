@@ -4,7 +4,11 @@ import { CopyButton } from "@/app/components/CopyButton";
 import { ExerciseView } from "@/app/components/exercise/ExerciseView";
 import { EngagementActions } from "@/app/components/engagement/EngagementActions";
 import { PersonalExerciseTracker } from "@/app/components/personal/PersonalExerciseTracker";
+import { ExplainPanel } from "@/app/components/ai/ExplainPanel";
+import { ExamTimer } from "@/app/components/exam/ExamTimer";
 import { generateAndSolve } from "@/core/application/generate-and-solve";
+import { decodeImportPayload } from "@/core/application/import-payload-codec";
+import { solveFromDados } from "@/core/application/solve-from-dados";
 import { encodeExerciseSeed } from "@/core/application/seed-codec";
 import { resolveVisualSpecs } from "@/core/presentation/visual/resolve-visual-specs";
 import { MathContent } from "@/app/components/math/MathContent";
@@ -22,6 +26,14 @@ function toSearchParams(searchParams: Record<string, string | string[] | undefin
   return params;
 }
 
+function param(
+  searchParams: Record<string, string | string[] | undefined>,
+  key: string,
+): string | undefined {
+  const v = searchParams[key];
+  return Array.isArray(v) ? v[0] : v;
+}
+
 export default function TopicPage({
   params,
   searchParams,
@@ -34,21 +46,28 @@ export default function TopicPage({
 
   const topico = getTopico(disciplina.id as any, params.topicoSlug);
   if (!topico || topico.status !== "ativo") {
-    // Para MVP, somente tópicos ativos têm geradores/solvers.
     notFound();
   }
 
-  const stepParam = Array.isArray(searchParams.step)
-    ? searchParams.step[0]
-    : searchParams.step;
+  const examMode = param(searchParams, "mode") === "prova";
+  const examMinutes = Number(param(searchParams, "minutes") ?? "30");
+
+  const stepParam = param(searchParams, "step");
   const revealStepsRaw = stepParam ? Number(stepParam) : 0;
   const revealSteps =
     Number.isFinite(revealStepsRaw) && revealStepsRaw >= 0
       ? Math.floor(revealStepsRaw)
       : 0;
+
+  const importPayload = (() => {
+    const p = param(searchParams, "p");
+    return p ? decodeImportPayload(p) : null;
+  })();
+
   const seedParams = toSearchParams(searchParams);
 
   const seedFromUrl = (() => {
+    if (importPayload) return null;
     const s = seedParams.get("s");
     if (!s) return null;
     const dRaw = Number(seedParams.get("d") ?? "2");
@@ -67,14 +86,25 @@ export default function TopicPage({
 
   let result: ReturnType<typeof generateAndSolve>;
   try {
-    result = generateAndSolve({
-      topicoId: topico.id,
-      disciplinaId: disciplina.id as any,
-      dificuldade: seedFromUrl?.dificuldade,
-      seed: seedFromUrl?.seed,
-      generatorVersion: seedFromUrl?.generatorVersion,
-      revealSteps,
-    });
+    if (importPayload) {
+      result = solveFromDados({
+        topicoId: importPayload.topicoId,
+        disciplinaId: disciplina.id as any,
+        dificuldade: importPayload.dificuldade,
+        dados: importPayload.dados,
+        generatorVersion: importPayload.generatorVersion,
+        revealSteps: examMode ? 0 : revealSteps,
+      });
+    } else {
+      result = generateAndSolve({
+        topicoId: topico.id,
+        disciplinaId: disciplina.id as any,
+        dificuldade: seedFromUrl?.dificuldade,
+        seed: seedFromUrl?.seed,
+        generatorVersion: seedFromUrl?.generatorVersion,
+        revealSteps: examMode ? 0 : revealSteps,
+      });
+    }
   } catch {
     notFound();
   }
@@ -83,25 +113,46 @@ export default function TopicPage({
   const visualSpecs = resolveVisualSpecs(problem);
 
   const currentStep = stepsVisiveis.length;
+  const respostaFinalRevelada = currentStep >= solution.steps.length;
 
   const basePath = `/${disciplina.id}/${params.topicoSlug}`;
   const shareParams = new URLSearchParams();
-  shareParams.set("s", exerciseSeed.seed);
-  shareParams.set("d", String(exerciseSeed.dificuldade));
-  if (exerciseSeed.generatorVersion !== 1) {
-    shareParams.set("v", String(exerciseSeed.generatorVersion));
+  if (importPayload && param(searchParams, "p")) {
+    shareParams.set("p", param(searchParams, "p")!);
+  } else {
+    shareParams.set("s", exerciseSeed.seed);
+    shareParams.set("d", String(exerciseSeed.dificuldade));
+    if (exerciseSeed.generatorVersion !== 1) {
+      shareParams.set("v", String(exerciseSeed.generatorVersion));
+    }
+  }
+  if (examMode) {
+    shareParams.set("mode", "prova");
+    shareParams.set("minutes", String(examMinutes));
   }
   shareParams.set("step", String(currentStep));
 
   const shareUrl = `${basePath}?${shareParams.toString()}`;
-  const shareCode = encodeExerciseSeed(exerciseSeed);
+  const shareCode = importPayload ? null : encodeExerciseSeed(exerciseSeed);
+
+  const printParams = new URLSearchParams(shareParams);
+  printParams.delete("step");
+  printParams.delete("mode");
+  printParams.delete("minutes");
+  const printUrl = `${basePath}/print?${printParams.toString()}`;
 
   const nextStep = currentStep + 1;
-  const hasNext = nextStep <= solution.steps.length;
+  const hasNext = !examMode && nextStep <= solution.steps.length;
 
   const nextParams = new URLSearchParams(shareParams);
   nextParams.set("step", String(nextStep));
   const nextUrl = `${basePath}?${nextParams.toString()}`;
+
+  const submitParams = new URLSearchParams(shareParams);
+  submitParams.set("step", String(solution.steps.length));
+  const submitUrl = `${basePath}?${submitParams.toString()}`;
+
+  const examStartUrl = `${basePath}?mode=prova&minutes=30&s=${exerciseSeed.seed}&d=${exerciseSeed.dificuldade}`;
 
   return (
     <div className="flex flex-col flex-1 bg-zinc-50 font-sans dark:bg-black">
@@ -110,6 +161,11 @@ export default function TopicPage({
           <div>
             <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
               {disciplina.nome} — {topico.nome}
+              {importPayload ? (
+                <span className="ml-2 text-sm font-normal text-violet-600">
+                  (importado)
+                </span>
+              ) : null}
             </h1>
             <p className="text-zinc-600 dark:text-zinc-300">{topico.descricao}</p>
           </div>
@@ -121,12 +177,14 @@ export default function TopicPage({
           </Link>
         </div>
 
-        <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-black">
+        {examMode ? <ExamTimer minutes={examMinutes} /> : null}
+
+        <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-black mt-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="text-sm text-zinc-700 dark:text-zinc-300">
                 Dificuldade: {exerciseSeed.dificuldade} · Passos visíveis:{" "}
-                {currentStep}/{solution.steps.length}
+                {examMode ? "ocultos" : `${currentStep}/${solution.steps.length}`}
               </div>
               <div className="flex items-center gap-2 flex-wrap">
                 <EngagementActions
@@ -140,13 +198,30 @@ export default function TopicPage({
                   enunciadoPreview={problem.enunciado}
                   currentStep={currentStep}
                 />
-                <CopyButton value={shareCode} label="Copiar código" />
+                {shareCode ? (
+                  <CopyButton value={shareCode} label="Copiar código" />
+                ) : null}
                 <CopyButton value={shareUrl} label="Copiar link" />
+                <Link
+                  href={printUrl}
+                  target="_blank"
+                  className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-black dark:text-zinc-50"
+                >
+                  PDF
+                </Link>
+                {!examMode ? (
+                  <Link
+                    href={examStartUrl}
+                    className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900"
+                  >
+                    Modo prova
+                  </Link>
+                ) : null}
               </div>
             </div>
 
             <div className="text-sm text-zinc-600 dark:text-zinc-300">
-              Exercício ID (determinístico): {problem.id}
+              Exercício ID: {problem.id}
             </div>
           </div>
 
@@ -156,8 +231,25 @@ export default function TopicPage({
             visualSpecs={visualSpecs}
           />
 
+          <ExplainPanel
+            topicoId={topico.id}
+            disciplinaId={disciplina.id}
+            enunciado={problem.enunciado}
+            enunciadoLatex={problem.enunciadoLatex}
+            stepsVisiveis={stepsVisiveis}
+            respostaFinalRevelada={respostaFinalRevelada}
+            respostaFinal={solution.respostaFinal}
+          />
+
           <div className="mt-6 flex items-center gap-3 flex-wrap">
-            {hasNext ? (
+            {examMode && !respostaFinalRevelada ? (
+              <Link
+                href={submitUrl}
+                className="rounded-lg bg-amber-600 px-4 py-2 text-white hover:bg-amber-500"
+              >
+                Entregar prova
+              </Link>
+            ) : hasNext ? (
               <Link
                 href={nextUrl}
                 className="rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-black"
@@ -174,7 +266,7 @@ export default function TopicPage({
             )}
 
             <Link
-              href={basePath}
+              href={importPayload ? basePath : `${basePath}?${new URLSearchParams({ d: String(exerciseSeed.dificuldade) }).toString()}`}
               className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-zinc-900 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-black dark:text-zinc-50"
             >
               Novo exercício
@@ -185,4 +277,3 @@ export default function TopicPage({
     </div>
   );
 }
-

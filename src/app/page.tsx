@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { disciplinas } from "@/infrastructure/catalog/disciplines";
 import { CopyCodeForm } from "./components/CopyCodeForm";
+import { ImportExerciseForm } from "./components/ai/ImportExerciseForm";
 import { PersonalPanels } from "./components/personal/PersonalPanels";
 import { topicoSlugFromId } from "@/infrastructure/catalog/disciplines";
 
@@ -28,6 +29,16 @@ export default function Home() {
         </section>
 
         <PersonalPanels />
+
+        <section className="mb-10 rounded-xl border border-violet-200 bg-white p-4 dark:border-violet-900 dark:bg-black">
+          <h2 className="font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+            Importar exercício com IA
+          </h2>
+          <p className="text-sm text-zinc-600 dark:text-zinc-300 mb-3">
+            Cole um enunciado em texto livre; a IA mapeia para um tópico do site.
+          </p>
+          <ImportExerciseForm />
+        </section>
 
         <section className="grid gap-4">
           {disciplinas.map((disciplina) => {
