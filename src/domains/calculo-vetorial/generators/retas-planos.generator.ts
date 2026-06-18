@@ -1,14 +1,15 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_RETAS_PLANOS, type RetasPlanosData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => RetasPlanosData> = [
-  gerarDiretor,
-  gerarParametrica,
-  gerarPlano,
-  gerarDistancia,
-  gerarDistanciaReta,
-  gerarIntersecao,
+const CENARIOS: CenarioEntry<RetasPlanosData>[] = [
+  { tipo: "retas-planos", gerar: gerarDiretor },
+  { tipo: "retas-planos-parametrica", gerar: gerarParametrica },
+  { tipo: "retas-planos-plano", gerar: gerarPlano },
+  { tipo: "retas-planos-distancia", gerar: gerarDistancia },
+  { tipo: "retas-planos-distancia-reta", gerar: gerarDistanciaReta },
+  { tipo: "retas-planos-intersecao", gerar: gerarIntersecao },
 ];
 
 function gerarDiretor(ctx: GeneratorContext): RetasPlanosData {
@@ -128,12 +129,14 @@ export const retasPlanosGenerator = {
   topicoId: TOPICO_RETAS_PLANOS,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [gerarDiretor, gerarParametrica]
+        ? CENARIOS.filter((c) =>
+            ["retas-planos", "retas-planos-parametrica"].includes(c.tipo),
+          )
         : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",

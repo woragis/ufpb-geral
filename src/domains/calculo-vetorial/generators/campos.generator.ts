@@ -1,13 +1,14 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_CAMPOS, type CamposData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => CamposData> = [
-  gerarGradiente,
-  gerarDivergente,
-  gerarRotacional,
-  gerarGradiente3d,
-  gerarDivergente3d,
+const CENARIOS: CenarioEntry<CamposData>[] = [
+  { tipo: "campos", gerar: gerarGradiente },
+  { tipo: "campos-divergente", gerar: gerarDivergente },
+  { tipo: "campos-rotacional", gerar: gerarRotacional },
+  { tipo: "campos-gradiente-3d", gerar: gerarGradiente3d },
+  { tipo: "campos-divergente-3d", gerar: gerarDivergente3d },
 ];
 
 function gerarGradiente(ctx: GeneratorContext): CamposData {
@@ -78,10 +79,16 @@ export const camposGenerator = {
   topicoId: TOPICO_CAMPOS,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
-      ctx.dificuldade === 1 ? [gerarGradiente, gerarDivergente, gerarGradiente3d] : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+      ctx.dificuldade === 1
+        ? CENARIOS.filter((c) =>
+            ["campos", "campos-divergente", "campos-gradiente-3d"].includes(
+              c.tipo,
+            ),
+          )
+        : CENARIOS;
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",

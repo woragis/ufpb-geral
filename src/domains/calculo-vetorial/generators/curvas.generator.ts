@@ -1,14 +1,15 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_CURVAS, type CurvasData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => CurvasData> = [
-  gerarVelocidadeModulo,
-  gerarVelocidadeVetor,
-  gerarTangente,
-  gerarCirculo,
-  gerarComprimento,
-  gerarHelice,
+const CENARIOS: CenarioEntry<CurvasData>[] = [
+  { tipo: "curvas", gerar: gerarVelocidadeModulo },
+  { tipo: "curvas-velocidade-vetor", gerar: gerarVelocidadeVetor },
+  { tipo: "curvas-tangente", gerar: gerarTangente },
+  { tipo: "curvas-circulo", gerar: gerarCirculo },
+  { tipo: "curvas-comprimento", gerar: gerarComprimento },
+  { tipo: "curvas-helice", gerar: gerarHelice },
 ];
 
 function gerarVelocidadeModulo(ctx: GeneratorContext): CurvasData {
@@ -74,12 +75,14 @@ export const curvasGenerator = {
   topicoId: TOPICO_CURVAS,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [gerarVelocidadeModulo, gerarCirculo, gerarComprimento]
+        ? CENARIOS.filter((c) =>
+            ["curvas", "curvas-circulo", "curvas-comprimento"].includes(c.tipo),
+          )
         : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
     return {
       id: "",
       disciplinaId: "calculo-vetorial",

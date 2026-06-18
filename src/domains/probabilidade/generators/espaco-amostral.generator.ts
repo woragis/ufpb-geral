@@ -4,12 +4,13 @@ import {
   TOPICO_ESPACO_AMOSTRAL,
   type EspacoAmostralData,
 } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => EspacoAmostralData> = [
-  gerarBasico,
-  gerarBaralho,
-  gerarMoedaDado,
-  gerarModular,
+const CENARIOS: CenarioEntry<EspacoAmostralData>[] = [
+  { tipo: "espaco-amostral", gerar: gerarBasico },
+  { tipo: "espaco-amostral-baralho", gerar: gerarBaralho },
+  { tipo: "espaco-amostral-moeda-dado", gerar: gerarMoedaDado },
+  { tipo: "espaco-amostral-modular", gerar: gerarModular },
 ];
 
 function gerarBasico(ctx: GeneratorContext): EspacoAmostralData {
@@ -74,12 +75,14 @@ export const espacoAmostralGenerator = {
   topicoId: TOPICO_ESPACO_AMOSTRAL,
   version: 2,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [gerarBasico, gerarMoedaDado]
+        ? CENARIOS.filter((c) =>
+            ["espaco-amostral", "espaco-amostral-moeda-dado"].includes(c.tipo),
+          )
         : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",

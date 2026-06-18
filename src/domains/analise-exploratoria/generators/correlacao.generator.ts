@@ -1,14 +1,15 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_CORRELACAO, type CorrelacaoData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => CorrelacaoData> = [
-  gerarPositiva,
-  gerarNegativa,
-  gerarFraca,
-  gerarSpearman,
-  gerarInterpretacao,
-  gerarCovariancia,
+const CENARIOS: CenarioEntry<CorrelacaoData>[] = [
+  { tipo: "correlacao", gerar: gerarPositiva },
+  { tipo: "correlacao-negativa", gerar: gerarNegativa },
+  { tipo: "correlacao-fraca", gerar: gerarFraca },
+  { tipo: "correlacao-spearman", gerar: gerarSpearman },
+  { tipo: "correlacao-interpretacao", gerar: gerarInterpretacao },
+  { tipo: "correlacao-covariancia", gerar: gerarCovariancia },
 ];
 
 function gerarPares(
@@ -79,10 +80,14 @@ export const correlacaoGenerator = {
   topicoId: TOPICO_CORRELACAO,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
-      ctx.dificuldade === 1 ? [gerarPositiva, gerarInterpretacao] : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+      ctx.dificuldade === 1
+        ? CENARIOS.filter((c) =>
+            ["correlacao", "correlacao-interpretacao"].includes(c.tipo),
+          )
+        : CENARIOS;
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",

@@ -1,11 +1,12 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_PRODUTO_VETORIAL, type ProdutoVetorialData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => ProdutoVetorialData> = [
-  gerarCross,
-  gerarArea,
-  gerarMisto,
+const CENARIOS: CenarioEntry<ProdutoVetorialData>[] = [
+  { tipo: "produto-vetorial", gerar: gerarCross },
+  { tipo: "produto-vetorial-area", gerar: gerarArea },
+  { tipo: "produto-vetorial-misto", gerar: gerarMisto },
 ];
 
 function gerarCross(ctx: GeneratorContext): ProdutoVetorialData {
@@ -62,10 +63,14 @@ export const produtoVetorialGenerator = {
   topicoId: TOPICO_PRODUTO_VETORIAL,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
-      ctx.dificuldade === 1 ? [gerarCross, gerarArea] : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+      ctx.dificuldade === 1
+        ? CENARIOS.filter((c) =>
+            ["produto-vetorial", "produto-vetorial-area"].includes(c.tipo),
+          )
+        : CENARIOS;
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
     return {
       id: "",
       disciplinaId: "calculo-vetorial",

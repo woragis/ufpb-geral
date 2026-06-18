@@ -1,17 +1,18 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_INDEPENDENCIA, type IndependenciaData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
+
+const CENARIOS: CenarioEntry<IndependenciaData>[] = [
+  { tipo: "independencia", gerar: gerarTeste },
+  { tipo: "independencia-contraste", gerar: gerarContraste },
+  { tipo: "independencia-prob", gerar: gerarProb },
+];
 
 const PARES = [
   { a: "sair cara no 1º lançamento", b: "sair cara no 2º lançamento" },
   { a: "cartão de copas", b: "carta vermelha" },
   { a: "número par", b: "múltiplo de 3" },
-];
-
-const CENARIOS: Array<(ctx: GeneratorContext) => IndependenciaData> = [
-  gerarTeste,
-  gerarContraste,
-  gerarProb,
 ];
 
 function gerarTeste(ctx: GeneratorContext): IndependenciaData {
@@ -84,8 +85,8 @@ export const independenciaGenerator = {
   topicoId: TOPICO_INDEPENDENCIA,
   version: 2,
 
-  gerar(ctx: GeneratorContext): Problem {
-    const dados = ctx.rng.pick(CENARIOS)(ctx);
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
+    const dados = pickCenarioByTipo(ctx, CENARIOS);
     return {
       id: "",
       disciplinaId: "probabilidade",

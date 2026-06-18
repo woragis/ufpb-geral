@@ -2,14 +2,15 @@ import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { nonZeroVec3, randVec2or3 } from "../lib/vec";
 import { TOPICO_VETORES, type VetoresData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => VetoresData> = [
-  gerarModulo,
-  gerarSoma,
-  gerarEscalar,
-  gerarUnitario,
-  gerarDistancia,
-  gerarParalelo,
+const CENARIOS: CenarioEntry<VetoresData>[] = [
+  { tipo: "vetores", gerar: gerarModulo },
+  { tipo: "vetores-soma", gerar: gerarSoma },
+  { tipo: "vetores-escalar", gerar: gerarEscalar },
+  { tipo: "vetores-unitario", gerar: gerarUnitario },
+  { tipo: "vetores-distancia", gerar: gerarDistancia },
+  { tipo: "vetores-paralelo", gerar: gerarParalelo },
 ];
 
 function gerarModulo(ctx: GeneratorContext): VetoresData {
@@ -102,12 +103,12 @@ export const vetoresGenerator = {
   topicoId: TOPICO_VETORES,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [gerarModulo, gerarSoma]
+        ? CENARIOS.filter((c) => ["vetores", "vetores-soma"].includes(c.tipo))
         : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",

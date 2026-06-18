@@ -4,12 +4,13 @@ import {
   TOPICO_MEDIDAS_DISPERSAO,
   type MedidasDispersaoData,
 } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => MedidasDispersaoData> = [
-  gerarBasico,
-  gerarCv,
-  gerarPopulacional,
-  gerarMad,
+const CENARIOS: CenarioEntry<MedidasDispersaoData>[] = [
+  { tipo: "medidas-dispersao", gerar: gerarBasico },
+  { tipo: "medidas-dispersao-cv", gerar: gerarCv },
+  { tipo: "medidas-dispersao-populacional", gerar: gerarPopulacional },
+  { tipo: "medidas-dispersao-mad", gerar: gerarMad },
 ];
 
 function gerarValores(ctx: GeneratorContext): number[] {
@@ -66,9 +67,14 @@ export const medidasDispersaoGenerator = {
   topicoId: TOPICO_MEDIDAS_DISPERSAO,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
-    const pool = ctx.dificuldade === 1 ? [gerarBasico, gerarCv] : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
+    const pool =
+      ctx.dificuldade === 1
+        ? CENARIOS.filter((c) =>
+            ["medidas-dispersao", "medidas-dispersao-cv"].includes(c.tipo),
+          )
+        : CENARIOS;
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",

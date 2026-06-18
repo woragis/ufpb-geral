@@ -1,6 +1,13 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_EVENTOS, type EventosData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
+
+const CENARIOS: CenarioEntry<EventosData>[] = [
+  { tipo: "eventos", gerar: gerarCardinalidade },
+  { tipo: "eventos-probabilidade", gerar: gerarProbabilidade },
+  { tipo: "eventos-exclusivos", gerar: gerarExclusivos },
+];
 
 const DESCRICOES = [
   { a: "número par", b: "número maior que 10" },
@@ -8,12 +15,6 @@ const DESCRICOES = [
   { a: "menor que 8", b: "maior que 12" },
   { a: "número primo", b: "divisível por 4" },
   { a: "face par no dado", b: "face ímpar no dado" },
-];
-
-const CENARIOS: Array<(ctx: GeneratorContext) => EventosData> = [
-  gerarCardinalidade,
-  gerarProbabilidade,
-  gerarExclusivos,
 ];
 
 function baseContagens(ctx: GeneratorContext) {
@@ -87,8 +88,8 @@ export const eventosGenerator = {
   topicoId: TOPICO_EVENTOS,
   version: 2,
 
-  gerar(ctx: GeneratorContext): Problem {
-    const dados = ctx.rng.pick(CENARIOS)(ctx);
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
+    const dados = pickCenarioByTipo(ctx, CENARIOS);
     return {
       id: "",
       disciplinaId: "probabilidade",

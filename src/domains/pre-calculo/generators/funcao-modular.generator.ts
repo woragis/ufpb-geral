@@ -1,12 +1,13 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_FUNCAO_MODULAR, type FuncaoModularData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => FuncaoModularData> = [
-  gerarEquacao,
-  gerarInequacao,
-  gerarAvaliar,
-  gerarInequacaoMaior,
+const CENARIOS: CenarioEntry<FuncaoModularData>[] = [
+  { tipo: "modular-equacao", gerar: gerarEquacao },
+  { tipo: "modular-inequacao", gerar: gerarInequacao },
+  { tipo: "modular-inequacao", gerar: gerarInequacaoMaior },
+  { tipo: "modular-avaliar", gerar: gerarAvaliar },
 ];
 
 function pickCoeffs(ctx: GeneratorContext) {
@@ -73,12 +74,14 @@ export const funcaoModularGenerator = {
   topicoId: TOPICO_FUNCAO_MODULAR,
   version: 1,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [gerarEquacao, gerarAvaliar]
+        ? CENARIOS.filter((c) =>
+            ["modular-equacao", "modular-avaliar"].includes(c.tipo),
+          )
         : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
     return {
       id: "",
       disciplinaId: "pre-calculo",

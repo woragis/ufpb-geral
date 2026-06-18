@@ -1,6 +1,7 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_TIPOS_DADOS, type TiposDadosData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
 const ESCALAS: Array<Extract<TiposDadosData, { tipo: "tipos-dados" }>> = [
   { tipo: "tipos-dados", variavel: "cor dos olhos", exemplos: ["azul", "castanho", "verde"], escalaCorreta: "nominal" },
@@ -30,11 +31,23 @@ const MEDIA_ESCALA: Array<Extract<TiposDadosData, { tipo: "tipos-dados-media-esc
   { tipo: "tipos-dados-media-escala", variavel: "temperatura ambiente (°C)", escalaCorreta: "intervalar" },
 ];
 
-const CENARIOS: Array<(ctx: GeneratorContext) => TiposDadosData> = [
-  (ctx) => ({ ...ctx.rng.pick(ESCALAS) }),
-  (ctx) => ({ ...ctx.rng.pick(GRAFICOS) }),
-  gerarFrequencia,
-  (ctx) => ({ ...ctx.rng.pick(MEDIA_ESCALA) }),
+function gerarEscalas(ctx: GeneratorContext): TiposDadosData {
+  return { ...ctx.rng.pick(ESCALAS) };
+}
+
+function gerarGraficos(ctx: GeneratorContext): TiposDadosData {
+  return { ...ctx.rng.pick(GRAFICOS) };
+}
+
+function gerarMediaEscala(ctx: GeneratorContext): TiposDadosData {
+  return { ...ctx.rng.pick(MEDIA_ESCALA) };
+}
+
+const CENARIOS: CenarioEntry<TiposDadosData>[] = [
+  { tipo: "tipos-dados", gerar: gerarEscalas },
+  { tipo: "tipos-dados-grafico", gerar: gerarGraficos },
+  { tipo: "tipos-dados-frequencia", gerar: gerarFrequencia },
+  { tipo: "tipos-dados-media-escala", gerar: gerarMediaEscala },
 ];
 
 function gerarFrequencia(ctx: GeneratorContext): TiposDadosData {
@@ -77,12 +90,14 @@ export const tiposDadosGenerator = {
   topicoId: TOPICO_TIPOS_DADOS,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [(c: GeneratorContext) => ({ ...c.rng.pick(ESCALAS) }), (c: GeneratorContext) => ({ ...c.rng.pick(GRAFICOS) })]
+        ? CENARIOS.filter((c) =>
+            ["tipos-dados", "tipos-dados-grafico"].includes(c.tipo),
+          )
         : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",

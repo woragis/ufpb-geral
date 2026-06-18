@@ -4,14 +4,15 @@ import {
   TOPICO_VARIAVEIS_DISCRETAS,
   type VariaveisDiscretasData,
 } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => VariaveisDiscretasData> = [
-  gerarEsperanca,
-  gerarProbabilidade,
-  gerarVariancia,
-  gerarAcumulada,
-  gerarBinomial,
-  gerarGeometrica,
+const CENARIOS: CenarioEntry<VariaveisDiscretasData>[] = [
+  { tipo: "variaveis-discretas", gerar: gerarEsperanca },
+  { tipo: "variaveis-discretas", gerar: gerarProbabilidade },
+  { tipo: "variaveis-discretas-variancia", gerar: gerarVariancia },
+  { tipo: "variaveis-discretas-acumulada", gerar: gerarAcumulada },
+  { tipo: "variaveis-discretas-binomial", gerar: gerarBinomial },
+  { tipo: "variaveis-discretas-geometrica", gerar: gerarGeometrica },
 ];
 
 function gerarTabela(ctx: GeneratorContext) {
@@ -94,12 +95,16 @@ export const variaveisDiscretasGenerator = {
   topicoId: TOPICO_VARIAVEIS_DISCRETAS,
   version: 2,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [gerarEsperanca, gerarProbabilidade, gerarBinomial]
+        ? CENARIOS.filter((c) =>
+            ["variaveis-discretas", "variaveis-discretas-binomial"].includes(
+              c.tipo,
+            ),
+          )
         : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
     return {
       id: "",
       disciplinaId: "probabilidade",

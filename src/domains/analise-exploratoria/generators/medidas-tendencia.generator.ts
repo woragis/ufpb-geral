@@ -4,14 +4,15 @@ import {
   TOPICO_MEDIDAS_TENDENCIA,
   type MedidasTendenciaData,
 } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => MedidasTendenciaData> = [
-  gerarMedia,
-  gerarMediana,
-  gerarModa,
-  gerarPonderada,
-  gerarEscolha,
-  gerarGeometrica,
+const CENARIOS: CenarioEntry<MedidasTendenciaData>[] = [
+  { tipo: "media-aritmetica", gerar: gerarMedia },
+  { tipo: "medidas-tendencia-mediana", gerar: gerarMediana },
+  { tipo: "medidas-tendencia-moda", gerar: gerarModa },
+  { tipo: "medidas-tendencia-ponderada", gerar: gerarPonderada },
+  { tipo: "medidas-tendencia-escolha", gerar: gerarEscolha },
+  { tipo: "medidas-tendencia-geometrica", gerar: gerarGeometrica },
 ];
 
 function tamanho(ctx: GeneratorContext): number {
@@ -91,12 +92,14 @@ export const medidasTendenciaGenerator = {
   topicoId: TOPICO_MEDIDAS_TENDENCIA,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [gerarMedia, gerarMediana]
+        ? CENARIOS.filter((c) =>
+            ["media-aritmetica", "medidas-tendencia-mediana"].includes(c.tipo),
+          )
         : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",

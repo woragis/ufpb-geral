@@ -1,12 +1,13 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_BINOMIO_NEWTON, type BinomioNewtonData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => BinomioNewtonData> = [
-  gerarCoeficiente,
-  gerarTermoGeral,
-  gerarSomaCoeficientes,
-  gerarExpansao,
+const CENARIOS: CenarioEntry<BinomioNewtonData>[] = [
+  { tipo: "binomio-coeficiente", gerar: gerarCoeficiente },
+  { tipo: "binomio-termo-geral", gerar: gerarTermoGeral },
+  { tipo: "binomio-soma-coeficientes", gerar: gerarSomaCoeficientes },
+  { tipo: "binomio-expansao", gerar: gerarExpansao },
 ];
 
 function gerarCoeficiente(ctx: GeneratorContext): BinomioNewtonData {
@@ -61,8 +62,8 @@ export const binomioNewtonGenerator = {
   topicoId: TOPICO_BINOMIO_NEWTON,
   version: 1,
 
-  gerar(ctx: GeneratorContext): Problem {
-    const dados = ctx.rng.pick(CENARIOS)(ctx);
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
+    const dados = pickCenarioByTipo(ctx, CENARIOS);
     return {
       id: "",
       disciplinaId: "pre-calculo",

@@ -4,14 +4,15 @@ import {
   TOPICO_FUNCOES_ELEMENTARES,
   type FuncoesElementaresData,
 } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => FuncoesElementaresData> = [
-  gerarAfim,
-  gerarQuadratica,
-  gerarExponencial,
-  gerarLogaritmica,
-  gerarAfimRaiz,
-  gerarQuadraticaVertice,
+const CENARIOS: CenarioEntry<FuncoesElementaresData>[] = [
+  { tipo: "funcao-afim", gerar: gerarAfim },
+  { tipo: "funcao-afim", gerar: gerarAfimRaiz },
+  { tipo: "funcao-quadratica", gerar: gerarQuadratica },
+  { tipo: "funcao-quadratica", gerar: gerarQuadraticaVertice },
+  { tipo: "funcao-exponencial", gerar: gerarExponencial },
+  { tipo: "funcao-logaritmica", gerar: gerarLogaritmica },
 ];
 
 function gerarAfim(ctx: GeneratorContext): FuncoesElementaresData {
@@ -108,12 +109,16 @@ export const funcoesElementaresGenerator = {
   topicoId: TOPICO_FUNCOES_ELEMENTARES,
   version: 1,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [gerarAfim, gerarExponencial, gerarLogaritmica]
+        ? CENARIOS.filter((c) =>
+            ["funcao-afim", "funcao-exponencial", "funcao-logaritmica"].includes(
+              c.tipo,
+            ),
+          )
         : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
     return {
       id: "",
       disciplinaId: "pre-calculo",

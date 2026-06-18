@@ -2,12 +2,13 @@ import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { nonZeroVec3, randVec3 } from "../lib/vec";
 import { TOPICO_PRODUTO_ESCULAR, type ProdutoEscalarData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => ProdutoEscalarData> = [
-  gerarDot,
-  gerarAngulo,
-  gerarProjecao,
-  gerarOrtogonal,
+const CENARIOS: CenarioEntry<ProdutoEscalarData>[] = [
+  { tipo: "produto-escalar", gerar: gerarDot },
+  { tipo: "produto-escalar-angulo", gerar: gerarAngulo },
+  { tipo: "produto-escalar-projecao", gerar: gerarProjecao },
+  { tipo: "produto-escalar-ortogonal", gerar: gerarOrtogonal },
 ];
 
 function gerarDot(ctx: GeneratorContext): ProdutoEscalarData {
@@ -59,10 +60,14 @@ export const produtoEscalarGenerator = {
   topicoId: TOPICO_PRODUTO_ESCULAR,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
-      ctx.dificuldade === 1 ? [gerarDot, gerarAngulo] : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+      ctx.dificuldade === 1
+        ? CENARIOS.filter((c) =>
+            ["produto-escalar", "produto-escalar-angulo"].includes(c.tipo),
+          )
+        : CENARIOS;
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",

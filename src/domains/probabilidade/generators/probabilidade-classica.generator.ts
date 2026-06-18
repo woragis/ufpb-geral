@@ -6,6 +6,7 @@ import {
   type ProbabilidadeClassicaData,
   type ProbabilidadeClassicaUrnaData,
 } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
 const CORES = [
   { nome: "vermelhas", cor: "vermelha" },
@@ -24,14 +25,14 @@ function gerarComposta(ctx: GeneratorContext): ProbabilidadeClassicaData {
   };
 }
 
-const CENARIOS: Array<(ctx: GeneratorContext) => ProbabilidadeClassicaData> = [
-  gerarUrna,
-  gerarSemReposicao,
-  gerarDadoSoma,
-  gerarBaralho,
-  gerarComites,
-  gerarModular,
-  gerarComposta,
+const CENARIOS: CenarioEntry<ProbabilidadeClassicaData>[] = [
+  { tipo: "probabilidade-classica", gerar: gerarUrna },
+  { tipo: "probabilidade-classica-sem-reposicao", gerar: gerarSemReposicao },
+  { tipo: "probabilidade-classica-dado-soma", gerar: gerarDadoSoma },
+  { tipo: "probabilidade-classica-baralho", gerar: gerarBaralho },
+  { tipo: "probabilidade-classica-comites", gerar: gerarComites },
+  { tipo: "probabilidade-classica-modular", gerar: gerarModular },
+  { tipo: "probabilidade-classica-composta", gerar: gerarComposta },
 ];
 
 function gerarUrna(ctx: GeneratorContext): ProbabilidadeClassicaUrnaData {
@@ -144,12 +145,18 @@ export const probabilidadeClassicaGenerator = {
   topicoId: TOPICO_PROBABILIDADE_CLASSICA,
   version: 2,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [gerarUrna, gerarDadoSoma, gerarBaralho]
+        ? CENARIOS.filter((c) =>
+            [
+              "probabilidade-classica",
+              "probabilidade-classica-dado-soma",
+              "probabilidade-classica-baralho",
+            ].includes(c.tipo),
+          )
         : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",

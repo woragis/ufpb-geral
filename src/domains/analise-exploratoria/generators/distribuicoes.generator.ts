@@ -4,15 +4,16 @@ import {
   TOPICO_DISTRIBUICOES,
   type DistribuicoesData,
 } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => DistribuicoesData> = [
-  gerarIqr,
-  gerarQuartis,
-  gerarOutliers,
-  gerarLerBoxplot,
-  gerarHistograma,
-  gerarAssimetria,
-  gerarCincoNumeros,
+const CENARIOS: CenarioEntry<DistribuicoesData>[] = [
+  { tipo: "distribuicoes", gerar: gerarIqr },
+  { tipo: "distribuicoes-quartis", gerar: gerarQuartis },
+  { tipo: "distribuicoes-outliers", gerar: gerarOutliers },
+  { tipo: "distribuicoes-ler-boxplot", gerar: gerarLerBoxplot },
+  { tipo: "distribuicoes-histograma", gerar: gerarHistograma },
+  { tipo: "distribuicoes-assimetria", gerar: gerarAssimetria },
+  { tipo: "distribuicoes-cinco-numeros", gerar: gerarCincoNumeros },
 ];
 
 function gerarIqr(ctx: GeneratorContext): DistribuicoesData {
@@ -108,12 +109,18 @@ export const distribuicoesGenerator = {
   topicoId: TOPICO_DISTRIBUICOES,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
-        ? [gerarIqr, gerarLerBoxplot, gerarHistograma]
+        ? CENARIOS.filter((c) =>
+            [
+              "distribuicoes",
+              "distribuicoes-ler-boxplot",
+              "distribuicoes-histograma",
+            ].includes(c.tipo),
+          )
         : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",
