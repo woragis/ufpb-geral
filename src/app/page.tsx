@@ -1,11 +1,9 @@
-import Link from "next/link";
-import { disciplinas, topicoSlugFromId } from "@/infrastructure/catalog/disciplines";
+import { disciplinas } from "@/infrastructure/catalog/disciplines";
+import { DisciplineCard } from "./components/catalog/DisciplineCard";
 import { CopyCodeForm } from "./components/CopyCodeForm";
 import { ImportExerciseForm } from "./components/ai/ImportExerciseForm";
 import { PersonalPanels } from "./components/personal/PersonalPanels";
 import { Card, CardAi } from "./components/ui/Card";
-import { disciplineAccentText } from "@/lib/discipline-accent";
-import type { DisciplinaId } from "@/core/domain/ids";
 
 export const dynamic = "force-dynamic";
 
@@ -38,56 +36,13 @@ export default function Home() {
           <ImportExerciseForm />
         </CardAi>
 
-        <section className="grid gap-4">
+        <section className="grid gap-6 sm:grid-cols-2">
           {disciplinas.map((disciplina) => {
             const activeTopics = disciplina.modulos
               .flatMap((m) => m.topicos)
               .filter((t) => t.status === "ativo");
             if (activeTopics.length === 0) return null;
-
-            const accent = disciplineAccentText[disciplina.id as DisciplinaId];
-
-            return (
-              <Card
-                key={disciplina.id}
-                disciplinaId={disciplina.id as DisciplinaId}
-                accent
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <Link
-                      href={`/${disciplina.id}`}
-                      className={`text-xl font-semibold hover:text-primary transition-colors ${accent}`}
-                    >
-                      {disciplina.nome}
-                    </Link>
-                    <p className="text-fg-muted">
-                      {activeTopics.length} tópico(s) ativo(s) no momento.
-                    </p>
-                  </div>
-                </div>
-
-                <ul className="mt-4 space-y-2">
-                  {activeTopics.map((topico) => {
-                    const topicoSlug = topicoSlugFromId(topico.id);
-                    const href = `/${disciplina.id}/${topicoSlug}`;
-                    return (
-                      <li key={topico.id}>
-                        <Link
-                          href={href}
-                          className="text-fg hover:text-primary transition-colors"
-                        >
-                          {topico.nome}
-                        </Link>
-                        <div className="text-sm text-fg-muted">
-                          {topico.descricao}
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </Card>
-            );
+            return <DisciplineCard key={disciplina.id} disciplina={disciplina} />;
           })}
         </section>
       </main>

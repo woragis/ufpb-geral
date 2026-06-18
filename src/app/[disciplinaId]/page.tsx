@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TopSeedsList } from "@/app/components/catalog/TopSeedsList";
+import { StudyNav } from "@/app/components/catalog/StudyNav";
 import { ButtonLink } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 import { disciplineAccentText } from "@/lib/discipline-accent";
@@ -35,7 +36,9 @@ export default async function DisciplinaPage({
           </ButtonLink>
         </div>
 
-        <section className="space-y-6">
+        <StudyNav disciplinaId={disciplina.id as DisciplinaId} />
+
+        <section className="space-y-6 mt-6">
           {disciplina.modulos.map((modulo) => (
             <Card
               key={modulo.id}

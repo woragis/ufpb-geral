@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { StudyNav } from "@/app/components/catalog/StudyNav";
 import { TopSeedsList } from "@/app/components/catalog/TopSeedsList";
 import { SubtopicoCard } from "@/app/components/catalog/SubtopicoCard";
 import { ButtonLink } from "@/app/components/ui/Button";
@@ -84,7 +85,12 @@ export default async function TopicoHubPage({
           </ButtonLink>
         </div>
 
-        <Card className="mb-8">
+        <StudyNav
+          disciplinaId={disciplina.id}
+          topicoSlug={params.topicoSlug}
+        />
+
+        <Card className="mb-8 mt-6">
           <h2 className="text-lg font-semibold text-fg">Escolha um subtópico</h2>
           <p className="text-sm text-fg-muted mt-1">
             Cada card foca em um tipo de exercício deste tópico.

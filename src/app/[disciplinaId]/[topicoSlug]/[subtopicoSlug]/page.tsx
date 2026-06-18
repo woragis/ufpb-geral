@@ -28,6 +28,7 @@ import {
 } from "@/infrastructure/catalog/disciplines";
 import type { ExerciseSeed } from "@/core/domain/seed";
 import Link from "next/link";
+import { StudyNav } from "@/app/components/catalog/StudyNav";
 
 export const dynamic = "force-dynamic";
 
@@ -217,7 +218,15 @@ export default async function SubtopicoExercisePage({
         />
       </Suspense>
       <main className="w-full max-w-4xl mx-auto px-4 py-10">
-        <div className="flex items-start justify-between gap-4 mb-6">
+        <StudyNav
+          disciplinaId={disciplina.id}
+          topicoSlug={params.topicoSlug}
+          subtopicoSlug={params.subtopicoSlug}
+          dificuldade={exerciseSeed.dificuldade}
+          showDifficulty
+        />
+
+        <div className="flex items-start justify-between gap-4 mb-6 mt-6">
           <div>
             <nav className="text-sm text-fg-muted mb-2">
               <Link href={`/${disciplina.id}`} className="hover:text-primary">
