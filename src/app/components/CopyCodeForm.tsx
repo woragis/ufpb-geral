@@ -26,7 +26,9 @@ export function CopyCodeForm() {
         params.set("v", String(decoded.generatorVersion));
       }
 
-      router.push(`/${disciplinaId}/${topicoSlug}?${params.toString()}`);
+      router.push(
+        `/${disciplinaId}/${topicoSlug}/todos?${params.toString()}`,
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Código inválido");
     }

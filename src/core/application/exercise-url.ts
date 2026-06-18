@@ -38,10 +38,11 @@ export function buildExerciseSearchParams(
 export function buildExerciseHref(
   disciplinaId: string,
   topicoSlug: string,
+  subtopicoSlug: string,
   opts: ExerciseUrlOptions,
 ): string {
   const qs = buildExerciseSearchParams(opts).toString();
-  return `/${disciplinaId}/${topicoSlug}${qs ? `?${qs}` : ""}`;
+  return `/${disciplinaId}/${topicoSlug}/${subtopicoSlug}${qs ? `?${qs}` : ""}`;
 }
 
 export function toAbsoluteExerciseUrl(

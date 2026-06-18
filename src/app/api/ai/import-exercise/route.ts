@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { encodeImportPayload } from "@/core/application/import-payload-codec";
 import { solveFromDados } from "@/core/application/solve-from-dados";
-import { topicoSlugFromId, findTopicoById } from "@/infrastructure/catalog/disciplines";
+import { topicoSlugFromId, findTopicoById, defaultSubtopicoSlug } from "@/infrastructure/catalog/disciplines";
 import { chatJson } from "@/infrastructure/ai/openai-client";
 import { checkRateLimit, clientIp } from "@/infrastructure/ai/rate-limit";
 import { AI_TOPIC_CATALOG } from "@/infrastructure/ai/topic-catalog";
@@ -60,7 +60,8 @@ export async function POST(request: Request) {
     });
 
     const slug = topicoSlugFromId(parsed.topicoId);
-    const openUrl = `/${found.disciplina.id}/${slug}?p=${payload}`;
+    const subSlug = defaultSubtopicoSlug(parsed.topicoId);
+    const openUrl = `/${found.disciplina.id}/${slug}/${subSlug}?p=${payload}`;
 
     return NextResponse.json({
       ok: true,

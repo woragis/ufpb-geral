@@ -6,7 +6,12 @@ import { decodeImportPayload } from "@/core/application/import-payload-codec";
 import { solveFromDados } from "@/core/application/solve-from-dados";
 import { resolveVisualSpecs } from "@/core/presentation/visual/resolve-visual-specs";
 import { MathContent } from "@/app/components/math/MathContent";
-import { getDisciplina, getTopico } from "@/infrastructure/catalog/disciplines";
+import {
+  getDisciplina,
+  getSubtopico,
+  getTopico,
+} from "@/infrastructure/catalog/disciplines";
+import type { DisciplinaId } from "@/core/domain/ids";
 import type { ExerciseSeed } from "@/core/domain/seed";
 
 export const dynamic = "force-dynamic";
@@ -15,17 +20,28 @@ export default async function PrintPage({
   params: paramsPromise,
   searchParams: searchParamsPromise,
 }: {
-  params: Promise<{ disciplinaId: string; topicoSlug: string }>;
+  params: Promise<{
+    disciplinaId: string;
+    topicoSlug: string;
+    subtopicoSlug: string;
+  }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await paramsPromise;
   const searchParams = await searchParamsPromise;
 
-  const disciplina = getDisciplina(params.disciplinaId as any);
+  const disciplina = getDisciplina(params.disciplinaId as DisciplinaId);
   if (!disciplina) notFound();
 
-  const topico = getTopico(disciplina.id as any, params.topicoSlug);
+  const topico = getTopico(disciplina.id, params.topicoSlug);
   if (!topico || topico.status !== "ativo") notFound();
+
+  const subtopico = getSubtopico(
+    disciplina.id,
+    params.topicoSlug,
+    params.subtopicoSlug,
+  );
+  if (!subtopico) notFound();
 
   const s = Array.isArray(searchParams.s) ? searchParams.s[0] : searchParams.s;
   const p = Array.isArray(searchParams.p) ? searchParams.p[0] : searchParams.p;
@@ -44,7 +60,7 @@ export default async function PrintPage({
     if (importPayload) {
       result = solveFromDados({
         topicoId: importPayload.topicoId,
-        disciplinaId: disciplina.id as any,
+        disciplinaId: disciplina.id,
         dificuldade: importPayload.dificuldade,
         dados: importPayload.dados,
         generatorVersion: importPayload.generatorVersion,
@@ -62,7 +78,7 @@ export default async function PrintPage({
 
       result = generateAndSolve({
         topicoId: topico.id,
-        disciplinaId: disciplina.id as any,
+        disciplinaId: disciplina.id,
         dificuldade: seedFromUrl?.dificuldade,
         seed: seedFromUrl?.seed,
         generatorVersion: seedFromUrl?.generatorVersion,
@@ -75,12 +91,13 @@ export default async function PrintPage({
 
   const { problem, solution, stepsVisiveis } = result;
   const visualSpecs = resolveVisualSpecs(problem);
+  const exercisePath = `/${disciplina.id}/${params.topicoSlug}/${params.subtopicoSlug}`;
 
   return (
     <div className="print-page bg-white text-black p-8 max-w-3xl mx-auto">
       <header className="mb-6 border-b pb-4">
         <h1 className="text-xl font-bold">
-          {disciplina.nome} — {topico.nome}
+          {disciplina.nome} — {topico.nome} — {subtopico.nome}
         </h1>
         <p className="text-sm text-fg-subtle">Exportação PDF / impressão</p>
       </header>
@@ -99,7 +116,7 @@ export default async function PrintPage({
       </div>
 
       <p className="mt-8 text-xs text-fg-subtle no-print">
-        <Link href={`/${disciplina.id}/${params.topicoSlug}`}>Voltar ao exercício</Link>
+        <Link href={exercisePath}>Voltar ao exercício</Link>
         {" · "}
         Use Ctrl+P para imprimir ou salvar como PDF.
       </p>

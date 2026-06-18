@@ -1,6 +1,6 @@
 import type { DisciplinaId } from "@/core/domain/ids";
 import type { ExerciseSeed } from "@/core/domain/seed";
-import { topicoSlugFromId } from "@/infrastructure/catalog/disciplines";
+import { topicoSlugFromId, defaultSubtopicoSlug } from "@/infrastructure/catalog/disciplines";
 import { buildExerciseHref } from "@/core/application/exercise-url";
 
 export function buildSeedKey(seed: ExerciseSeed): string {
@@ -13,7 +13,8 @@ export function exercisePath(
   extra?: { step?: number },
 ): string {
   const slug = topicoSlugFromId(seed.topicoId);
-  return buildExerciseHref(disciplinaId, slug, {
+  const subtopicoSlug = defaultSubtopicoSlug(seed.topicoId);
+  return buildExerciseHref(disciplinaId, slug, subtopicoSlug, {
     seed,
     step: extra?.step,
   });

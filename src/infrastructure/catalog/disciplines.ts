@@ -130,6 +130,6 @@ export function findTopicoById(topicoId: TopicoId): {
 export function defaultSubtopicoSlug(topicoId: TopicoId): string {
   const subs = listSubtopicos(topicoId);
   if (subs.length === 1) return subs[0]!.slug;
-  const single = subs.find((s) => s.slug !== "todos");
-  return single?.slug ?? subs[0]!.slug;
+  const todos = subs.find((s) => s.slug === "todos");
+  return todos?.slug ?? subs[0]!.slug;
 }

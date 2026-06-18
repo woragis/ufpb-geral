@@ -8,6 +8,7 @@ import { useEffect } from "react";
 interface ExerciseUrlSyncProps {
   disciplinaId: string;
   topicoSlug: string;
+  subtopicoSlug: string;
   exerciseSeed: ExerciseSeed;
   currentStep: number;
   examMode: boolean;
@@ -18,6 +19,7 @@ interface ExerciseUrlSyncProps {
 export function ExerciseUrlSync({
   disciplinaId,
   topicoSlug,
+  subtopicoSlug,
   exerciseSeed,
   currentStep,
   examMode,
@@ -53,7 +55,7 @@ export function ExerciseUrlSync({
 
     if (!needsSync) return;
 
-    const href = buildExerciseHref(disciplinaId, topicoSlug, {
+    const href = buildExerciseHref(disciplinaId, topicoSlug, subtopicoSlug, {
       seed: exerciseSeed,
       step: currentStep,
       examMode,
@@ -71,6 +73,7 @@ export function ExerciseUrlSync({
     pathname,
     router,
     searchParams,
+    subtopicoSlug,
     topicoSlug,
   ]);
 
