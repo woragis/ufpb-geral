@@ -4,7 +4,13 @@ import { hashString } from "./hash";
 import { mulberry32 } from "./prng/mulberry32";
 
 function seedKey(exercise: ExerciseSeed): string {
-  return `${exercise.topicoId}|${exercise.dificuldade}|${exercise.seed}|v${exercise.generatorVersion}`;
+  return [
+    exercise.topicoId,
+    exercise.dificuldade,
+    exercise.seed,
+    `v${exercise.generatorVersion}`,
+    exercise.tipo ?? "",
+  ].join("|");
 }
 
 export function createSeededRandom(exercise: ExerciseSeed): SeededRandom {

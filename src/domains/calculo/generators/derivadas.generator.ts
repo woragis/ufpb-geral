@@ -1,6 +1,7 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { fmtPoly, trigFn, fmtX } from "../lib/format";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 import { TOPICO_DERIVADAS, type DerivadasData } from "../entities/types";
 
 const POLINOMIOS = [
@@ -10,19 +11,19 @@ const POLINOMIOS = [
   { coeficientes: [4, 1], expoentes: [4, 2] },
 ];
 
-const CENARIOS: Array<(ctx: GeneratorContext) => DerivadasData> = [
-  gerarPolinomio,
-  gerarTrig,
-  gerarExpLog,
-  gerarProduto,
-  gerarQuociente,
-  gerarTangente,
-  gerarDefinicao,
-  gerarTaxaRelacionada,
-  gerarImplicita,
-  gerarAproxLinear,
-  gerarSegundaTeste,
-  gerarInversaTrig,
+const CENARIOS: CenarioEntry<DerivadasData>[] = [
+  { tipo: "derivadas-polinomio", gerar: gerarPolinomio },
+  { tipo: "derivadas-trig", gerar: gerarTrig },
+  { tipo: "derivadas-exp-log", gerar: gerarExpLog },
+  { tipo: "derivadas-produto", gerar: gerarProduto },
+  { tipo: "derivadas-quociente", gerar: gerarQuociente },
+  { tipo: "derivadas-tangente", gerar: gerarTangente },
+  { tipo: "derivadas-definicao", gerar: gerarDefinicao },
+  { tipo: "derivadas-taxa-relacionada", gerar: gerarTaxaRelacionada },
+  { tipo: "derivadas-implicita", gerar: gerarImplicita },
+  { tipo: "derivadas-aprox-linear", gerar: gerarAproxLinear },
+  { tipo: "derivadas-segunda-teste", gerar: gerarSegundaTeste },
+  { tipo: "derivadas-inversa-trig", gerar: gerarInversaTrig },
 ];
 
 function gerarPolinomio(ctx: GeneratorContext): DerivadasData {
@@ -168,14 +169,14 @@ export const derivadasGenerator = {
   topicoId: TOPICO_DERIVADAS,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
     const pool =
       ctx.dificuldade === 1
         ? CENARIOS.slice(0, 3)
         : ctx.dificuldade === 2
           ? CENARIOS.slice(0, 6)
           : CENARIOS;
-    const dados = ctx.rng.pick(pool)(ctx);
+    const dados = pickCenarioByTipo(ctx, CENARIOS, pool);
 
     return {
       id: "",

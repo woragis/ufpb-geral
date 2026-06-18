@@ -5,4 +5,5 @@ export interface ExerciseSeed {
   dificuldade: Dificuldade;
   seed: string;
   generatorVersion: number;
+  tipo?: string;
 }

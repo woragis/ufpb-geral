@@ -91,6 +91,9 @@ export default async function SubtopicoExercisePage({
 
   const seedParams = toSearchParams(searchParams);
 
+  const tipoFilter =
+    params.subtopicoSlug !== "todos" ? params.subtopicoSlug : undefined;
+
   const seedFromUrl = (() => {
     if (importPayload) return null;
     const s = seedParams.get("s");
@@ -106,6 +109,7 @@ export default async function SubtopicoExercisePage({
       dificuldade: dRaw as 1 | 2 | 3,
       seed: s,
       generatorVersion: vRaw,
+      ...(tipoFilter ? { tipo: tipoFilter } : {}),
     } satisfies ExerciseSeed;
   })();
 
@@ -128,6 +132,7 @@ export default async function SubtopicoExercisePage({
         seed: seedFromUrl?.seed,
         generatorVersion: seedFromUrl?.generatorVersion,
         revealSteps: examMode ? 0 : revealSteps,
+        tipo: tipoFilter ?? seedFromUrl?.tipo,
       });
     }
   } catch {

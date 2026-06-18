@@ -1,16 +1,17 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_OTIMIZACAO, type OtimizacaoData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => OtimizacaoData> = [
-  gerarParabola,
-  gerarGeometrica,
-  gerarCrescimento,
-  gerarConcavidade,
-  gerarCilindro,
-  gerarCaixa,
-  gerarSegundaDerivada,
-  gerarEsboço,
+const CENARIOS: CenarioEntry<OtimizacaoData>[] = [
+  { tipo: "otimizacao-parabola", gerar: gerarParabola },
+  { tipo: "otimizacao-geometrica", gerar: gerarGeometrica },
+  { tipo: "otimizacao-crescimento", gerar: gerarCrescimento },
+  { tipo: "otimizacao-concavidade", gerar: gerarConcavidade },
+  { tipo: "otimizacao-cilindro", gerar: gerarCilindro },
+  { tipo: "otimizacao-caixa", gerar: gerarCaixa },
+  { tipo: "otimizacao-segunda-derivada", gerar: gerarSegundaDerivada },
+  { tipo: "otimizacao-esboco", gerar: gerarEsboço },
 ];
 
 function gerarParabola(ctx: GeneratorContext): OtimizacaoData {
@@ -82,8 +83,8 @@ export const otimizacaoGenerator = {
   topicoId: TOPICO_OTIMIZACAO,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
-    const dados = ctx.rng.pick(CENARIOS)(ctx);
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
+    const dados = pickCenarioByTipo(ctx, CENARIOS);
     return {
       id: "",
       disciplinaId: "calculo",

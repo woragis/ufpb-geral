@@ -1,15 +1,16 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_CONTINUIDADE, type ContinuidadeData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => ContinuidadeData> = [
-  gerarAfim,
-  gerarClassificar,
-  gerarCompletar,
-  gerarLateral,
-  gerarTvi,
-  gerarTrigPonto,
-  gerarRolle,
+const CENARIOS: CenarioEntry<ContinuidadeData>[] = [
+  { tipo: "continuidade-afim", gerar: gerarAfim },
+  { tipo: "continuidade-classificar", gerar: gerarClassificar },
+  { tipo: "continuidade-completar", gerar: gerarCompletar },
+  { tipo: "continuidade-lateral", gerar: gerarLateral },
+  { tipo: "continuidade-tvi", gerar: gerarTvi },
+  { tipo: "continuidade-trig-ponto", gerar: gerarTrigPonto },
+  { tipo: "continuidade-rolle", gerar: gerarRolle },
 ];
 
 function gerarAfim(ctx: GeneratorContext): ContinuidadeData {
@@ -110,8 +111,8 @@ export const continuidadeGenerator = {
   topicoId: TOPICO_CONTINUIDADE,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
-    const dados = ctx.rng.pick(CENARIOS)(ctx);
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
+    const dados = pickCenarioByTipo(ctx, CENARIOS);
     return {
       id: "",
       disciplinaId: "calculo",

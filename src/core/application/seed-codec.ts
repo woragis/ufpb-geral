@@ -37,6 +37,7 @@ interface SeedPayload {
   d: Dificuldade;
   s: string;
   v: number;
+  tipo?: string;
 }
 
 export function encodeExerciseSeed(seed: ExerciseSeed): string {
@@ -45,6 +46,7 @@ export function encodeExerciseSeed(seed: ExerciseSeed): string {
     d: seed.dificuldade,
     s: seed.seed,
     v: seed.generatorVersion,
+    ...(seed.tipo ? { tipo: seed.tipo } : {}),
   };
   const json = JSON.stringify(payload);
   const base64url = base64UrlEncodeUtf8(json);
@@ -63,6 +65,7 @@ export function decodeExerciseSeed(code: string): ExerciseSeed {
       dificuldade: payload.d,
       seed: payload.s,
       generatorVersion: payload.v,
+      ...(payload.tipo ? { tipo: payload.tipo } : {}),
     };
   }
 

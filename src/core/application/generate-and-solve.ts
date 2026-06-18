@@ -14,6 +14,7 @@ export interface GenerateAndSolveInput {
   seed?: string;
   generatorVersion?: number;
   revealSteps?: number;
+  tipo?: string;
 }
 
 export interface GenerateAndSolveOutput {
@@ -38,15 +39,23 @@ export function generateAndSolve(
     dificuldade: input.dificuldade ?? 2,
     seed: input.seed ?? randomShareableSeed(),
     generatorVersion: entry.generator.version,
+    ...(input.tipo && input.tipo !== "todos" ? { tipo: input.tipo } : {}),
   };
 
   const rng = createSeededRandom(exerciseSeed);
-  const seedKey = `${exerciseSeed.topicoId}|${exerciseSeed.dificuldade}|${exerciseSeed.seed}|v${exerciseSeed.generatorVersion}`;
+  const seedKey = [
+    exerciseSeed.topicoId,
+    exerciseSeed.dificuldade,
+    exerciseSeed.seed,
+    `v${exerciseSeed.generatorVersion}`,
+    exerciseSeed.tipo ?? "",
+  ].join("|");
 
   const problem = entry.generator.gerar({
     topicoId: input.topicoId,
     dificuldade: exerciseSeed.dificuldade,
     rng,
+    params: input.tipo ? { tipo: input.tipo } : undefined,
   });
 
   const problemWithMeta: Problem = enrichProblem({

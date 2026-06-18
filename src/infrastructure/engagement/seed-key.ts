@@ -4,7 +4,13 @@ import { topicoSlugFromId, defaultSubtopicoSlug } from "@/infrastructure/catalog
 import { buildExerciseHref } from "@/core/application/exercise-url";
 
 export function buildSeedKey(seed: ExerciseSeed): string {
-  return `${seed.topicoId}|${seed.dificuldade}|${seed.seed}|v${seed.generatorVersion}`;
+  return [
+    seed.topicoId,
+    seed.dificuldade,
+    seed.seed,
+    `v${seed.generatorVersion}`,
+    seed.tipo ?? "",
+  ].join("|");
 }
 
 export function exercisePath(

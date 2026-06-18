@@ -1,17 +1,18 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_LIMITES, type LimitesData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => LimitesData> = [
-  gerarAlgebrico,
-  gerarTrig,
-  gerarRacional,
-  gerarRadical,
-  gerarInfinito,
-  gerarInfinitoNeg,
-  gerarSubstituicao,
-  gerarExpLog,
-  gerarLhopital,
+const CENARIOS: CenarioEntry<LimitesData>[] = [
+  { tipo: "limite-algebrico", gerar: gerarAlgebrico },
+  { tipo: "limite-trig", gerar: gerarTrig },
+  { tipo: "limite-racional", gerar: gerarRacional },
+  { tipo: "limite-radical", gerar: gerarRadical },
+  { tipo: "limite-infinito", gerar: gerarInfinito },
+  { tipo: "limite-infinito-neg", gerar: gerarInfinitoNeg },
+  { tipo: "limite-substituicao", gerar: gerarSubstituicao },
+  { tipo: "limite-exp-log", gerar: gerarExpLog },
+  { tipo: "limite-lhopital", gerar: gerarLhopital },
 ];
 
 function gerarAlgebrico(ctx: GeneratorContext): LimitesData {
@@ -149,8 +150,8 @@ export const limitesGenerator = {
   topicoId: TOPICO_LIMITES,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
-    const dados = ctx.rng.pick(CENARIOS)(ctx);
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
+    const dados = pickCenarioByTipo(ctx, CENARIOS);
 
     return {
       id: "",

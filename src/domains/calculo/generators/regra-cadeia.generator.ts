@@ -1,12 +1,13 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_REGRA_CADEIA, type RegraCadeiaData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
-const CENARIOS: Array<(ctx: GeneratorContext) => RegraCadeiaData> = [
-  gerarPotencia,
-  gerarTrig,
-  gerarExpLog,
-  gerarAvancada,
+const CENARIOS: CenarioEntry<RegraCadeiaData>[] = [
+  { tipo: "regra-cadeia-potencia", gerar: gerarPotencia },
+  { tipo: "regra-cadeia-trig", gerar: gerarTrig },
+  { tipo: "regra-cadeia-exp-log", gerar: gerarExpLog },
+  { tipo: "regra-cadeia-avancada", gerar: gerarAvancada },
 ];
 
 function gerarPotencia(ctx: GeneratorContext): RegraCadeiaData {
@@ -74,8 +75,8 @@ export const regraCadeiaGenerator = {
   topicoId: TOPICO_REGRA_CADEIA,
   version: 3,
 
-  gerar(ctx: GeneratorContext): Problem {
-    const dados = ctx.rng.pick(CENARIOS)(ctx);
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
+    const dados = pickCenarioByTipo(ctx, CENARIOS);
     return {
       id: "",
       disciplinaId: "calculo",

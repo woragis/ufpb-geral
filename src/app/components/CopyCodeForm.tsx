@@ -27,7 +27,7 @@ export function CopyCodeForm() {
       }
 
       router.push(
-        `/${disciplinaId}/${topicoSlug}/todos?${params.toString()}`,
+        `/${disciplinaId}/${topicoSlug}/${decoded.tipo ?? "todos"}?${params.toString()}`,
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Código inválido");
