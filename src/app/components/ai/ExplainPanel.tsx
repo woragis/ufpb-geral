@@ -3,6 +3,7 @@
 import type { Step } from "@/core/domain/problem";
 import { useState } from "react";
 import { Button } from "@/app/components/ui/Button";
+import { RichMarkdown } from "@/app/components/content/RichMarkdown";
 
 interface ExplainPanelProps {
   topicoId: string;
@@ -90,8 +91,8 @@ export function ExplainPanel(props: ExplainPanelProps) {
       {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
 
       {explanation ? (
-        <div className="mt-3 whitespace-pre-wrap text-sm text-fg">
-          {explanation}
+        <div className="mt-3 text-sm">
+          <RichMarkdown>{explanation}</RichMarkdown>
         </div>
       ) : null}
 
