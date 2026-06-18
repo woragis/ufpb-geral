@@ -1,6 +1,7 @@
 import type { GeneratorContext } from "@/core/domain/generator";
 import type { Problem } from "@/core/domain/problem";
 import { TOPICO_CONJUNTOS, type ConjuntosData } from "../entities/types";
+import { pickCenarioByTipo, type CenarioEntry } from "@/core/application/pick-cenario";
 
 const DESCRICOES = [
   { a: "números pares", b: "múltiplos de 3" },
@@ -10,11 +11,11 @@ const DESCRICOES = [
   { a: "múltiplos de 2", b: "múltiplos de 5" },
 ];
 
-const CENARIOS: Array<(ctx: GeneratorContext) => ConjuntosData> = [
-  gerarOperacao,
-  gerarProdutoCartesiano,
-  gerarPertinencia,
-  gerarDiferenca,
+const CENARIOS: CenarioEntry<ConjuntosData>[] = [
+  { tipo: "conjuntos-operacao", gerar: gerarOperacao },
+  { tipo: "conjuntos-operacao", gerar: gerarDiferenca },
+  { tipo: "conjuntos-produto-cartesiano", gerar: gerarProdutoCartesiano },
+  { tipo: "conjuntos-pertinencia", gerar: gerarPertinencia },
 ];
 
 function baseContagens(ctx: GeneratorContext) {
@@ -90,8 +91,8 @@ export const conjuntosGenerator = {
   topicoId: TOPICO_CONJUNTOS,
   version: 1,
 
-  gerar(ctx: GeneratorContext): Problem {
-    const dados = ctx.rng.pick(CENARIOS)(ctx);
+  gerar(ctx: GeneratorContext<{ tipo?: string }>): Problem {
+    const dados = pickCenarioByTipo(ctx, CENARIOS);
     return {
       id: "",
       disciplinaId: "pre-calculo",

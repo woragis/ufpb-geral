@@ -11,6 +11,10 @@ import { calculoDomain } from "@/domains/calculo";
 import { calculoVetorialDomain } from "@/domains/calculo-vetorial";
 import { analiseExploratoriaDomain } from "@/domains/analise-exploratoria";
 import { calculoSubtopicos } from "@/domains/calculo/catalog/subtopicos";
+import { preCalculoSubtopicos } from "@/domains/pre-calculo/catalog/subtopicos";
+import { analiseExploratoriaSubtopicos } from "@/domains/analise-exploratoria/catalog/subtopicos";
+import { calculoVetorialSubtopicos } from "@/domains/calculo-vetorial/catalog/subtopicos";
+import { probabilidadeSubtopicos } from "@/domains/probabilidade/catalog/subtopicos";
 
 const domains = [
   probabilidadeDomain,
@@ -22,6 +26,10 @@ const domains = [
 
 const subtopicosByTopico: Partial<Record<TopicoId, SubtopicoMeta[]>> = {
   ...calculoSubtopicos,
+  ...preCalculoSubtopicos,
+  ...analiseExploratoriaSubtopicos,
+  ...calculoVetorialSubtopicos,
+  ...probabilidadeSubtopicos,
 };
 
 function fallbackSubtopicos(topicoId: TopicoId): SubtopicoMeta[] {
