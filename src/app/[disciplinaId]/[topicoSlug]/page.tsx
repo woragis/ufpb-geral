@@ -10,6 +10,7 @@ import { ShareExerciseButton } from "@/app/components/exercise/ShareExerciseButt
 import { EngagementActions } from "@/app/components/engagement/EngagementActions";
 import { PersonalExerciseTracker } from "@/app/components/personal/PersonalExerciseTracker";
 import { ExplainPanel } from "@/app/components/ai/ExplainPanel";
+import { MathContent } from "@/app/components/math/MathContent";
 import { ExamTimer } from "@/app/components/exam/ExamTimer";
 import { generateAndSolve } from "@/core/application/generate-and-solve";
 import { buildExerciseHref } from "@/core/application/exercise-url";
@@ -17,7 +18,8 @@ import { decodeImportPayload } from "@/core/application/import-payload-codec";
 import { solveFromDados } from "@/core/application/solve-from-dados";
 import { encodeExerciseSeed } from "@/core/application/seed-codec";
 import { resolveVisualSpecs } from "@/core/presentation/visual/resolve-visual-specs";
-import { MathContent } from "@/app/components/math/MathContent";
+import { StepRevealButton } from "@/app/components/exercise/StepRevealButton";
+import { StepScrollOnReveal } from "@/app/components/exercise/StepScrollOnReveal";
 import { getDisciplina, getTopico } from "@/infrastructure/catalog/disciplines";
 
 import type { ExerciseSeed } from "@/core/domain/seed";
@@ -175,6 +177,7 @@ export default async function TopicPage({
   return (
     <div className="flex flex-col flex-1">
       <Suspense fallback={null}>
+        <StepScrollOnReveal stepOrdem={currentStep} />
         <ExerciseUrlSync
           disciplinaId={disciplina.id}
           topicoSlug={params.topicoSlug}
@@ -264,13 +267,11 @@ export default async function TopicPage({
 
           <div className="mt-6 flex items-center gap-3 flex-wrap">
             {examMode && !respostaFinalRevelada ? (
-              <ButtonLink href={submitHref} variant="warning">
+              <StepRevealButton href={submitHref} variant="warning">
                 Entregar prova
-              </ButtonLink>
+              </StepRevealButton>
             ) : hasNext ? (
-              <ButtonLink href={nextHref} variant="primary">
-                Revelar próximo passo
-              </ButtonLink>
+              <StepRevealButton href={nextHref}>Revelar próximo passo</StepRevealButton>
             ) : (
               <div className="text-sm text-fg-muted">
                 Resposta final:{" "}

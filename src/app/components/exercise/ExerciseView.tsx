@@ -33,7 +33,8 @@ export function ExerciseView({
         {stepsVisiveis.map((step) => (
           <div
             key={step.ordem}
-            className="rounded-lg border border-border bg-surface-elevated p-4"
+            id={`step-${step.ordem}`}
+            className="rounded-lg border border-border bg-surface-elevated p-4 scroll-mt-24"
           >
             <div className="font-semibold text-fg">
               Passo {step.ordem}: {step.titulo}

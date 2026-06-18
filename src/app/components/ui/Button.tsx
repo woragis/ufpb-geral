@@ -47,9 +47,14 @@ type ButtonLinkProps = ComponentProps<typeof Link> & {
 export function ButtonLink({
   variant = "primary",
   className = "",
+  scroll = true,
   ...props
 }: ButtonLinkProps) {
   return (
-    <Link className={`${base} ${variants[variant]} ${className}`} {...props} />
+    <Link
+      scroll={scroll}
+      className={`${base} ${variants[variant]} ${className}`}
+      {...props}
+    />
   );
 }
